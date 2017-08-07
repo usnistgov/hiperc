@@ -11,9 +11,9 @@ Diffusion and phase-field models for accelerator architectures
 ## Basic Algorithm
 Diffusion and phase-field problems depend extensively on the divergence of gradients, or Laplacian operators:
 
-> &part;c/&part;t = D&nabla;&sup2;c &asymp; D(c&#8314; -2c&#8304; + c&#8315;)/(h&sup2;)
+&part;c/&part;t = D&nabla;&sup2;c &asymp; D(c&#8314; -2c&#8304; + c&#8315;)/(h&sup2;)
 
-This discretization is a special case of [convolution](https://en.wikipedia.org/wiki/Discrete_Laplace_operator#Image_Processing) with
+This discretization is a special case of [convolution](https://en.wikipedia.org/wiki/Discrete_Laplace_operator#Image_Processing).
 
 1D convolution kernel:
 

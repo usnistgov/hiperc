@@ -1,5 +1,5 @@
-# GPU code
+# GPU (CUDA) code
 
-This directory contains code for GPU acceleratores based on the following text:
+This directory contains CUDA code for GPUs, based on the following text:
 
-> Kirk and Hwu, *Programming Massively Parallel Processors* 3 Ed. Morgan-Kaufmann: New York, 2017.
+> Kirk and Hwu, *Programming Massively Parallel Processors* 3 Ed. Morgan Kaufmann. New York: 2017.

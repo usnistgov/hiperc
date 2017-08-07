@@ -1,6 +1,7 @@
 # accelerator-testing
 Diffusion and phase-field models for accelerator architectures
 
+
 ## Basic Algorithm
 Diffusion and phase-field problems depend extensively on the divergence of gradients, or Laplacian operators:
 
@@ -40,6 +41,7 @@ This discretization is a special case of [convolution](https://en.wikipedia.org/
 
 Accelerators are well-suited to the convolution of these kernels (or stencils) with input data matrices.
 
+
 ## Accelerator Languages
 
 There are five mainstream approaches to shared-memory parallel programming,
@@ -70,9 +72,24 @@ capabilities for performance and optimization of a specific application.
 Proof-of-concept GPU code can be run on Amazon's [HPC EC2](https://aws.amazon.com/ec2/Elastic-GPUs/), and
 with a similar offering through [Rescale ScaleX](http://www.rescale.com/products/) for Xeon Phi.
 
+The code in this repository is specifically aimed at the GPU and Xeon Phi architectures:
+POSIX threads will be ignored, and OpenMP will be used only for reference computations.
+
+
 ## Hardware Cheatsheet
 | System     | CPU                    | Threads | RAM   | GPU                         | Cores | Phi      | Cores    |
 | :--------: | :--------------------: | ------: | ----: | :-------------------------: | ----: | :------: | -------: |
 | Huginn     | Intel Xeon E5-1650 v3  | 12      | 64 GB | 1&times; NVIDIA Quadro K620 | 384   | &empty;  | &empty;  |
 | rgpu2      | Intel Xeon E5-2697A v4 | 32      | 64 GB | 2&times; NVIDIA Tesla K40m  | 2880  | &empty;  | &empty;  |
 | rgpu3      | Intel Xeon E5-2697A v4 | 32      | 64 GB | 2&times; NVIDIA Tesla K40m  | 2880  | &empty;  | &empty;  |
+
+
+## Contribute
+Forks of this git repository are encouraged, and pull requests providing patches
+or implementations are more than welcome.
+
+
+## Contact
+Questions, concerns, and feedback regarding the source code provided in this git
+repository should be addressed to trevor.keller@nist.gov (Trevor Keller).
+

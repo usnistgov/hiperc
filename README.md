@@ -17,14 +17,32 @@ This discretization is a special case of [convolution](https://en.wikipedia.org/
 
 1D convolution kernel:
 
->
-| 1 | -2 | 1 |
+<table>
+  <tr>
+    <td>1</td>
+    <td>-2</td>
+    <td>1</td>
+  </tr>
+</table>
 
 2D convolution kernel:
 
->
-| 0 | 1 | 0 |
-| 1 | -4 | 1 |
-| 0 | 1  | 0 |
+<table>
+  <tr>
+    <td>0</td>
+    <td>1</td>
+    <td>0</td>
+  </tr>
+  <tr>
+    <td>1</td>
+    <td>-2</td>
+    <td>1</td>
+  </tr>
+  <tr>
+    <td>0</td>
+    <td>1</td>
+    <td>0</td>
+  </tr>
+</table>
 
 Accelerators are well-suited to the convolution of these kernels (or stencils) with input data matrices.

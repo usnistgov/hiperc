@@ -3,13 +3,22 @@ Diffusion and phase-field models for accelerator architectures
 
 
 ## Basic Algorithm
-Diffusion and phase-field problems depend extensively on the divergence of gradients, or Laplacian operators:
+Diffusion and phase-field problems depend extensively on the divergence of gradients, *e.g.*
 
-&part;c/&part;t = D&nabla;&sup2;c &asymp; D(c&#8314; - 2c&#8304; + c&#8315;)/(h&sup2;)
+> &part;*c*/&part;*t* = &nabla;&middot;*D*&nabla;*c*
 
-This discretization is a special case of [convolution](https://en.wikipedia.org/wiki/Discrete_Laplace_operator#Image_Processing).
+When *D* is constant, this simplifies to the Laplacian operator:
 
-1D convolution kernel:
+> &part;*c*/&part;*t* = *D*&nabla;&sup2;*c*
+
+In 1D, the Laplacian can be discretized:
+
+> &part;*c*/&part;*t* &asymp; *D*(*c*&#8314; - 2*c*&#8304; + *c*&#8315;)/(*h*&sup2;)
+
+This discretization is a special case of [convolution](https://en.wikipedia.org/wiki/Discrete_Laplace_operator#Image_Processing),
+wherein a constant kernel of weighting coefficients is applied to an input dataset to produce a transformed output.
+
+1D Laplacian convolution kernel:
 
 <table>
   <tr>
@@ -19,7 +28,7 @@ This discretization is a special case of [convolution](https://en.wikipedia.org/
   </tr>
 </table>
 
-2D convolution kernel:
+2D Laplacian convolution kernel:
 
 <table>
   <tr>
@@ -39,7 +48,7 @@ This discretization is a special case of [convolution](https://en.wikipedia.org/
   </tr>
 </table>
 
-Accelerators are well-suited to the convolution of these kernels (or stencils) with input data matrices.
+Accelerators and coprocessors are well-suited to this type of computation.
 
 
 ## Accelerator Languages

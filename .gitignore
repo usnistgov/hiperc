@@ -1,5 +1,9 @@
 *.aux
 *.csv
 *.log
+*.o
 *.out
 *.pdf
+diffusion
+spinodal
+ripening

@@ -1,0 +1,81 @@
+/*
+	File: discretization.c
+	Role: implementation of discretized mathematical operations
+
+	Questions/comments to trevor.keller@nist.gov
+	Bugs/requests to https://github.com/tkphd/accelerator-testing
+*/
+
+#include <math.h>
+
+#include "diffusion.h"
+
+void set_mask(double dx, double dy, int* nm, double** M)
+{
+	/* M is initialized to zero, so corners can be ignored */
+	*nm = 1;
+
+	M[0][1] = 1.0 / (dy * dy); /* up */
+	M[1][0] = 1.0 / (dx * dx); /* left */
+	M[1][1] = -2.0 * (dx*dx + dy*dy) / (dx*dx * dy*dy); /* middle */
+	M[1][2] = 1.0 / (dx * dx); /* right */
+	M[2][1] = 1.0 / (dy * dy); /* down */
+}
+
+void compute_convolution(double** A, double** C, double** M, int nx, int ny, int nm)
+{
+	int i, j, mi, mj;
+	double value;
+
+	for (j = 1; j < ny-1; j++) {
+		for (i = 1; i < nx-1; i++) {
+			value = 0.0;
+			for (mj = -nm; mj < nm+1; mj++) {
+				for (mi = -nm; mi < nm+1; mi++) {
+					value += M[mj+nm][mi+nm] * A[j+mj][i+mi];
+				}
+			}
+			C[j][i] = value;
+		}
+	}
+}
+
+void step_in_time(double** A, double** B, double** C, int nx, int ny, double D, double dt, double* elapsed)
+{
+	int i, j;
+
+	for (j = 1; j < ny-1; j++)
+		for (i = 1; i < nx-1; i++)
+			B[j][i] = A[j][i] + dt * D * C[j][i];
+
+	*elapsed += dt;
+}
+
+void analytical_value(double x, double y, double t, double D, double bc[2][2], double* c)
+{
+	/* 1D error function solution */
+	*c = bc[1][0] * (1.0 - erf(x / sqrt(4.0 * D * t)));
+
+	/* 2D error function solution
+	*c = 0.5 * bc[1][0] * (1.0 - erf(x / sqrt(4.0 * D * t)))
+	   + 0.5 * bc[0][0] * (1.0 - erf(y / sqrt(4.0 * D * t)));
+	*/
+}
+
+void check_solution(double** A, int nx, int ny, double dx, double dy, double elapsed, double D, double bc[2][2], double* sse)
+{
+	int i, j;
+	double x, y, ca, cn;
+	*sse = 0.0;
+
+	for (j = 1; j < ny-1; j++) {
+		for (i = 1; i < nx-1; i++) {
+			x = dx * (i - 1);
+			y = dy * (j - 1);
+			analytical_value(x, y, elapsed, D, bc, &ca);
+			cn = A[j][i];
+			*sse += (ca - cn) * (ca - cn);
+		}
+	}
+	*sse = sqrt(*sse);
+}

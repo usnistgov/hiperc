@@ -4,6 +4,8 @@
 *.o
 *.out
 *.pdf
+*.png
+.directory
 diffusion
 spinodal
 ripening

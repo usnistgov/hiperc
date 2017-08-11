@@ -6,7 +6,6 @@
 	Bugs/requests to https://github.com/tkphd/accelerator-testing
 */
 
-#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -19,7 +18,7 @@ int main(int argc, char* argv[])
 	FILE * input, * error;
 
 	/* declare mesh size */
-	int nx, ny;
+	int nx, ny, nm;
 
 	/* declare mesh resolution */
 	double dx, dy, h;
@@ -52,7 +51,7 @@ int main(int argc, char* argv[])
 	/* read parameters */
 	fscanf(input, "%i %i %lf %lf %i %i %lf", &nx, &ny, &dx, &dy, &steps, &checks, &D);
 	#ifndef NDEBUG
-	printf("Constructing %ix%i grid with resolution %fx%f. Taking %i steps with checkpoints every %i.\n", nx, ny, dx, dy, steps, checks);
+	printf("Constructing %i x %i grid with resolution %.2e x %.2e. Taking %i steps with checkpoints every %i.\n", nx, ny, dx, dy, steps, checks);
 	#endif
 	fclose(input);
 
@@ -62,36 +61,44 @@ int main(int argc, char* argv[])
 	linStab = (h * h) / (4.0 * dt * D);
 
 	/* report runtime parameters */
-	printf("Evolving %i steps with dt=%f. Using D=%f, linear stability is %f\n", steps, dt, D, linStab);
+	printf("Evolving %i steps with dt=%.2e. Using D=%.2e, linear stability is 1/%.1f\n", steps, dt, D, linStab);
 
 	/* initialize memory */
 	make_arrays(&oldMesh, &newMesh, &conMesh, &mask, &oldData, &newData, &conData, &maskData, nx, ny);
-	set_mask(mask);
+	set_mask(dx, dy, &nm, mask);
 	set_boundaries(&c0, bc);
-	apply_initial_conditions(oldMesh, newMesh, conMesh, nx, ny, c0, bc);
+	apply_initial_conditions(oldMesh, nx, ny, c0, bc);
+
+	apply_boundary_conditions(oldMesh, nx, ny, bc);
 
 	/* prepare to log errrors */
 	error = fopen("error.csv", "w");
 
+	/* write initial condition data */
+	write_csv(newMesh, nx, ny, dx, dy, 0);
+	write_png(newMesh, nx, ny, dx, dy, 0, bc);
+
 	/* do the work */
-	for (step = 0; step < steps; step++) {
-		apply_boundary_conditions(oldMesh, newMesh, nx, ny, bc);
+	for (step = 1; step < steps+1; step++) {
+		compute_convolution(oldMesh, conMesh, mask, nx, ny, nm);
 
-		compute_convolution(oldMesh, newMesh, conMesh, mask, nx, ny, dx, dy);
+		step_in_time(oldMesh, newMesh, conMesh, nx, ny, D, dt, &elapsed);
 
-		step_in_time(oldMesh, newMesh, conMesh, nx, ny, dt, &elapsed);
-
-		check_solution(newMesh, nx, ny, dx, dy, elapsed, bc, &sse);
+		check_solution(newMesh, nx, ny, dx, dy, elapsed, D, bc, &sse);
 		fprintf(error, "%f,%f\n", elapsed, sse);
 
-		write_csv(newMesh, nx, ny, dx, dy, step);
+		apply_boundary_conditions(newMesh, nx, ny, bc);
+
+		if (step % checks == 0) {
+			write_csv(newMesh, nx, ny, dx, dy, step);
+			write_png(newMesh, nx, ny, dx, dy, step, bc);
+		}
 
 		swap_pointers(&oldData, &newData, &oldMesh, &newMesh);
 	}
 
 	/* clean up */
 	fclose(error);
-
 	free_arrays(oldMesh, newMesh, conMesh, mask, oldData, newData, conData, maskData, nx, ny);
 
 	return 0;

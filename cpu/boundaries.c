@@ -37,17 +37,17 @@ void apply_initial_conditions(double** A, int nx, int ny, double c0, double bc[2
 
 void apply_boundary_conditions(double** A, int nx, int ny, double bc[2][2])
 {
-	/* boundary values only */
 	int i, j;
 
 	for (j = 0; j < ny; j++) {
-		A[j][0] = bc[1][0]; /* left */
-		A[j][nx-1] = A[j][nx-2]; /* right */
+		A[j][0] = bc[1][0]; /* boundary left */
+		A[j][1] = bc[1][0]; /* bulk left */
+		A[j][nx-1] = A[j][nx-2]; /* boundary right */
 	}
 
 	for (i = 0; i < nx; i++) {
-		A[0][i] = A[1][i]; /* bottom */
-		A[ny-1][i] = A[ny-2][i]; /* top */
+		A[0][i] = A[1][i]; /* boundary bottom */
+		A[ny-1][i] = A[ny-2][i]; /* boundary top */
 	}
 
 }

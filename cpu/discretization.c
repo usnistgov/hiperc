@@ -54,11 +54,11 @@ void step_in_time(double** A, double** B, double** C, int nx, int ny, double D, 
 void analytical_value(double x, double y, double t, double D, double bc[2][2], double* c)
 {
 	/* 1D error function solution */
-	*c = 0.5 * bc[1][0] * (1.0 + erf(x / sqrt(4.0 * D * t)));
+	*c = bc[1][0] * (1.0 - erf(x / sqrt(4.0 * D * t)));
 
 	/* 2D error function solution
-	*c = 0.5 * bc[1][0] * (1.0 + erf(x / sqrt(4.0 * D * t)))
-	   + 0.5 * bc[0][0] * (1.0 + erf(y / sqrt(4.0 * D * t)));
+	*c = 0.5 * bc[1][0] * (1.0 - erf(x / sqrt(4.0 * D * t)))
+	   + 0.5 * bc[0][0] * (1.0 - erf(y / sqrt(4.0 * D * t)));
 	*/
 }
 

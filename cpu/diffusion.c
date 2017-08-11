@@ -84,10 +84,11 @@ int main(int argc, char* argv[])
 
 		step_in_time(oldMesh, newMesh, conMesh, nx, ny, D, dt, &elapsed);
 
+		apply_boundary_conditions(newMesh, nx, ny, bc);
+
 		check_solution(newMesh, nx, ny, dx, dy, elapsed, D, bc, &sse);
 		fprintf(error, "%f,%f\n", elapsed, sse);
 
-		apply_boundary_conditions(newMesh, nx, ny, bc);
 
 		if (step % checks == 0) {
 			write_csv(newMesh, nx, ny, dx, dy, step);

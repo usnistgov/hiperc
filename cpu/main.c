@@ -26,12 +26,16 @@ int main(int argc, char* argv[])
 	/* declare mesh parameters */
 	double **oldMesh, **newMesh, **conMesh, **mask;
 	double *oldData, *newData, *conData, *maskData;
-	int step, steps, checks;
+	int step=0, steps, checks;
 	double bc[2][2];
 
+	/* declare timers */
+	double start_time, conv_time=0., step_time, file_time, soln_time=0.;
 
 	/* declare materials and numerical parameters */
-	double D, linStab, dt, elapsed, rss;
+	double D, linStab=0.1, dt, elapsed=0., rss=0.;
+
+	StartTimer();
 
 	/* check for proper invocation */
 	if (argc != 2) {
@@ -50,8 +54,6 @@ int main(int argc, char* argv[])
 	fscanf(input, "%i %i %lf %lf %i %i %lf", &nx, &ny, &dx, &dy, &steps, &checks, &D);
 	fclose(input);
 
-	elapsed = 0.0;
-	linStab = 0.1;
 	h = (dx > dy) ? dy : dx;
 	dt = (linStab * h * h) / (4.0 * D);
 
@@ -60,36 +62,53 @@ int main(int argc, char* argv[])
 	set_mask(dx, dy, &nm, mask);
 	set_boundaries(bc);
 
+	start_time = GetTimer();
 	apply_initial_conditions(oldMesh, nx, ny, bc);
+	step_time = GetTimer() - start_time;
 
 	/* write initial condition data */
+	start_time = GetTimer();
 	write_csv(oldMesh, nx, ny, dx, dy, 0);
 	write_png(oldMesh, nx, ny, 0);
+	file_time = GetTimer() - start_time;
 
 	/* prepare to log comparison to analytical solution */
-	output = fopen("error.csv", "w");
+	output = fopen("runlog.csv", "w");
 	if (output == NULL) {
-		printf("Error: unable to %s for output. Check permissions.\n", "error.csv");
+		printf("Error: unable to %s for output. Check permissions.\n", "runlog.csv");
 		exit(-1);
 	}
+
+	fprintf(output, "iter,sim_time,wrss,conv_time,step_time,IO_time,soln_time,run_time\n");
+	fprintf(output, "%i,%f,%f,%f,%f,%f,%f,%f\n", step, elapsed, rss, conv_time, step_time, file_time, soln_time, GetTimer());
 
 	/* do the work */
 	for (step = 1; step < steps+1; step++) {
 		apply_boundary_conditions(oldMesh, nx, ny, bc);
 
+		start_time = GetTimer();
 		compute_convolution(oldMesh, conMesh, mask, nx, ny, nm);
+		conv_time += GetTimer() - start_time;
 
+		start_time = GetTimer();
 		step_in_time(oldMesh, newMesh, conMesh, nx, ny, D, dt, &elapsed);
+		step_time += GetTimer() - start_time;
 
 		swap_pointers(&oldData, &newData, &oldMesh, &newMesh);
 
 		if (step % checks == 0) {
+			start_time = GetTimer();
 			write_csv(oldMesh, nx, ny, dx, dy, step);
-
 			write_png(oldMesh, nx, ny, step);
+			file_time += GetTimer() - start_time;
+		}
 
+		if (step % 100 == 0) {
+			start_time = GetTimer();
 			check_solution(oldMesh, nx, ny, dx, dy, elapsed, D, bc, &rss);
-			fprintf(output, "%f,%f\n", elapsed, rss);
+			soln_time += GetTimer() - start_time;
+
+			fprintf(output, "%i,%f,%f,%f,%f,%f,%f,%f\n", step, elapsed, rss, conv_time, step_time, file_time, soln_time, GetTimer());
 		}
 	}
 
@@ -99,4 +118,3 @@ int main(int argc, char* argv[])
 
 	return 0;
 }
-

@@ -30,4 +30,8 @@ void check_solution(double** A, int nx, int ny, double dx, double dy, double ela
 void write_csv(double** A, int nx, int ny, double dx, double dy, int step);
 void write_png(double** A, int nx, int ny, int step);
 
+/* Time function calls */
+void StartTimer();
+double GetTimer();
+
 #endif /* _DIFFUSION_H_ */

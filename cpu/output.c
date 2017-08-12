@@ -22,7 +22,7 @@ void write_csv(double** A, int nx, int ny, double dx, double dy, int step)
 	char num[20];
 
 	/* generate the filename */
-	sprintf(num, "%06i", step);
+	sprintf(num, "%07i", step);
 	strcpy(name, "data.");
 	strcat(name, num);
 	strcat(name, ".csv");
@@ -69,7 +69,7 @@ void write_png(double** A, int nx, int ny, int step)
 	h = ny - 2;
 
 	/* generate the filename */
-	sprintf(num, "%06i", step);
+	sprintf(num, "%07i", step);
 	strcpy(name, "data.");
 	strcat(name, num);
 	strcat(name, ".png");

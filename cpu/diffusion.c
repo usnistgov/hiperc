@@ -31,7 +31,7 @@ int main(int argc, char* argv[])
 
 
 	/* declare materials and numerical parameters */
-	double D, linStab, dt, elapsed, sse;
+	double D, linStab, dt, elapsed, rss;
 
 	/* check for proper invocation */
 	if (argc != 2) {
@@ -88,8 +88,8 @@ int main(int argc, char* argv[])
 
 			write_png(oldMesh, nx, ny, step);
 
-			check_solution(oldMesh, nx, ny, dx, dy, elapsed, D, bc, &sse);
-			fprintf(output, "%f,%f\n", elapsed, sse);
+			check_solution(oldMesh, nx, ny, dx, dy, elapsed, D, bc, &rss);
+			fprintf(output, "%f,%f\n", elapsed, rss);
 		}
 	}
 

@@ -22,7 +22,7 @@ void write_csv(double** A, int nx, int ny, double dx, double dy, int step)
 	char num[20];
 
 	/* generate the filename */
-	sprintf(num, "%05i", step);
+	sprintf(num, "%07i", step);
 	strcpy(name, "data.");
 	strcat(name, num);
 	strcat(name, ".csv");
@@ -47,11 +47,12 @@ void write_csv(double** A, int nx, int ny, double dx, double dy, int step)
 	fclose(output);
 }
 
-void write_png(double** A, int nx, int ny, double dx, double dy, int step, double bc[2][2])
+void write_png(double** A, int nx, int ny, int step)
 {
 	/* After "A simple libpng example program," http://zarb.org/~gc/html/libpng.html
 	   and the libong manual, http://www.libpng.org/pub/png */
 
+	double min, max, *c;
 	int i, j, w, h, n;
 	FILE* output;
 	char name[256];
@@ -68,7 +69,7 @@ void write_png(double** A, int nx, int ny, double dx, double dy, int step, doubl
 	h = ny - 2;
 
 	/* generate the filename */
-	sprintf(num, "%05i", step);
+	sprintf(num, "%07i", step);
 	strcpy(name, "data.");
 	strcat(name, num);
 	strcat(name, ".png");
@@ -84,17 +85,35 @@ void write_png(double** A, int nx, int ny, double dx, double dy, int step, doubl
 	buffer = (unsigned char*)malloc(w * h * sizeof(unsigned char));
 	row_pointers = (png_bytepp)malloc(h * sizeof(png_bytep));
 	for (j = 0; j < h; j++)
-		row_pointers[j] = &buffer[j*w];
+		row_pointers[j] = &buffer[w * j];
 
-	n = 0;
-	for (j = 1; j < ny-1; j++) {
+	/* determine data range */
+	min = 0.0;
+	max = 1.0;
+	for (j = ny-2; j > 0; j--) {
 		for (i = 1; i < nx-1; i++) {
-			buffer[n] = (unsigned char) 255 * (A[j][i] / bc[1][0]);
-			n++;
+			c = &A[j][i];
+			if (*c < min)
+				min = *c;
+			if (*c > max)
+				max = *c;
 		}
 	}
 
-	/* let libpng handle the heavy lifting */
+	/* rescale data into buffer */
+	n = 0;
+	for (j = ny-2; j > 0; j--) {
+		for (i = 1; i < nx-1; i++) {
+			buffer[n] = (unsigned char) 255 * (min + (A[j][i] - min) / (max - min));
+			n++;
+		}
+	}
+	if (n != w * h) {
+		printf("Error making image: expected %i values in buffer, got %i.\n", w*h, n);
+		exit(-1);
+	}
+
+	/* let libpng do the heavy lifting */
 	png_ptr = png_create_write_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
 	if (!png_ptr) {
 		printf("Error making image: png_create_write_struct failed.\n");
@@ -107,7 +126,7 @@ void write_png(double** A, int nx, int ny, double dx, double dy, int step, doubl
 	}
 	png_init_io(png_ptr, output);
 
-	/* Write PNG header */
+	/* write PNG header */
 	if (setjmp(png_jmpbuf(png_ptr))) {
 		printf("Error making image: unable to write header.\n");
 		exit(-1);
@@ -118,7 +137,7 @@ void write_png(double** A, int nx, int ny, double dx, double dy, int step, doubl
 
 	png_write_info(png_ptr, info_ptr);
 
-	/* Write image */
+	/* write image */
 	if (setjmp(png_jmpbuf(png_ptr))) {
 		printf("Error making image: unable to write data.\n");
 		exit(-1);
@@ -131,7 +150,7 @@ void write_png(double** A, int nx, int ny, double dx, double dy, int step, doubl
 	}
 	png_write_end(png_ptr, NULL);
 
-	/* Clean up */
+	/* clean up */
 	fclose(output);
 	free(row_pointers);
 	free(buffer);

@@ -10,44 +10,57 @@
 
 #include "diffusion.h"
 
-void set_boundaries(double* c0, double bc[2][2])
+void set_boundaries(double bc[2][2])
 {
-	*c0 = 0.0; /*initial flat composition */
-
-	/* C indexing is A[y][x], so bc = [[ylo,yhi], [xlo,xhi]] */
-	bc[0][0] = *c0; /* bottom boundary */
-	bc[0][1] = *c0; /* top boundary */
-	bc[1][0] = 1.0; /* left boundary */
-	bc[1][1] = *c0; /* right boundary */
+	/* indexing is A[y][x], so bc = [[ylo,yhi], [xlo,xhi]] */
+	double clo = 0.0, chi = 1.0;
+	bc[0][0] = clo; /* bottom boundary */
+	bc[0][1] = clo; /* top boundary */
+	bc[1][0] = chi; /* left boundary */
+	bc[1][1] = chi; /* right boundary */
 }
 
-void apply_initial_conditions(double** A, int nx, int ny, double c0, double bc[2][2])
+void apply_initial_conditions(double** A, int nx, int ny, double bc[2][2])
 {
-	/* bulk values only */
 	int i, j;
 
-	for (j = 1; j < ny-1; j++) {
-		A[j][1] = bc[1][0];
-		for (i = 2; i < nx-1; i++) {
-			A[j][i] = c0;
-		}
-	}
+	for (j = 1; j < ny; j++)
+		for (i = 1; i < nx; i++)
+			A[j][i] = bc[0][0];
 
+	for (j = 1; j < ny/2; j++)
+		A[j][1] = bc[1][0]; /* left half-wall */
+
+	for (j = ny/2; j < ny-1; j++)
+		A[j][nx-1] = bc[1][1]; /* right half-wall */
 }
 
 void apply_boundary_conditions(double** A, int nx, int ny, double bc[2][2])
 {
+	/* Set fixed value (c=1) along left and bottom, zero-flux elsewhere */
 	int i, j;
 
-	for (j = 0; j < ny; j++) {
-		A[j][0] = bc[1][0]; /* boundary left */
-		A[j][1] = bc[1][0]; /* bulk left */
-		A[j][nx-1] = A[j][nx-2]; /* boundary right */
+	/* left boundary */
+	for (j = 1; j < ny/2; j++) {
+		A[j][0] = bc[1][0]; /* fixed value */
+		A[j][1] = bc[1][0];
 	}
+	for (j = ny/2; j < ny-1; j++)
+		A[j][0] = A[j][1]; /* no-flux */
 
-	for (i = 0; i < nx; i++) {
-		A[0][i] = A[1][i]; /* boundary bottom */
-		A[ny-1][i] = A[ny-2][i]; /* boundary top */
+	/* right boundary */
+	for (j = ny/2; j < ny-1; j++) {
+		A[j][nx-1] = bc[1][1]; /* fixed value */
+		A[j][nx-2] = bc[1][1];
 	}
+	for (j = 1; j < ny/2; j++)
+		A[j][nx-1] = A[j][nx-2]; /* no-flux */
 
+	/* bottom boundary */
+	for (i = 1; i < nx-1; i++)
+		A[0][i] = A[1][i]; /* no-flux */
+
+	/* top boundary */
+	for (i = 1; i < nx-1; i++)
+		A[ny-1][i] = A[ny-2][i]; /* no-flux */
 }

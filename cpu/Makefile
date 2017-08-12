@@ -1,7 +1,7 @@
 # Makefile for CPU diffusion code
 
 CC = gcc
-CFLAGS = -O2 -Wall -Werror -Wmissing-prototypes -pedantic
+CFLAGS = -O2 -Wall -pedantic
 LINKS = -lm -lpng
 
 OBJS = mesh.o boundaries.o discretization.o output.o

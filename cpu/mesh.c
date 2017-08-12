@@ -38,7 +38,7 @@ void make_arrays(double*** A, double*** B, double*** C, double*** M, double** da
 	}
 }
 
-void free_arrays(double** A, double** B, double** C, double** M, double* dataA, double* dataB, double* dataC, double* dataM, int nx, int ny)
+void free_arrays(double** A, double** B, double** C, double** M, double* dataA, double* dataB, double* dataC, double* dataM)
 {
 	free(A);
 	free(B);

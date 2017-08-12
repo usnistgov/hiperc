@@ -15,25 +15,23 @@
 int main(int argc, char* argv[])
 {
 	/* declare file handles */
-	FILE * input, * error;
+	FILE * input, * output;
 
-	/* declare mesh size */
+	/* declare mesh and mask sizes */
 	int nx, ny, nm;
 
 	/* declare mesh resolution */
 	double dx, dy, h;
 
-	/* declare mesh pointers */
+	/* declare mesh parameters */
 	double **oldMesh, **newMesh, **conMesh, **mask;
 	double *oldData, *newData, *conData, *maskData;
+	int step, steps, checks;
 	double bc[2][2];
 
-	/* declare time variables */
-	double dt, elapsed;
-	int step, steps, checks;
 
 	/* declare materials and numerical parameters */
-	double c0, D, linStab, sse;
+	double D, linStab, dt, elapsed, sse;
 
 	/* check for proper invocation */
 	if (argc != 2) {
@@ -50,57 +48,55 @@ int main(int argc, char* argv[])
 
 	/* read parameters */
 	fscanf(input, "%i %i %lf %lf %i %i %lf", &nx, &ny, &dx, &dy, &steps, &checks, &D);
-	#ifndef NDEBUG
-	printf("Constructing %i x %i grid with resolution %.2e x %.2e. Taking %i steps with checkpoints every %i.\n", nx, ny, dx, dy, steps, checks);
-	#endif
 	fclose(input);
 
 	elapsed = 0.0;
-	h = (dx>dy) ? dy : dx;
-	dt = (h * h) / (64.0 * D);
-	linStab = (h * h) / (4.0 * dt * D);
-
-	/* report runtime parameters */
-	printf("Evolving %i steps with dt=%.2e. Using D=%.2e, linear stability is 1/%.1f\n", steps, dt, D, linStab);
+	linStab = 0.1;
+	h = (dx > dy) ? dy : dx;
+	dt = (linStab * h * h) / (4.0 * D);
 
 	/* initialize memory */
 	make_arrays(&oldMesh, &newMesh, &conMesh, &mask, &oldData, &newData, &conData, &maskData, nx, ny);
 	set_mask(dx, dy, &nm, mask);
-	set_boundaries(&c0, bc);
-	apply_initial_conditions(oldMesh, nx, ny, c0, bc);
+	set_boundaries(bc);
 
-	apply_boundary_conditions(oldMesh, nx, ny, bc);
-
-	/* prepare to log errrors */
-	error = fopen("error.csv", "w");
+	apply_initial_conditions(oldMesh, nx, ny, bc);
 
 	/* write initial condition data */
-	write_csv(newMesh, nx, ny, dx, dy, 0);
-	write_png(newMesh, nx, ny, dx, dy, 0, bc);
+	write_csv(oldMesh, nx, ny, dx, dy, 0);
+	write_png(oldMesh, nx, ny, 0);
+
+	/* prepare to log comparison to analytical solution */
+	output = fopen("error.csv", "w");
+	if (output == NULL) {
+		printf("Error: unable to %s for output. Check permissions.\n", "error.csv");
+		exit(-1);
+	}
 
 	/* do the work */
 	for (step = 1; step < steps+1; step++) {
+		apply_boundary_conditions(oldMesh, nx, ny, bc);
+
 		compute_convolution(oldMesh, conMesh, mask, nx, ny, nm);
 
 		step_in_time(oldMesh, newMesh, conMesh, nx, ny, D, dt, &elapsed);
 
-		apply_boundary_conditions(newMesh, nx, ny, bc);
-
-		check_solution(newMesh, nx, ny, dx, dy, elapsed, D, bc, &sse);
-		fprintf(error, "%f,%f\n", elapsed, sse);
-
+		swap_pointers(&oldData, &newData, &oldMesh, &newMesh);
 
 		if (step % checks == 0) {
-			write_csv(newMesh, nx, ny, dx, dy, step);
-			write_png(newMesh, nx, ny, dx, dy, step, bc);
-		}
+			write_csv(oldMesh, nx, ny, dx, dy, step);
 
-		swap_pointers(&oldData, &newData, &oldMesh, &newMesh);
+			write_png(oldMesh, nx, ny, step);
+
+			check_solution(oldMesh, nx, ny, dx, dy, elapsed, D, bc, &sse);
+			fprintf(output, "%f,%f\n", elapsed, sse);
+		}
 	}
 
 	/* clean up */
-	fclose(error);
-	free_arrays(oldMesh, newMesh, conMesh, mask, oldData, newData, conData, maskData, nx, ny);
+	fclose(output);
+	free_arrays(oldMesh, newMesh, conMesh, mask, oldData, newData, conData, maskData);
 
 	return 0;
 }
+

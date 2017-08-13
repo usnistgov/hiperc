@@ -1,19 +1,22 @@
 # Makefile for CPU diffusion code
 # implementation-independent headers
 
-CC = g++ # TBB requires C++, so g++ is required over gcc
-CFLAGS = -O2 -Wall -pedantic
+all: serial/diffusion openmp/diffusion tbb/diffusion
 
-all: mesh.o output.o timer.o
+serial/diffusion:
+	$(MAKE) -C serial
 
-mesh.o: mesh.c
-	$(CC) $(CFLAGS) -c $<
+openmp/diffusion:
+	$(MAKE) -C openmp
 
-output.o: output.c
-	$(CC) $(CFLAGS) -c $<
+tbb/diffusion:
+	$(MAKE) -C tbb
 
-timer.o: timer.c
-	$(CC) $(CFLAGS) -c $<
+runall:
+	$(MAKE) -C serial run; $(MAKE) -C openmp run; $(MAKE) -C tbb run
 
 clean:
-	rm -f *.o
+	$(MAKE) -C serial clean; $(MAKE) -C openmp clean; $(MAKE) -C tbb clean
+
+squeaky:
+	$(MAKE) -C serial squeaky; $(MAKE) -C openmp squeaky; $(MAKE) -C tbb squeaky

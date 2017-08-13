@@ -5,22 +5,12 @@ CXX = g++
 CPPFLAGS = -O2 -Wall -pedantic -I../
 LINKS = -lm -lpng -ltbb
 
-OBJS = ../mesh.o ../output.o ../timer.o \
-       boundaries.o discretization.o
+OBJS = boundaries.o discretization.o mesh.o output.o timer.o
 
 all: diffusion
 
 diffusion: ../main.c $(OBJS)
 	$(CXX) $(CPPFLAGS) $(OBJS) $< -o $@ $(LINKS)
-
-../mesh.o:
-	$(MAKE) -C ..
-
-../output.o:
-	$(MAKE) -C ..
-
-../timer.o:
-	$(MAKE) -C ..
 
 boundaries.o: boundaries.c
 	$(CXX) $(CPPFLAGS) -c $<
@@ -28,8 +18,20 @@ boundaries.o: boundaries.c
 discretization.o: discretization.c
 	$(CXX) $(CPPFLAGS) -c $<
 
+mesh.o: ../mesh.c
+	$(CXX) $(CPPFLAGS) -c $<
+
+output.o: ../output.c
+	$(CXX) $(CPPFLAGS) -c $<
+
+timer.o: ../timer.c
+	$(CXX) $(CPPFLAGS) -c $<
+
 run: diffusion
-	./diffusion ../params.txt
+	/usr/bin/time -f' Time (%E wall, %U user, %S sys)' ./diffusion ../params.txt
 
 clean:
+	rm -f diffusion *.o
+
+squeaky:
 	rm -f diffusion *.o data.*.csv data.*.png runlog.csv

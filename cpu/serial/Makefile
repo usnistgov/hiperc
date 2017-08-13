@@ -1,26 +1,16 @@
 # Makefile for CPU diffusion code
 # serial implementation (no parallel model)
 
-CC = g++
+CC = gcc
 CFLAGS = -O2 -Wall -pedantic -I../
 LINKS = -lm -lpng
 
-OBJS = ../mesh.o ../output.o ../timer.o \
-       boundaries.o discretization.o
+OBJS = boundaries.o discretization.o mesh.o output.o timer.o
 
 all: diffusion
 
 diffusion: ../main.c $(OBJS)
 	$(CC) $(CFLAGS) $(OBJS) $< -o $@ $(LINKS)
-
-../mesh.o:
-	$(MAKE) -C ..
-
-../output.o:
-	$(MAKE) -C ..
-
-../timer.o:
-	$(MAKE) -C ..
 
 boundaries.o: boundaries.c
 	$(CC) $(CFLAGS) -c $<
@@ -28,8 +18,20 @@ boundaries.o: boundaries.c
 discretization.o: discretization.c
 	$(CC) $(CFLAGS) -c $<
 
+mesh.o: ../mesh.c
+	$(CC) -c $<
+
+output.o: ../output.c
+	$(CC) -c $<
+
+timer.o: ../timer.c
+	$(CC) -c $<
+
 run: diffusion
-	./diffusion ../params.txt
+	/usr/bin/time -f' Time (%E wall, %U user, %S sys)' ./diffusion ../params.txt
 
 clean:
+	rm -f diffusion *.o
+
+squeaky:
 	rm -f diffusion *.o data.*.csv data.*.png runlog.csv

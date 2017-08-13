@@ -109,6 +109,8 @@ void analytical_value(double x, double t, double D, double chi, double* c)
 
 class ResidualSumOfSquares2D {
 	double** my_A;
+	int my_nx;
+	int my_ny;
 	double my_dx;
 	double my_dy;
 	double my_elapsed;
@@ -119,24 +121,23 @@ class ResidualSumOfSquares2D {
 		double my_rss;
 
 		/* constructors */
-		ResidualSumOfSquares2D(double** A, double dx, double dy, double elapsed, double D, double c)
-		                      : my_A(A), my_dx(dx), my_dy(dy), my_elapsed(elapsed), my_D(D), my_c(c), my_rss(0.0) {}
+		ResidualSumOfSquares2D(double** A, int nx, int ny, double dx, double dy, double elapsed, double D, double c)
+		                      : my_A(A), my_nx(nx), my_ny(ny), my_dx(dx), my_dy(dy), my_elapsed(elapsed), my_D(D), my_c(c), my_rss(0.0) {}
 		ResidualSumOfSquares2D(ResidualSumOfSquares2D& a, tbb::split)
-		                      : my_A(a.my_A), my_dx(a.my_dx), my_dy(a.my_dy), my_elapsed(a.my_elapsed), my_D(a.my_D), my_c(a.my_c), my_rss(0.0) {}
+		                      : my_A(a.my_A), my_nx(a.my_nx), my_ny(a.my_ny), my_dx(a.my_dx), my_dy(a.my_dy), my_elapsed(a.my_elapsed), my_D(a.my_D), my_c(a.my_c), my_rss(0.0) {}
 
 		/* modifier */
 		void operator()(const tbb::blocked_range2d<int>& r)
 		{
 			double** A = my_A;
+			int nx = my_nx;
+			int ny = my_ny;
 			double dx = my_dx;
 			double dy = my_dy;
 			double elapsed = my_elapsed;
 			double D = my_D;
 			double c = my_c;
 			double sum = my_rss;
-
-			const int nx = r.rows().size() + 2;
-			const int ny = r.cols().size() + 2;
 
 			for (int j = r.cols().begin(); j != r.cols().end(); j++) {
 				for (int i = r.rows().begin(); i != r.rows().end(); i++) {
@@ -178,7 +179,7 @@ void check_solution(double** A, int nx, int ny, double dx, double dy, double ela
 {
 	const int tbb_bs = 16;
 
-	ResidualSumOfSquares2D R(A, dx, dy, elapsed, D, bc[1][0]);
+	ResidualSumOfSquares2D R(A, nx, ny, dx, dy, elapsed, D, bc[1][0]);
 
 	tbb::parallel_reduce( tbb::blocked_range2d<int>(1, ny-1, tbb_bs, 1, nx-1, tbb_bs), R);
 

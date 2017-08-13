@@ -99,17 +99,19 @@ void apply_initial_conditions(double** A, int nx, int ny, double bc[2][2])
 
 class ApplyBoundaryConditions {
 	double** my_A;
+	int my_nx;
+	int my_ny;
 
 	public:
 		/* constructor */
-		ApplyBoundaryConditions(double** A) : my_A(A) {}
+		ApplyBoundaryConditions(double** A, int nx, int ny) : my_A(A), my_nx(nx), my_ny(ny) {}
 
 		/* modifier */
 		void operator()(const tbb::blocked_range2d<int>& r) const
 		{
 			double** A = my_A;
-			const int nx = r.rows().size() + 2;
-			const int ny = r.cols().size() + 2;
+			int nx = my_nx;
+			int ny = my_ny;
 
 			for (int j = r.cols().begin(); j != r.cols().end(); j++) {
 				A[j][0] = A[j][1]; /* left boundary */
@@ -126,13 +128,11 @@ class ApplyBoundaryConditions {
 
 void apply_boundary_conditions(double** A, int nx, int ny, double bc[2][2])
 {
-	/* Set fixed value (c=1) along left and bottom, zero-flux elsewhere */
-
 	const int tbb_bs = 16;
 
 	tbb::parallel_for( tbb::blocked_range<int>(1, ny/2, tbb_bs), ApplyLeftBoundaryValues(A, bc[1][0], 1) );
 
 	tbb::parallel_for( tbb::blocked_range<int>(ny/2, ny-1, tbb_bs), ApplyRightBoundaryValues(A, bc[1][1], nx-2) );
 
-	tbb::parallel_for( tbb::blocked_range2d<int>(1, ny-1, tbb_bs, 1, nx-1, tbb_bs), ApplyBoundaryConditions(A) );
+	tbb::parallel_for( tbb::blocked_range2d<int>(1, ny-1, tbb_bs, 1, nx-1, tbb_bs), ApplyBoundaryConditions(A, nx, ny) );
 }

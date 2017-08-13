@@ -17,23 +17,28 @@ int main(int argc, char* argv[])
 	/* declare file handles */
 	FILE * input, * output;
 
+	/* declare parameter variables */
+	char buffer[256];
+	char* pch;
+	int ith=0, inx=0, iny=0, idx=0, idy=0, ins=0, inc=0, idc=0, ico=0;
+
 	/* declare mesh and mask sizes */
-	int nx, ny, nm;
+	int nx=512, ny=512, nm=3, nth=4;
 
 	/* declare mesh resolution */
-	double dx, dy, h;
+	double dx=0.5, dy=0.5, h=0.5;
 
 	/* declare mesh parameters */
 	double **oldMesh, **newMesh, **conMesh, **mask;
 	double *oldData, *newData, *conData, *maskData;
-	int step=0, steps, checks;
+	int step=0, steps=100000, checks=10000;
 	double bc[2][2];
 
 	/* declare timers */
-	double start_time, conv_time=0., step_time, file_time, soln_time=0.;
+	double start_time=0., conv_time=0., step_time=0., file_time=0., soln_time=0.;
 
 	/* declare materials and numerical parameters */
-	double D, linStab=0.1, dt, elapsed=0., rss=0.;
+	double D=0.00625, linStab=0.1, dt=1., elapsed=0., rss=0.;
 
 	StartTimer();
 
@@ -46,14 +51,85 @@ int main(int argc, char* argv[])
 	/* Read grid size and mesh resolution from file */
 	input = fopen(argv[1], "r");
 	if (input == NULL) {
-		printf("Error: unable to open parameter file %s. Check permissions.\n", argv[1]);
-		exit(-1);
+		printf("Warning: unable to open parameter file %s. Marching with default values.\n", argv[1]);
+	} else {
+		/* read parameters */
+		while ( !feof(input))
+		{
+			/* process key-value pairs line-by-line */
+			if (fgets(buffer, 256, input) != NULL)
+			{
+				/* tokenize the key */
+				pch = strtok(buffer, " ");
+
+				if (strcmp(pch, "nt") == 0) {
+					/* tokenize the value */
+					pch = strtok(NULL, " ");
+					/* set the value */
+					nth = atof(pch);
+					ith = 1;
+				} else if (strcmp(pch, "nx") == 0) {
+					pch = strtok(NULL, " ");
+					nx = atoi(pch);
+					inx = 1;
+				} else if (strcmp(pch, "ny") == 0) {
+					pch = strtok(NULL, " ");
+					ny = atoi(pch);
+					iny = 1;
+				} else if (strcmp(pch, "dx") == 0) {
+					pch = strtok(NULL, " ");
+					dx = atof(pch);
+					idx = 1;
+				} else if (strcmp(pch, "dy") == 0) {
+					pch = strtok(NULL, " ");
+					dy = atof(pch);
+					idy = 1;
+				} else if (strcmp(pch, "ns") == 0) {
+					pch = strtok(NULL, " ");
+					steps = atoi(pch);
+					ins = 1;
+				} else if (strcmp(pch, "nc") == 0) {
+					pch = strtok(NULL, " ");
+					checks = atoi(pch);
+					inc = 1;
+				} else if (strcmp(pch, "dc") == 0) {
+					pch = strtok(NULL, " ");
+					D = atof(pch);
+					idc = 1;
+				} else if (strcmp(pch, "co") == 0) {
+					pch = strtok(NULL, " ");
+					linStab = atof(pch);
+					ico = 1;
+				} else {
+					printf("Warning: unknown key %s. Ignoring value.\n", pch);
+				}
+			}
+		}
+
+		/* make sure we got everyone */
+		if (! ith) {
+			printf("Warning: parameter %s undefined. Using default value, %i.\n", "nt", nth);
+		} else if (! inx) {
+			printf("Warning: parameter %s undefined. Using default value, %i.\n", "nx", nx);
+		} else if (! iny) {
+			printf("Warning: parameter %s undefined. Using default value, %i.\n", "ny", ny);
+		} else if (! idx) {
+			printf("Warning: parameter %s undefined. Using default value, %f.\n", "dx", dx);
+		} else if (! idy) {
+			printf("Warning: parameter %s undefined. Using default value, %f.\n", "dy", dy);
+		} else if (! ins) {
+			printf("Warning: parameter %s undefined. Using default value, %i.\n", "ns", steps);
+		} else if (! inc) {
+			printf("Warning: parameter %s undefined. Using default value, %i.\n", "nc", checks);
+		} else if (! idc) {
+			printf("Warning: parameter %s undefined. Using default value, %f.\n", "dc", D);
+		} else if (! ico) {
+			printf("Warning: parameter %s undefined. Using default value, %f.\n", "co", linStab);
+		}
 	}
 
-	/* read parameters */
-	fscanf(input, "%i %i %lf %lf %i %i %lf", &nx, &ny, &dx, &dy, &steps, &checks, &D);
-	fclose(input);
-
+	/* set numerical parameters */
+	set_threads(nth);
 	h = (dx > dy) ? dy : dx;
 	dt = (linStab * h * h) / (4.0 * D);
 

@@ -10,6 +10,11 @@
 
 #include "diffusion.h"
 
+void set_threads(int n)
+{
+	/* nothing to do here */
+}
+
 void set_mask(double dx, double dy, int* nm, double** M)
 {
 	/* M is initialized to zero, so corners can be ignored */

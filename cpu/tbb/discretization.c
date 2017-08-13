@@ -8,11 +8,18 @@
 
 #include <math.h>
 #include <tbb/tbb.h>
+#include <tbb/task_scheduler_init.h>
 #include <tbb/parallel_for.h>
 #include <tbb/parallel_reduce.h>
 #include <tbb/blocked_range2d.h>
 
 #include "diffusion.h"
+
+void set_threads(int n)
+{
+	tbb::task_scheduler_init init(n);
+}
+
 
 void set_mask(double dx, double dy, int* nm, double** M)
 {

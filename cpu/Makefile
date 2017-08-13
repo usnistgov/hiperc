@@ -12,7 +12,7 @@ openmp/diffusion:
 tbb/diffusion:
 	$(MAKE) -C tbb
 
-runall:
+run:
 	$(MAKE) -C serial run; $(MAKE) -C openmp run; $(MAKE) -C tbb run
 
 clean:

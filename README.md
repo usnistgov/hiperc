@@ -1,25 +1,39 @@
 # accelerator-testing
+
 Diffusion and phase-field models for accelerator architectures
 
+## *Work in Progress*
+
+ - [ ] diffusion
+   - [x] cpu
+     - [x] serial
+     - [x] OpenMP
+     - [x] Threading Building Blocks
+   - [ ] gpu
+     - [ ] CUDA
+     - [ ] OpenACC
+     - [ ] OpenCL
+   - [ ] knl
+ - [ ] spinodal
+   - [ ] &middot;&middot;&middot;
+ - [ ] ripening
+   - [ ] &middot;&middot;&middot;
 
 ## Basic Algorithm
-Diffusion and phase-field problems depend extensively on the divergence of gradients, *e.g.*
 
+Diffusion and phase-field problems depend extensively on the divergence of gradients, *e.g.*
 > &part;*c*/&part;*t* = &nabla;&middot;*D*&nabla;*c*
 
-When *D* is constant, this simplifies to the Laplacian operator:
-
+When *D* is constant, this simplifies to
 > &part;*c*/&part;*t* = *D*&nabla;&sup2;*c*
 
 In 1D, the Laplacian can be discretized:
-
 > &part;*c*/&part;*t* &asymp; *D*(*c*&#8314; - 2*c*&#8304; + *c*&#8315;)/(*h*&sup2;)
 
 This discretization is a special case of [convolution](https://en.wikipedia.org/wiki/Discrete_Laplace_operator#Image_Processing),
 wherein a constant kernel of weighting coefficients is applied to an input dataset to produce a transformed output.
 
 1D Laplacian convolution kernel:
-
 <table>
   <tr>
     <td>1</td>
@@ -29,7 +43,6 @@ wherein a constant kernel of weighting coefficients is applied to an input datas
 </table>
 
 2D Laplacian convolution kernel:
-
 <table>
   <tr>
     <td>0</td>
@@ -49,7 +62,6 @@ wherein a constant kernel of weighting coefficients is applied to an input datas
 </table>
 
 Accelerators and coprocessors are well-suited to this type of computation.
-
 
 ## Accelerator Languages
 
@@ -84,16 +96,16 @@ with a similar offering through [Rescale ScaleX](http://www.rescale.com/products
 The code in this repository is specifically aimed at the GPU and Xeon Phi architectures:
 POSIX threads will be ignored, and OpenMP will be used only for reference computations.
 
-
 ## Hardware Cheatsheet
-| System     | CPU                    | Threads | RAM   | GPU                         | Cores | Phi      | Cores    |
-| :--------: | :--------------------: | ------: | ----: | :-------------------------: | ----: | :------: | -------: |
-| Huginn     | Intel Xeon E5-1650 v3  | 12      | 64 GB | 1&times; NVIDIA Quadro K620 | 384   | &empty;  | &empty;  |
-| rgpu2      | Intel Xeon E5-2697A v4 | 32      | 64 GB | 2&times; NVIDIA Tesla K40m  | 2880  | &empty;  | &empty;  |
-| rgpu3      | Intel Xeon E5-2697A v4 | 32      | 64 GB | 2&times; NVIDIA Tesla K40m  | 2880  | &empty;  | &empty;  |
 
+| System | CPU                    | Threads | RAM   | GPU                         | Cores | Phi      | Cores    |
+| :----: | :--------------------: | ------: | ----: | :-------------------------: | ----: | :------: | -------: |
+| Huginn | Intel Xeon E5-1650 v3  | 12      | 64 GB | 1&times; NVIDIA Quadro K620 | 384   | &empty;  | &empty;  |
+| rgpu2  | Intel Xeon E5-2697A v4 | 32      | 64 GB | 2&times; NVIDIA Tesla K40m  | 2880  | &empty;  | &empty;  |
+| rgpu3  | Intel Xeon E5-2697A v4 | 32      | 64 GB | 2&times; NVIDIA Tesla K40m  | 2880  | &empty;  | &empty;  |
 
 ## Disclaimer
+
 Certain commercial entities, equipment, or materials may be identified in this
 document in order to describe an experimental procedure or concept adequately.
 Such identification is not intended to imply recommendation or endorsement by
@@ -101,8 +113,8 @@ the [National Institute of Standards and Technology (NIST)](http://www.nist.gov)
 nor is it intended to imply that the entities, materials, or equipment are
 necessarily the best available for the purpose.
 
-
 ## Contributions and Contact
+
 Forks of this git repository are encouraged, and pull requests providing patches
 or implementations are more than welcome.
 Questions, concerns, and feedback regarding the source code provided in this git

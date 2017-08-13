@@ -1,12 +1,13 @@
 /*
 	File: boundaries.c
-	Role: implementation of boundary condition functions with CUDA acceleration
+	Role: implementation of boundary condition functions with OpenMP threading
 
 	Questions/comments to trevor.keller@nist.gov
 	Bugs/requests to https://github.com/tkphd/accelerator-testing
 */
 
 #include <math.h>
+#include <omp.h>
 
 #include "diffusion.h"
 
@@ -22,37 +23,51 @@ void set_boundaries(double bc[2][2])
 
 void apply_initial_conditions(double** A, int nx, int ny, double bc[2][2])
 {
-	int i, j;
+	#pragma omp parallel
+	{
+		int i, j;
 
-	for (j = 1; j < ny; j++)
-		for (i = 1; i < nx; i++)
-			A[j][i] = bc[0][0];
+		#pragma omp for collapse(2)
+		for (j = 1; j < ny; j++)
+			for (i = 1; i < nx; i++)
+				A[j][i] = bc[0][0];
 
-	for (j = 1; j < ny/2; j++)
-		A[j][1] = bc[1][0]; /* left half-wall */
+		#pragma omp for nowait
+		for (j = 1; j < ny/2; j++)
+			A[j][1] = bc[1][0]; /* left half-wall */
 
-	for (j = ny/2; j < ny-1; j++)
-		A[j][nx-2] = bc[1][1]; /* right half-wall */
+		#pragma omp for
+		for (j = ny/2; j < ny-1; j++)
+			A[j][nx-2] = bc[1][1]; /* right half-wall */
+	}
 }
 
 void apply_boundary_conditions(double** A, int nx, int ny, double bc[2][2])
 {
-	/* Set fixed value (c=1) along left and bottom, zero-flux elsewhere */
-	int i, j;
+	#pragma omp parallel
+	{
+		/* Set fixed value (c=1) along left and bottom, zero-flux elsewhere */
+		int i, j;
 
-	for (j = 1; j < ny/2; j++)
-		A[j][1] = bc[1][0]; /* left value */
+		#pragma omp for
+		for (j = 1; j < ny/2; j++)
+			A[j][1] = bc[1][0]; /* left value */
 
-	for (j = ny/2; j < ny-1; j++)
-		A[j][nx-2] = bc[1][1]; /* right value */
+		#pragma omp for
+		for (j = ny/2; j < ny-1; j++)
+			A[j][nx-2] = bc[1][1]; /* right value */
 
-	for (j = 1; j < ny-1; j++) {
-		A[j][0] = A[j][1]; /* left condition */
-		A[j][nx-1] = A[j][nx-2]; /* right condition */
-	}
+		#pragma omp for nowait
+		for (j = 1; j < ny-1; j++) {
+			A[j][0] = A[j][1]; /* left condition */
+			A[j][nx-1] = A[j][nx-2]; /* right condition */
+		}
 
-	for (i = 1; i < nx-1; i++) {
-		A[0][i] = A[1][i]; /* bottom condition */
-		A[ny-1][i] = A[ny-2][i]; /* top condition */
+		/* bottom boundary */
+		#pragma omp for nowait
+		for (i = 1; i < nx-1; i++) {
+			A[0][i] = A[1][i]; /* top condition */
+			A[ny-1][i] = A[ny-2][i]; /* bottom condition */
+		}
 	}
 }

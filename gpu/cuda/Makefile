@@ -2,7 +2,7 @@
 # CUDA implementation
 
 NVCXX = nvcc
-NVCXXFLAGS = -Wno-deprecated-gpu-targets --compiler-options="-O2 -Wall -pedantic -I../"
+NVCXXFLAGS = -Wno-deprecated-gpu-targets --compiler-options="-O2 -Wall -pedantic -I../ -fopenmp"
 LINKS = -lm -lpng
 
 OBJS = boundaries.o discretization.o mesh.o output.o timer.o

@@ -38,7 +38,7 @@ void apply_initial_conditions(double** A, int nx, int ny, double bc[2][2])
 
 		#pragma omp for
 		for (j = ny/2; j < ny-1; j++)
-			A[j][nx-1] = bc[1][1]; /* right half-wall */
+			A[j][nx-2] = bc[1][1]; /* right half-wall */
 	}
 }
 
@@ -49,33 +49,25 @@ void apply_boundary_conditions(double** A, int nx, int ny, double bc[2][2])
 		/* Set fixed value (c=1) along left and bottom, zero-flux elsewhere */
 		int i, j;
 
-		/* left boundary */
 		#pragma omp for
-		for (j = 1; j < ny/2; j++) {
-			A[j][0] = bc[1][0]; /* fixed value */
-			A[j][1] = bc[1][0];
-		}
-		#pragma omp for nowait
-		for (j = ny/2; j < ny-1; j++)
-			A[j][0] = A[j][1]; /* no-flux */
-
-		/* right boundary */
-		#pragma omp for
-		for (j = ny/2; j < ny-1; j++) {
-			A[j][nx-1] = bc[1][1]; /* fixed value */
-			A[j][nx-2] = bc[1][1];
-		}
-		#pragma omp for nowait
 		for (j = 1; j < ny/2; j++)
-			A[j][nx-1] = A[j][nx-2]; /* no-flux */
+			A[j][1] = bc[1][0]; /* left value */
+
+		#pragma omp for
+		for (j = ny/2; j < ny-1; j++)
+			A[j][nx-2] = bc[1][1]; /* right value */
+
+		#pragma omp for nowait
+		for (j = 1; j < ny-1; j++) {
+			A[j][0] = A[j][1]; /* left condition */
+			A[j][nx-1] = A[j][nx-2]; /* right condition */
+		}
 
 		/* bottom boundary */
-		#pragma omp for
-		for (i = 1; i < nx-1; i++)
-			A[0][i] = A[1][i]; /* no-flux */
-
-		/* top boundary */
-		for (i = 1; i < nx-1; i++)
-			A[ny-1][i] = A[ny-2][i]; /* no-flux */
+		#pragma omp for nowait
+		for (i = 1; i < nx-1; i++) {
+			A[0][i] = A[1][i]; /* top condition */
+			A[ny-1][i] = A[ny-2][i]; /* bottom condition */
+		}
 	}
 }

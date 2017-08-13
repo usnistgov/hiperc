@@ -1,30 +1,19 @@
 # Makefile for CPU diffusion code
+# implementation-independent headers
 
 CC = gcc
 CFLAGS = -O2 -Wall -pedantic
-LINKS = -lm -lpng
 
-OBJS = mesh.o boundaries.o discretization.o output.o
-
-all: diffusion
-
-diffusion: diffusion.c $(OBJS)
-	$(CC) $(CFLAGS) $(OBJS) $< -o $@ $(LINKS)
+all: mesh.o output.o timer.o
 
 mesh.o: mesh.c
-	$(CC) $(CFLAGS) -c $<
-
-boundaries.o: boundaries.c
-	$(CC) $(CFLAGS) -c $<
-
-discretization.o: discretization.c
 	$(CC) $(CFLAGS) -c $<
 
 output.o: output.c
 	$(CC) $(CFLAGS) -c $<
 
-run: diffusion
-	./diffusion params.txt
+timer.o: timer.c
+	$(CC) $(CFLAGS) -c $<
 
 clean:
-	rm -f diffusion *.o data.*.csv data.*.png error.csv
+	rm -f *.o

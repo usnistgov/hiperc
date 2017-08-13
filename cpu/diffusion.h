@@ -9,6 +9,9 @@
 #ifndef _DIFFUSION_H_
 #define _DIFFUSION_H_
 
+/* Parallelism */
+void set_threads(int n);
+
 /* Mesh handling */
 void make_arrays(double*** A, double*** B, double*** C, double*** M, double** dataA, double** dataB, double** dataC, double** dataM, int nx, int ny);
 void free_arrays(double** A, double** B, double** C, double** M, double* dataA, double* dataB, double* dataC, double* dataM);

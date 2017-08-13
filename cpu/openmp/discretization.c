@@ -11,6 +11,11 @@
 
 #include "diffusion.h"
 
+void set_threads(int n)
+{
+	omp_set_num_threads(n);
+}
+
 void set_mask(double dx, double dy, int* nm, double** M)
 {
 	/* M is initialized to zero, so corners can be ignored */

@@ -1,7 +1,7 @@
 # Makefile for CPU diffusion code
 # implementation-independent headers
 
-CC = gcc
+CC = g++ # TBB requires C++, so g++ is required over gcc
 CFLAGS = -O2 -Wall -pedantic
 
 all: mesh.o output.o timer.o

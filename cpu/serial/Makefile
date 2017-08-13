@@ -1,7 +1,7 @@
 # Makefile for CPU diffusion code
 # serial implementation (no parallel model)
 
-CC = gcc
+CC = g++
 CFLAGS = -O2 -Wall -pedantic -I../
 LINKS = -lm -lpng
 
@@ -12,6 +12,15 @@ all: diffusion
 
 diffusion: ../main.c $(OBJS)
 	$(CC) $(CFLAGS) $(OBJS) $< -o $@ $(LINKS)
+
+../mesh.o:
+	$(MAKE) -C ..
+
+../output.o:
+	$(MAKE) -C ..
+
+../timer.o:
+	$(MAKE) -C ..
 
 boundaries.o: boundaries.c
 	$(CC) $(CFLAGS) -c $<

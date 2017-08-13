@@ -1,9 +1,9 @@
 # Makefile for CPU diffusion code
-# OpenMP implementation
+# serial implementation (no parallel model)
 
-CC = g++
-CFLAGS = -O2 -Wall -pedantic -I../ -fopenmp
-LINKS = -lm -lpng
+CXX = g++
+CPPFLAGS = -O2 -Wall -pedantic -I../
+LINKS = -lm -lpng -ltbb
 
 OBJS = ../mesh.o ../output.o ../timer.o \
        boundaries.o discretization.o
@@ -11,7 +11,7 @@ OBJS = ../mesh.o ../output.o ../timer.o \
 all: diffusion
 
 diffusion: ../main.c $(OBJS)
-	$(CC) $(CFLAGS) $(OBJS) -include omp.h $< -o $@ $(LINKS)
+	$(CXX) $(CPPFLAGS) $(OBJS) $< -o $@ $(LINKS)
 
 ../mesh.o:
 	$(MAKE) -C ..
@@ -23,10 +23,10 @@ diffusion: ../main.c $(OBJS)
 	$(MAKE) -C ..
 
 boundaries.o: boundaries.c
-	$(CC) $(CFLAGS) -c $<
+	$(CXX) $(CPPFLAGS) -c $<
 
 discretization.o: discretization.c
-	$(CC) $(CFLAGS) -c $<
+	$(CXX) $(CPPFLAGS) -c $<
 
 run: diffusion
 	./diffusion ../params.txt

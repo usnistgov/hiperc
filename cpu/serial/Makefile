@@ -19,13 +19,13 @@ discretization.o: discretization.c
 	$(CC) $(CFLAGS) -c $<
 
 mesh.o: ../mesh.c
-	$(CC) -c $<
+	$(CC) $(CFLAGS) -c $<
 
 output.o: ../output.c
-	$(CC) -c $<
+	$(CC) $(CFLAGS) -c $<
 
 timer.o: ../timer.c
-	$(CC) -c $<
+	$(CC) $(CFLAGS) -c $<
 
 run: diffusion
 	/usr/bin/time -f' Time (%E wall, %U user, %S sys)' ./diffusion ../params.txt

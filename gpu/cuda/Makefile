@@ -1,8 +1,8 @@
 # Makefile for GPU diffusion code
 # CUDA implementation
 
-CC = nvcc
-CFLAGS = -O2 -Wall -pedantic -I../
+NVCXX = nvcc
+NVCXXFLAGS = -Wno-deprecated-gpu-targets --compiler-options="-O2 -Wall -pedantic -I../"
 LINKS = -lm -lpng
 
 OBJS = boundaries.o discretization.o mesh.o output.o timer.o
@@ -10,22 +10,22 @@ OBJS = boundaries.o discretization.o mesh.o output.o timer.o
 all: diffusion
 
 diffusion: ../main.c $(OBJS)
-	$(CC) $(CFLAGS) $(OBJS) $< -o $@ $(LINKS)
+	$(NVCXX) $(NVCXXFLAGS) $(OBJS) $< -o $@ $(LINKS)
 
 boundaries.o: boundaries.c
-	$(CC) $(CFLAGS) -c $<
+	$(NVCXX) $(NVCXXFLAGS) -c $<
 
 discretization.o: discretization.c
-	$(CC) $(CFLAGS) -c $<
+	$(NVCXX) $(NVCXXFLAGS) -c $<
 
 mesh.o: ../mesh.c
-	$(CC) -c $<
+	$(NVCXX) $(NVCXXFLAGS) -c $<
 
 output.o: ../output.c
-	$(CC) -c $<
+	$(NVCXX) $(NVCXXFLAGS) -c $<
 
 timer.o: ../timer.c
-	$(CC) -c $<
+	$(NVCXX) $(NVCXXFLAGS) -c $<
 
 run: diffusion
 	/usr/bin/time -f' Time (%E wall, %U user, %S sys)' ./diffusion ../params.txt

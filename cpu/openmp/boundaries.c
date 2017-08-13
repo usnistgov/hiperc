@@ -1,6 +1,6 @@
 /*
 	File: boundaries.c
-	Role: implementation of boundary condition functions
+	Role: implementation of boundary condition functions with OpenMP threading
 
 	Questions/comments to trevor.keller@nist.gov
 	Bugs/requests to https://github.com/tkphd/accelerator-testing

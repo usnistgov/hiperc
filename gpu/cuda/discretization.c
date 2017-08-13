@@ -1,6 +1,6 @@
 /*
 	File: discretization.c
-	Role: implementation of discretized mathematical operations without threading
+	Role: implementation of discretized mathematical operations with CUDA acceleration
 
 	Questions/comments to trevor.keller@nist.gov
 	Bugs/requests to https://github.com/tkphd/accelerator-testing

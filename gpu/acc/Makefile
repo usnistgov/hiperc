@@ -1,9 +1,9 @@
-# Makefile for CPU diffusion code
-# serial implementation (no parallel model)
+# Makefile for GPU diffusion code
+# OpenACC implementation
 
-CXX = g++
-CXXFLAGS = -O2 -Wall -pedantic -I../
-LINKS = -lm -lpng -ltbb
+CXX = pgcc
+CXXFLAGS = -O2 -I../ -acc -ta=radeon -Minfo=accel -mp
+LINKS = -lm -lpng
 
 OBJS = boundaries.o discretization.o mesh.o output.o timer.o
 

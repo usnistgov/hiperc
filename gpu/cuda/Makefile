@@ -1,31 +1,31 @@
-# Makefile for CPU diffusion code
-# serial implementation (no parallel model)
+# Makefile for GPU diffusion code
+# CUDA implementation
 
-CXX = g++
-CXXFLAGS = -O2 -Wall -pedantic -I../
-LINKS = -lm -lpng -ltbb
+NVCXX = nvcc
+NVCXXFLAGS = -Wno-deprecated-gpu-targets --compiler-options="-O2 -Wall -pedantic -I../ -fopenmp"
+LINKS = -lm -lpng
 
 OBJS = boundaries.o discretization.o mesh.o output.o timer.o
 
 all: diffusion
 
 diffusion: ../main.c $(OBJS)
-	$(CXX) $(CXXFLAGS) $(OBJS) $< -o $@ $(LINKS)
+	$(NVCXX) $(NVCXXFLAGS) $(OBJS) $< -o $@ $(LINKS)
 
 boundaries.o: boundaries.c
-	$(CXX) $(CXXFLAGS) -c $<
+	$(NVCXX) $(NVCXXFLAGS) -c $<
 
 discretization.o: discretization.c
-	$(CXX) $(CXXFLAGS) -c $<
+	$(NVCXX) $(NVCXXFLAGS) -c $<
 
 mesh.o: ../mesh.c
-	$(CXX) $(CXXFLAGS) -c $<
+	$(NVCXX) $(NVCXXFLAGS) -c $<
 
 output.o: ../output.c
-	$(CXX) $(CXXFLAGS) -c $<
+	$(NVCXX) $(NVCXXFLAGS) -c $<
 
 timer.o: ../timer.c
-	$(CXX) $(CXXFLAGS) -c $<
+	$(NVCXX) $(NVCXXFLAGS) -c $<
 
 run: diffusion
 	/usr/bin/time -f' Time (%E wall, %U user, %S sys)' ./diffusion ../params.txt

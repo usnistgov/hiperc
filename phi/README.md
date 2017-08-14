@@ -1,12 +1,11 @@
-# GPU code
+# Xeon Phi code
 
-This directory contains implementations of the diffusion equation for GPUs, with help from the following text:
-> Kirk and Wu. *Programming Massively Parallel Processors: A Hands-On Approach,* 3 Ed. Morgan Kaufmann. New York: 2017.
+This directory contains implementations of the diffusion equation for KNL, with help from the following text:
+> Jeffers, Reinders, and Sodani. *Intel Xeon Phi Processor High Performance Programming: Knights Landing Edition* 2 Ed. Morgan Kaufmann. New York: 2016.
 
 ## Work in Progress
 
- - [ ] OpenACC
- - [ ] CUDA
+ - [ ] Knights Landing
 
 ## Usage
 
@@ -17,36 +16,28 @@ This directory, and each sub-directory, contains a makefile with three important
     the weighted sum-of-squares residual from the analytical solution, as well as runtime data.
  3. ```make clean``` will remove the executable and object files ```.o```, but not the data.
 
-To test the code, ```make run``` from this directory (```gpu```).
+To test the code, ```make run``` from this directory (```phi```).
 
 ## Dependencies
 
 To build this code, you must have installed
  * [GNU make](https://www.gnu.org/software/make/);
  * the [PNG library](http://www.libpng.org/pub/png/libpng.html);
- * the [CUDA toolkit](https://developer.nvidia.com/cuda-llvm-compiler);
- * the [PGI compiler](http://www.pgroup.com/products/community.htm); 
- * the [OpenCL library](https://www.khronos.org/opencl/);
- * the OpenCL runtime for [AMD](http://developer.amd.com/tools-and-sdks/opencl-zone/),
-   [NVIDIA](https://developer.nvidia.com/opencl), or
-   [Intel](https://software.intel.com/en-us/articles/opencl-drivers) hardware.
+ * the [Intel compiler](https://software.intel.com/en-us/intel-compilers).
 
 These are usually available through the package manager. For example,
-```apt-get install make libpng12-dev nvidia-cuda-dev opencl-headers nvidia-opencl-dev```
-or ```apt-get install make libpng12-dev nvidia-cuda-dev opencl-headers amd-opencl-dev```.
-Note that CUDA is not compatible with all GPU architectures.
-Proof-of-concept GPU code can be run on [Amazon's EC2](https://aws.amazon.com/ec2/Elastic-GPUs/)
+```apt-get install make libpng12-dev```. The Intel compiler is proprietary,
+but available to open-source developers at no cost. Hardware capable of AVX-512
+instructions, whether a primary Xeon CPU or a Xeon Phi, is also required.
+
+Proof-of-concept KNL code can be run on [Rescale's ScaleX](http://www.rescale.com/products/)
 and other HPC cloud computing platforms.
 
 ## Source Layout
 
 ```
- gpu
- ├── openacc
- │   ├── boundaries.c
- │   ├── discretization.c
- │   └── Makefile
- ├── cuda
+ phi
+ ├── knl
  │   ├── boundaries.c
  │   ├── discretization.c
  │   └── Makefile

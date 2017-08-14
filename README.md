@@ -10,7 +10,7 @@ Diffusion and phase-field models for accelerator architectures
      - [x] OpenMP
      - [x] Threading Building Blocks
    - [ ] gpu
-     - [ ] OpenACC
+     - [x] OpenACC
      - [ ] CUDA
    - [ ] phi
      - [ ] Knights Landing

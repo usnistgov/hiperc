@@ -5,7 +5,7 @@ This directory contains implementations of the diffusion equation for GPUs, with
 
 ## Work in Progress
 
- - [ ] OpenACC
+ - [x] OpenACC
  - [ ] CUDA
 
 ## Usage

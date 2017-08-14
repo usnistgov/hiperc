@@ -50,7 +50,7 @@ necessarily the best available for the purpose.
 
 ```
  gpu
- ├── openacc
+ ├── acc
  │   ├── boundaries.c
  │   ├── discretization.c
  │   └── Makefile

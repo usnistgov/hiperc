@@ -1,8 +1,8 @@
 # Makefile for CPU diffusion code
-# serial implementation (no parallel model)
+# Threading Building Blocks implementation
 
 CXX = g++
-CXXFLAGS = -O2 -Wall -pedantic -I../
+CXXFLAGS = -O2 -Wall -pedantic -std=c++11 -I../
 LINKS = -lm -lpng -ltbb
 
 OBJS = boundaries.o discretization.o mesh.o output.o timer.o
@@ -12,10 +12,10 @@ all: diffusion
 diffusion: ../main.c $(OBJS)
 	$(CXX) $(CXXFLAGS) $(OBJS) $< -o $@ $(LINKS)
 
-boundaries.o: boundaries.c
+boundaries.o: boundaries.cpp
 	$(CXX) $(CXXFLAGS) -c $<
 
-discretization.o: discretization.c
+discretization.o: discretization.cpp
 	$(CXX) $(CXXFLAGS) -c $<
 
 mesh.o: ../mesh.c

@@ -101,14 +101,14 @@ void check_solution(double** A, int nx, int ny, double dx, double dy, double ela
 					r = (j < ny/2) ? dx * (i - 1) : sqrt(dx*dx * (i - 1) * (i - 1) + dy*dy * (j - ny/2) * (j - ny/2));
 					z = r / sqrt(4. * D * elapsed);
 					z2 = z * z;
-					poly_erf = (z < 1.) ? 2. * z * (1. + z2 * (-1./3 + z2 * (1./10 + z2 * (-1./42 + z2 / 216)))) / M_PI : 1.;
+					poly_erf = (z < 1.5) ? 2. * z * (1. + z2 * (-1./3 + z2 * (1./10 + z2 * (-1./42 + z2 / 216)))) / sqrt(M_PI) : 1.;
 					cal = bc[1][0] * (1. - poly_erf);
 
 					/* shortest distance to right-wall source */
 					r = (j >= ny/2) ? dx * (nx-2 - i) : sqrt(dx*dx * (nx-2 - i)*(nx-2 - i) + dy*dy * (ny/2 - j)*(ny/2 - j));
 					z = r / sqrt(4. * D * elapsed);
 					z2 = z * z;
-					poly_erf = (z < 1.) ? 2. * z * (1. + z2 * (-1./3 + z2 * (1./10 + z2 * (-1./42 + z2 / 216)))) / M_PI : 1.;
+					poly_erf = (z < 1.5) ? 2. * z * (1. + z2 * (-1./3 + z2 * (1./10 + z2 * (-1./42 + z2 / 216)))) / sqrt(M_PI) : 1.;
 					car = bc[1][0] * (1. - poly_erf);
 
 					/* superposition of analytical solutions */

@@ -32,11 +32,19 @@ To build this code, you must have installed
    [Intel](https://software.intel.com/en-us/articles/opencl-drivers) hardware.
 
 These are usually available through the package manager. For example,
-```apt-get install make libpng12-dev nvidia-cuda-dev opencl-headers nvidia-opencl-dev```
-or ```apt-get install make libpng12-dev nvidia-cuda-dev opencl-headers amd-opencl-dev```.
+```apt-get install make libpng12-dev nvidia-cuda-dev opencl-headers nvidia-opencl-dev```.
 Note that CUDA is not compatible with all GPU architectures.
 Proof-of-concept GPU code can be run on [Amazon's EC2](https://aws.amazon.com/ec2/Elastic-GPUs/)
-and other HPC cloud computing platforms.
+and equivalent HPC cloud computing platforms.
+
+### Disclaimer
+
+Certain commercial entities, equipment, or materials may be identified in this
+document in order to describe an experimental procedure or concept adequately.
+Such identification is not intended to imply recommendation or endorsement by
+the [National Institute of Standards and Technology (NIST)](http://www.nist.gov),
+nor is it intended to imply that the entities, materials, or equipment are
+necessarily the best available for the purpose.
 
 ## Source Layout
 
@@ -74,12 +82,3 @@ with one pair per line. The two-character keys are predefined, and must be one o
 If you wish to change parameters (D, runtime, etc.), either modify ```params.txt``` in place and
 ```make run```, or create your own copy of ```params.txt``` and execute ```./diffusion newparams```.
 The file name and extension make no difference, so long as it contains plain text.
-
-## Disclaimer
-
-Certain commercial entities, equipment, or materials may be identified in this
-document in order to describe an experimental procedure or concept adequately.
-Such identification is not intended to imply recommendation or endorsement by
-the [National Institute of Standards and Technology (NIST)](http://www.nist.gov),
-nor is it intended to imply that the entities, materials, or equipment are
-necessarily the best available for the purpose.

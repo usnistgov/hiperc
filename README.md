@@ -2,7 +2,7 @@
 
 Diffusion and phase-field models for accelerator architectures
 
-## *Work in Progress*
+## Work in Progress
 
  - [ ] diffusion
    - [x] cpu
@@ -77,12 +77,11 @@ with varying coding complexity and hardware dependencies:
    Provided by all compilers and compatible with any hardware configuration.
  * **Threading Building Blocks**: loop-level parallelism for multi-core CPU architectures
    using C++. Similar to OpenMP, but requires a wrapper around parallel regions that is
-   more complicated than a simple ```#pragma```. This provides more direct opportunities
-   for performance tuning. Open-source library, freely available.
+   more complicated than a one-line ```#pragma```. This provides more direct opportunities
+   for performance tuning. Available as an open-source library.
  * **OpenACC**: loop-level massive parallelism for GPU architectures.
    Like OpenMP, implementation requires prefixing target code with ```#pragma``` statements,
-   with little opportunity for performance tuning.
-   Provided in compilers from Cray, PGI, and GNU;
+   with little opportunity for performance tuning. Provided in compilers from Cray, PGI, and GNU;
    depends on a compatible graphics card, drivers, and CUDA library installation.
  * **CUDA**: general-purpose massive parallelism for GPGPU architectures.
    Like POSIX threading but for GPUs, provides low-level capabilities and ample opportunity
@@ -96,10 +95,10 @@ with varying coding complexity and hardware dependencies:
 Generically speaking, OpenMP and OpenACC provide low barriers for entry into acceleration;
 CUDA and Xeon Phi require high investments for hardware and compilers, but offer the greatest
 capabilities for performance and optimization of a specific application.
-Proof-of-concept GPU code can be run on [Amazon's EC2](https://aws.amazon.com/ec2/Elastic-GPUs/),
-and with a similar offering on [Rescale's ScaleX](http://www.rescale.com/products/) for Xeon Phi.
+Proof-of-concept code for GPU and KNL can be run on [Amazon's EC2](https://aws.amazon.com/ec2/Elastic-GPUs/),
+[Rescale's ScaleX](http://www.rescale.com/products/), and equivalent HPC cloud computing platforms.
 
-## Disclaimer
+### Disclaimer
 
 Certain commercial entities, equipment, or materials may be identified in this
 document in order to describe an experimental procedure or concept adequately.
@@ -122,4 +121,3 @@ repository should be addressed to trevor.keller@nist.gov (Trevor Keller).
 | Huginn | Intel Xeon E5-1650 v3  | 12      | 64 GB | 1&times; NVIDIA Quadro K620 | 384   | &empty;  | &empty;  |
 | rgpu2  | Intel Xeon E5-2697A v4 | 32      | 64 GB | 2&times; NVIDIA Tesla K40m  | 2880  | &empty;  | &empty;  |
 | rgpu3  | Intel Xeon E5-2697A v4 | 32      | 64 GB | 2&times; NVIDIA Tesla K40m  | 2880  | &empty;  | &empty;  |
-

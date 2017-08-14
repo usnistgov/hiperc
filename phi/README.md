@@ -1,7 +1,7 @@
 # Xeon Phi code
 
 This directory contains implementations of the diffusion equation for KNL, with help from the following text:
-> Jeffers, Reinders, and Sodani. *Intel Xeon Phi Processor High Performance Programming: Knights Landing Edition* 2 Ed. Morgan Kaufmann. New York: 2016.
+> Jeffers, Reinders, and Sodani. *Intel Xeon Phi Processor High Performance Programming: Knights Landing Edition,* 2 Ed. Morgan Kaufmann. New York: 2016.
 
 ## Work in Progress
 
@@ -31,7 +31,16 @@ but available to open-source developers at no cost. Hardware capable of AVX-512
 instructions, whether a primary Xeon CPU or a Xeon Phi, is also required.
 
 Proof-of-concept KNL code can be run on [Rescale's ScaleX](http://www.rescale.com/products/)
-and other HPC cloud computing platforms.
+and equivalent HPC cloud computing platforms.
+
+### Disclaimer
+
+Certain commercial entities, equipment, or materials may be identified in this
+document in order to describe an experimental procedure or concept adequately.
+Such identification is not intended to imply recommendation or endorsement by
+the [National Institute of Standards and Technology (NIST)](http://www.nist.gov),
+nor is it intended to imply that the entities, materials, or equipment are
+necessarily the best available for the purpose.
 
 ## Source Layout
 
@@ -65,12 +74,3 @@ with one pair per line. The two-character keys are predefined, and must be one o
 If you wish to change parameters (D, runtime, etc.), either modify ```params.txt``` in place and
 ```make run```, or create your own copy of ```params.txt``` and execute ```./diffusion newparams```.
 The file name and extension make no difference, so long as it contains plain text.
-
-## Disclaimer
-
-Certain commercial entities, equipment, or materials may be identified in this
-document in order to describe an experimental procedure or concept adequately.
-Such identification is not intended to imply recommendation or endorsement by
-the [National Institute of Standards and Technology (NIST)](http://www.nist.gov),
-nor is it intended to imply that the entities, materials, or equipment are
-necessarily the best available for the purpose.

@@ -2,7 +2,7 @@
 
 This directory contains implementations of the diffusion equation for CPUs.
 
-## Work in Progress
+## Working Code
 
  - [x] serial
  - [x] OpenMP
@@ -23,7 +23,7 @@ To test the code, ```make run``` from this directory (```cpu```).
 
 To build this code, you must have installed
  * [GNU make](https://www.gnu.org/software/make/);
- * the [GNU compiler collection](https://gcc.gnu.org) (``gcc``` and ```g++```);
+ * the [GNU compiler collection](https://gcc.gnu.org) (```gcc``` and ```g++```);
  * the [PNG](http://www.libpng.org/pub/png/libpng.html) library;
  * the [Threading Building Blocks (TBB)](https://www.threadingbuildingblocks.org) library.
 

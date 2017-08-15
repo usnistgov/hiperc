@@ -36,6 +36,21 @@ void five_point_Laplacian_stencil(double dx, double dy, double** M)
 	M[2][1] =  1. / (dy * dy); /* down */
 }
 
+void nine_point_Laplacian_stencil(double dx, double dy, double** M)
+{
+	M[0][0] =   1. / (6. * dx * dy);
+	M[0][1] =   4. / (6. * dy * dy);
+	M[0][2] =   1. / (6. * dx * dy);
+
+	M[1][0] =   4. / (6. * dx * dx);
+	M[1][1] = -10. * (dx*dx + dy*dy) / (6. * dx*dx * dy*dy);
+	M[1][2] =   4. / (6. * dx * dx);
+
+	M[2][0] =   1. / (6. * dx * dy);
+	M[2][1] =   4. / (6. * dy * dy);
+	M[2][2] =   1. / (6. * dx * dy);
+}
+
 void set_mask(double dx, double dy, int nm, double** M)
 {
 	five_point_Laplacian_stencil(dx, dy, M);
@@ -138,7 +153,9 @@ __global__ void diffusion_kernel(double* A, double* B, double* C, int nx, int ny
 	}
 }
 
-void solve_diffusion_equation(double** A, double** B, double** C, int nx, int ny, int nm, int bs, double D, double dt, double* elapsed)
+void solve_diffusion_equation(double** A, double** B, double** C,
+                              int nx, int ny, int nm, int bs,
+                              double D, double dt, double* elapsed)
 {
 	double* d_A, *d_B, *d_C;
 
@@ -169,7 +186,9 @@ void solve_diffusion_equation(double** A, double** B, double** C, int nx, int ny
 	*elapsed += dt;
 }
 
-void check_solution(double** A, int nx, int ny, double dx, double dy, int nm, int bs, double elapsed, double D, double bc[2][2], double* rss)
+void check_solution(double** A,
+                    int nx, int ny, double dx, double dy, int nm, int bs,
+                    double elapsed, double D, double bc[2][2], double* rss)
 {
 	/* Not easily CUDA-able without a prefix-sum formulation */
 

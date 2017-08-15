@@ -29,6 +29,21 @@ void five_point_Laplacian_stencil(double dx, double dy, double** M)
 	M[2][1] =  1. / (dy * dy); /* down */
 }
 
+void nine_point_Laplacian_stencil(double dx, double dy, double** M)
+{
+	M[0][0] =   1. / (6. * dx * dy);
+	M[0][1] =   4. / (6. * dy * dy);
+	M[0][2] =   1. / (6. * dx * dy);
+
+	M[1][0] =   4. / (6. * dx * dx);
+	M[1][1] = -10. * (dx*dx + dy*dy) / (6. * dx*dx * dy*dy);
+	M[1][2] =   4. / (6. * dx * dx);
+
+	M[2][0] =   1. / (6. * dx * dy);
+	M[2][1] =   4. / (6. * dy * dy);
+	M[2][2] =   1. / (6. * dx * dy);
+}
+
 void set_mask(double dx, double dy, int nm, double** M)
 {
 	five_point_Laplacian_stencil(dx, dy, M);

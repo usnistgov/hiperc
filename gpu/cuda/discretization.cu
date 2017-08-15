@@ -8,18 +8,14 @@
 
 #include <math.h>
 #include <omp.h>
-#ifndef MCUDA
 #include <cuda.h>
-#include <cutil.h>
-#else
-#include <mcuda.h>
-#endif
 
 #include "diffusion.h"
 
 /* CUDA allocates memory tiles on the GPU statically, so their sizes must be hard coded */
-#define TILE_W 32
-#define TILE_H 32
+#define MAX_TILE_W 32
+#define MAX_TILE_H 32
+#define MAX_MASK_W 3
 
 void set_threads(int n)
 {
@@ -31,11 +27,8 @@ inline int iDivUp(int a, int b){
 	return (a % b != 0) ? (a / b + 1) : (a / b);
 }
 
-void set_mask(double dx, double dy, int* nm, double** M)
+void five_point_Laplacian_stencil(double dx, double dy, double** M)
 {
-	/* M is initialized to zero, so corners can be ignored */
-	*nm = 1;
-
 	M[0][1] =  1. / (dy * dy); /* up */
 	M[1][0] =  1. / (dx * dx); /* left */
 	M[1][1] = -2. * (dx*dx + dy*dy) / (dx*dx * dy*dy); /* middle */
@@ -43,36 +36,53 @@ void set_mask(double dx, double dy, int* nm, double** M)
 	M[2][1] =  1. / (dy * dy); /* down */
 }
 
-__global__ void convolution_kernel(double* A, double* B, double* C, const double __restrict__ *M, int nx, int ny, int nm)
+void set_mask(double dx, double dy, int nm, double** M)
 {
-	/* DANGER: the source (book) example was written for image data, which is row-major. Check loop indices! */
+	five_point_Laplacian_stencil(dx, dy, M);
+}
 
-	/* one CUDA core operates on one array index */
-	int i, j, tx, ty, src_row, dst_row, src_col, dst_col;
+__global__ void convolution_kernel(double* A, double* C, const double* M, int nx, int ny, int nm)
+{
+	/* Notes:
+		* The source matrix (A) and destination matrix (C) must be identical in size
+		* One CUDA core operates on one array index: there is no nested loop over matrix elements
+		* The halo (nm/2 perimeter cells) in C are unallocated garbage
+		* The same cells in A are boundary values, and contribute to the convolution
+		* N_ds is the shared tile data array... dunno where the name comes from yet
+	*/
+
+	int i, j, tx, ty, dst_row, dst_col, src_row, src_col;
 	double value = 0.;
 
 	/* determine indices on which to operate */
 	tx = threadIdx.x;
 	ty = threadIdx.y;
-	dst_row = blockIdx.x * DST_TILE_W + ty;
-	dst_col = blockIdx.y * DST_TILE_H + tx;
+
+	dst_row = blockIdx.y * blockDim.y + ty;
+	dst_col = blockIdx.x * blockDim.x + tx;
+
 	src_row = dst_row - nm/2;
 	src_col = dst_col - nm/2;
 
-	/* copy A data into this thread's tile buffer */
-	__shared__ double N_ds[TILE_H + MAX_MASK_H - 1][TILE_W + MAX_MASK_W - 1];
+	/* copy tile from A: __shared__ gives acces to all threads working on this tile */
+	__shared__ double N_ds[MAX_TILE_H + MAX_MASK_W - 1][MAX_TILE_W + MAX_MASK_W - 1];
 
-	if ((src_row >= 0) && (src_row < ny)) && (src_col >= 0) && (src_col < nx)) {
+	if ((src_row >= 0) && (src_row < ny) &&
+	    (src_col >= 0) && (src_col < nx)) {
+		/* if src_row==0, then dst_row==nm/2: this is a halo row, still contributing to the output */
 		N_ds[ty][tx] = A[src_row*nx + src_col];
 	} else {
 		N_ds[ty][tx] = 0.;
 	}
 
+	/* tile data is shared: wait for all threads to finish copying */
+	__syncthreads();
+
 	/* compute the convolution */
-	if (ty < DST_TILE_W && tx < DST_TILE_WIDTH) {
+	if (tx < MAX_TILE_W && ty < MAX_TILE_H) {
 		for (j = 0; j < nm; j++) {
 			for (i = 0; i < nm; i++) {
-				value += M[j][i] * N_ds[j+tx][i+ty];
+				value += M[j*nm+i] * N_ds[j+ty][i+tx];
 			}
 		}
 		/* record value */
@@ -85,26 +95,25 @@ __global__ void convolution_kernel(double* A, double* B, double* C, const double
 void compute_convolution(double** A, double** C, double** M, int nx, int ny, int nm, int bs)
 {
 	/* Rejoice: easily CUDA-able! */
-	double** d_A, **d_C, **d_M;
+	double* d_A, *d_C, *d_M;
 
 	dim3 threads(bs, bs);
 	dim3 blocks(iDivUp(nx, threads.x), iDivUp(ny, threads.y));
 
 	/* allocate memory on device */
-	cudaMalloc((void **)&d_A, nx * ny * sizeof(double));
-	cudaMalloc((void **)&d_C, nx * ny * sizeof(double));
-	cudaMalloc((void **)&d_M, nm * nm * sizeof(double));
+	cudaMalloc((void **) &d_A, nx * ny * sizeof(double));
+	cudaMalloc((void **) &d_C, nx * ny * sizeof(double));
+	cudaMalloc((void **) &d_M, nm * nm * sizeof(double));
 
 	/* transfer data from host in to device */
-	cudaMemcpy(d_A, A, nx * ny * sizeof(double), cudaMemcpyHostToDevice);
-	cudaMemcpy(d_C, C, nx * ny * sizeof(double), cudaMemcpyHostToDevice);
-	cudaMemcpy(d_M, M, nm * nm * sizeof(double), cudaMemcpyHostToDevice);
+	cudaMemcpy(d_A, A[0], nx * ny * sizeof(double), cudaMemcpyHostToDevice);
+	cudaMemcpy(d_M, M[0], nm * nm * sizeof(double), cudaMemcpyHostToDevice);
 
 	/* compute result */
 	convolution_kernel<<<blocks, threads>>>(d_A, d_C, d_M, nx, ny, nm);
 
 	/* transfer from device out from host */
-	cudaMemcpy(C, d_C, nx * ny * sizeof(double), cudaMemcpyDeviceToHost);
+	cudaMemcpy(C[0], d_C, nx * ny * sizeof(double), cudaMemcpyDeviceToHost);
 
 	/* free memory on device */
 	cudaFree(d_A);
@@ -112,7 +121,7 @@ void compute_convolution(double** A, double** C, double** M, int nx, int ny, int
 	cudaFree(d_M);
 }
 
-void step_in_time(double** A, double** B, double** C, int nx, int ny, double D, double dt, double* elapsed)
+void step_in_time(double** A, double** B, double** C, int nx, int ny, int nm, int bs, double D, double dt, double* elapsed)
 {
 	/* Rejoice: easily CUDA-able! */
 
@@ -121,15 +130,15 @@ void step_in_time(double** A, double** B, double** C, int nx, int ny, double D, 
 		int i, j;
 
 		#pragma omp for collapse(2)
-		for (j = 1; j < ny-1; j++)
-			for (i = 1; i < nx-1; i++)
+		for (j = nm/2; j < ny-nm/2; j++)
+			for (i = nm/2; i < nx-nm/2; i++)
 				B[j][i] = A[j][i] + dt * D * C[j][i];
 	}
 
 	*elapsed += dt;
 }
 
-void check_solution(double** A, int nx, int ny, double dx, double dy, int bs, double elapsed, double D, double bc[2][2], double* rss)
+void check_solution(double** A, int nx, int ny, double dx, double dy, int nm, int bs, double elapsed, double D, double bc[2][2], double* rss)
 {
 	/* Not easily CUDA-able without a prefix-sum formulation */
 
@@ -141,20 +150,20 @@ void check_solution(double** A, int nx, int ny, double dx, double dy, int bs, do
 		double ca, cal, car, cn, poly_erf, r, trss, z, z2;
 
 		#pragma omp for collapse(2)
-		for (j = 1; j < ny-1; j++) {
-			for (i = 1; i < nx-1; i++) {
+		for (j = nm/2; j < ny-nm/2; j++) {
+			for (i = nm/2; i < nx-nm/2; i++) {
 				/* numerical solution */
 				cn = A[j][i];
 
 				/* shortest distance to left-wall source */
-				r = (j < ny/2) ? dx * (i - 1) : sqrt(dx*dx * (i - 1) * (i - 1) + dy*dy * (j - ny/2) * (j - ny/2));
+				r = (j < ny/2) ? dx * (i - nm/2) : sqrt(dx*dx * (i - nm/2) * (i - nm/2) + dy*dy * (j - ny/2) * (j - ny/2));
 				z = r / sqrt(4. * D * elapsed);
 				z2 = z * z;
 				poly_erf = (z < 1.5) ? 2. * z * (1. + z2 * (-1./3 + z2 * (1./10 + z2 * (-1./42 + z2 / 216)))) / sqrt(M_PI) : 1.;
 				cal = bc[1][0] * (1. - poly_erf);
 
 				/* shortest distance to right-wall source */
-				r = (j >= ny/2) ? dx * (nx-2 - i) : sqrt(dx*dx * (nx-2 - i)*(nx-2 - i) + dy*dy * (ny/2 - j)*(ny/2 - j));
+				r = (j >= ny/2) ? dx * (nx-nm+1 - i) : sqrt(dx*dx * (nx-nm+1 - i)*(nx-nm+1 - i) + dy*dy * (ny/2 - j)*(ny/2 - j));
 				z = r / sqrt(4. * D * elapsed);
 				z2 = z * z;
 				poly_erf = (z < 1.5) ? 2. * z * (1. + z2 * (-1./3 + z2 * (1./10 + z2 * (-1./42 + z2 / 216)))) / sqrt(M_PI) : 1.;
@@ -164,7 +173,7 @@ void check_solution(double** A, int nx, int ny, double dx, double dy, int bs, do
 				ca = cal + car;
 
 				/* residual sum of squares (RSS) */
-				trss = (ca - cn) * (ca - cn) / (double)((nx-2) * (ny-2));
+				trss = (ca - cn) * (ca - cn) / (double)((nx-nm+1) * (ny-nm+1));
 				sum += trss;
 			}
 		}

@@ -17,19 +17,18 @@ void set_threads(int n)
 	omp_set_num_threads(n);
 }
 
-void set_mask(double dx, double dy, int* nm, double** M)
+void five_point_Laplacian_stencil(double dx, double dy, double** M)
 {
-	/* M is initialized to zero, so corners can be ignored */
-	double dx2, dy2;
-	*nm = 1;
-	dx2 = dx * dx;
-	dy2 = dy * dy;
+	M[0][1] =  1. / (dy * dy); /* up */
+	M[1][0] =  1. / (dx * dx); /* left */
+	M[1][1] = -2. * (dx*dx + dy*dy) / (dx*dx * dy*dy); /* middle */
+	M[1][2] =  1. / (dx * dx); /* right */
+	M[2][1] =  1. / (dy * dy); /* down */
+}
 
-	M[0][1] =  1. / (dy2); /* up */
-	M[1][0] =  1. / (dx2); /* left */
-	M[1][1] = -2. * (dx2 + dy2) / (dx2 * dy2); /* middle */
-	M[1][2] =  1. / (dx2); /* right */
-	M[2][1] =  1. / (dy2); /* down */
+void set_mask(double dx, double dy, int nm, double** M)
+{
+	five_point_Laplacian_stencil(dx, dy, M);
 }
 
 void compute_convolution(double** A, double** C, double** M, int nx, int ny, int nm, int bs)
@@ -42,13 +41,13 @@ void compute_convolution(double** A, double** C, double** M, int nx, int ny, int
 			double value;
 
 			#pragma acc loop
-			for (j = 1; j < ny-1; j++) {
+			for (j = nm/2; j < ny-nm/2; j++) {
 				#pragma acc loop
-				for (i = 1; i < nx-1; i++) {
+				for (i = nm/2; i < nx-nm/2; i++) {
 					value = 0.;
-					for (mj = -nm; mj < nm+1; mj++) {
-						for (mi = -nm; mi < nm+1; mi++) {
-							value += M[mj+nm][mi+nm] * A[j+mj][i+mi];
+					for (mj = -nm/2; mj < 1+nm/2; mj++) {
+						for (mi = -nm/2; mi < 1+nm/2; mi++) {
+							value += M[mj+nm/2][mi+nm/2] * A[j+mj][i+mi];
 						}
 					}
 					C[j][i] = value;
@@ -58,7 +57,7 @@ void compute_convolution(double** A, double** C, double** M, int nx, int ny, int
 	}
 }
 
-void step_in_time(double** A, double** B, double** C, int nx, int ny, int bs, double D, double dt, double* elapsed)
+void step_in_time(double** A, double** B, double** C, int nx, int ny, int nm, int bs, double D, double dt, double* elapsed)
 {
 	#pragma acc data copyin(A[0:ny][0:nx], C[0:ny][0:nx]) copyout(B[0:ny][0:nx])
 	{
@@ -67,9 +66,9 @@ void step_in_time(double** A, double** B, double** C, int nx, int ny, int bs, do
 			int i, j;
 
 			#pragma acc loop
-			for (j = 1; j < ny-1; j++) {
+			for (j = nm/2; j < ny-nm/2; j++) {
 				#pragma acc loop
-				for (i = 1; i < nx-1; i++) {
+				for (i = nm/2; i < nx-nm/2; i++) {
 					B[j][i] = A[j][i] + dt * D * C[j][i];
 				}
 			}
@@ -79,7 +78,7 @@ void step_in_time(double** A, double** B, double** C, int nx, int ny, int bs, do
 	*elapsed += dt;
 }
 
-void check_solution(double** A, int nx, int ny, double dx, double dy, int bs, double elapsed, double D, double bc[2][2], double* rss)
+void check_solution(double** A, int nx, int ny, double dx, double dy, int nm, int bs, double elapsed, double D, double bc[2][2], double* rss)
 {
 	/* OpenCL does not have a GPU-based erf() definition, using Maclaurin series approximation */
 	double sum=0.;
@@ -91,21 +90,21 @@ void check_solution(double** A, int nx, int ny, double dx, double dy, int bs, do
 			double ca, cal, car, cn, poly_erf, r, trss, z, z2;
 
 			#pragma acc loop
-			for (j = 1; j < ny-1; j++) {
+			for (j = nm/2; j < ny-nm/2; j++) {
 				#pragma acc loop
-				for (i = 1; i < nx-1; i++) {
+				for (i = nm/2; i < nx-nm/2; i++) {
 					/* numerical solution */
 					cn = A[j][i];
 
 					/* shortest distance to left-wall source */
-					r = (j < ny/2) ? dx * (i - 1) : sqrt(dx*dx * (i - 1) * (i - 1) + dy*dy * (j - ny/2) * (j - ny/2));
+					r = (j < ny/2) ? dx * (i - nm/2) : sqrt(dx*dx * (i - nm/2) * (i - nm/2) + dy*dy * (j - ny/2) * (j - ny/2));
 					z = r / sqrt(4. * D * elapsed);
 					z2 = z * z;
 					poly_erf = (z < 1.5) ? 2. * z * (1. + z2 * (-1./3 + z2 * (1./10 + z2 * (-1./42 + z2 / 216)))) / sqrt(M_PI) : 1.;
 					cal = bc[1][0] * (1. - poly_erf);
 
 					/* shortest distance to right-wall source */
-					r = (j >= ny/2) ? dx * (nx-2 - i) : sqrt(dx*dx * (nx-2 - i)*(nx-2 - i) + dy*dy * (ny/2 - j)*(ny/2 - j));
+					r = (j >= ny/2) ? dx * (nx-nm+1 - i) : sqrt(dx*dx * (nx-nm+1 - i)*(nx-nm+1 - i) + dy*dy * (ny/2 - j)*(ny/2 - j));
 					z = r / sqrt(4. * D * elapsed);
 					z2 = z * z;
 					poly_erf = (z < 1.5) ? 2. * z * (1. + z2 * (-1./3 + z2 * (1./10 + z2 * (-1./42 + z2 / 216)))) / sqrt(M_PI) : 1.;
@@ -115,7 +114,7 @@ void check_solution(double** A, int nx, int ny, double dx, double dy, int bs, do
 					ca = cal + car;
 
 					/* residual sum of squares (RSS) */
-					trss = (ca - cn) * (ca - cn) / (double)((nx-2) * (ny-2));
+					trss = (ca - cn) * (ca - cn) / (double)((nx-nm+1) * (ny-nm+1));
 					sum += trss;
 				}
 			}

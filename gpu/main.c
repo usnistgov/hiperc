@@ -141,7 +141,7 @@ int main(int argc, char* argv[])
 
 	/* initialize memory */
 	make_arrays(&oldMesh, &newMesh, &conMesh, &mask, &oldData, &newData, &conData, &maskData, nx, ny);
-	set_mask(dx, dy, &nm, mask);
+	set_mask(dx, dy, nm, mask);
 	set_boundaries(bc);
 
 	start_time = GetTimer();
@@ -173,7 +173,7 @@ int main(int argc, char* argv[])
 		conv_time += GetTimer() - start_time;
 
 		start_time = GetTimer();
-		step_in_time(oldMesh, newMesh, conMesh, nx, ny, bs, D, dt, &elapsed);
+		step_in_time(oldMesh, newMesh, conMesh, nx, ny, nm, bs, D, dt, &elapsed);
 		step_time += GetTimer() - start_time;
 
 		swap_pointers(&oldData, &newData, &oldMesh, &newMesh);
@@ -187,7 +187,7 @@ int main(int argc, char* argv[])
 
 		if (step % 100 == 0) {
 			start_time = GetTimer();
-			check_solution(oldMesh, nx, ny, dx, dy, bs, elapsed, D, bc, &rss);
+			check_solution(oldMesh, nx, ny, dx, dy, nm, bs, elapsed, D, bc, &rss);
 			soln_time += GetTimer() - start_time;
 
 			fprintf(output, "%i,%f,%f,%f,%f,%f,%f,%f\n", step, elapsed, rss, conv_time, step_time, file_time, soln_time, GetTimer());

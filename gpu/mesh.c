@@ -15,6 +15,10 @@ void make_arrays(double*** A, double*** B, double*** C, double*** M, double** da
 {
 	int j;
 
+	if ((nx * sizeof(double)) % 32 != 0) {
+		printf("Warning: domain width of %i (%lu B) produces misaligned DRAM reads. Consider a multiple of 32.\n", nx, nx * sizeof(double));
+	}
+
 	/* allocate 1D data arrays */
 	(*dataA) = (double *)calloc(nx * ny, sizeof(double));
 	(*dataB) = (double *)calloc(nx * ny, sizeof(double));

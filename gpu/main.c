@@ -20,10 +20,10 @@ int main(int argc, char* argv[])
 	/* declare parameter variables */
 	char buffer[256];
 	char* pch;
-	int ith=0, inx=0, iny=0, idx=0, idy=0, ins=0, inc=0, idc=0, ico=0;
+	int ith=0, inx=0, iny=0, ibs=0, idx=0, idy=0, ins=0, inc=0, idc=0, ico=0;
 
 	/* declare mesh and mask sizes */
-	int nx=512, ny=512, nm=3, nth=4;
+	int nx=512, ny=512, nm=3, bs=32, nth=4;
 
 	/* declare mesh resolution */
 	double dx=0.5, dy=0.5, h=0.5;
@@ -84,6 +84,10 @@ int main(int argc, char* argv[])
 					pch = strtok(NULL, " ");
 					dy = atof(pch);
 					idy = 1;
+				} else if (strcmp(pch, "bs") == 0) {
+					pch = strtok(NULL, " ");
+					bs = atoi(pch);
+					ibs = 1;
 				} else if (strcmp(pch, "ns") == 0) {
 					pch = strtok(NULL, " ");
 					steps = atoi(pch);
@@ -117,6 +121,8 @@ int main(int argc, char* argv[])
 			printf("Warning: parameter %s undefined. Using default value, %f.\n", "dx", dx);
 		} else if (! idy) {
 			printf("Warning: parameter %s undefined. Using default value, %f.\n", "dy", dy);
+		} else if (! ibs) {
+			printf("Warning: parameter %s undefined. Using default value, %i.\n", "bs", bs);
 		} else if (! ins) {
 			printf("Warning: parameter %s undefined. Using default value, %i.\n", "ns", steps);
 		} else if (! inc) {
@@ -163,11 +169,11 @@ int main(int argc, char* argv[])
 		apply_boundary_conditions(oldMesh, nx, ny, bc);
 
 		start_time = GetTimer();
-		compute_convolution(oldMesh, conMesh, mask, nx, ny, nm);
+		compute_convolution(oldMesh, conMesh, mask, nx, ny, nm, bs);
 		conv_time += GetTimer() - start_time;
 
 		start_time = GetTimer();
-		step_in_time(oldMesh, newMesh, conMesh, nx, ny, D, dt, &elapsed);
+		step_in_time(oldMesh, newMesh, conMesh, nx, ny, bs, D, dt, &elapsed);
 		step_time += GetTimer() - start_time;
 
 		swap_pointers(&oldData, &newData, &oldMesh, &newMesh);
@@ -181,7 +187,7 @@ int main(int argc, char* argv[])
 
 		if (step % 100 == 0) {
 			start_time = GetTimer();
-			check_solution(oldMesh, nx, ny, dx, dy, elapsed, D, bc, &rss);
+			check_solution(oldMesh, nx, ny, dx, dy, bs, elapsed, D, bc, &rss);
 			soln_time += GetTimer() - start_time;
 
 			fprintf(output, "%i,%f,%f,%f,%f,%f,%f,%f\n", step, elapsed, rss, conv_time, step_time, file_time, soln_time, GetTimer());

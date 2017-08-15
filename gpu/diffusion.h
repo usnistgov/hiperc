@@ -24,9 +24,9 @@ void apply_boundary_conditions(double** A, int nx, int ny, double bc[2][2]);
 
 /* Discretized mathematical operations */
 void set_mask(double dx, double dy, int* nm, double** M);
-void compute_convolution(double** A, double** C, double** M, int nx, int ny, int nm);
-void step_in_time(double** A, double** B, double** C, int nx, int ny, double D, double dt, double *elapsed);
-void check_solution(double** A, int nx, int ny, double dx, double dy, double elapsed, double D, double bc[2][2], double* rss);
+void compute_convolution(double** A, double** C, double** M, int nx, int ny, int nm, int bs);
+void step_in_time(double** A, double** B, double** C, int nx, int ny, int bs, double D, double dt, double *elapsed);
+void check_solution(double** A, int nx, int ny, double dx, double dy, int bs, double elapsed, double D, double bc[2][2], double* rss);
 
 /* Output results */
 void write_csv(double** A, int nx, int ny, double dx, double dy, int step);

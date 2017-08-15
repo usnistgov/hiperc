@@ -134,12 +134,12 @@ int main(int argc, char* argv[])
 	dt = (linStab * h * h) / (4.0 * D);
 
 	/* initialize memory */
-	make_arrays(&oldMesh, &newMesh, &conMesh, &mask, &oldData, &newData, &conData, &maskData, nx, ny);
-	set_mask(dx, dy, &nm, mask);
+	make_arrays(&oldMesh, &newMesh, &conMesh, &mask, &oldData, &newData, &conData, &maskData, nx, ny, nm);
+	set_mask(dx, dy, nm, mask);
 	set_boundaries(bc);
 
 	start_time = GetTimer();
-	apply_initial_conditions(oldMesh, nx, ny, bc);
+	apply_initial_conditions(oldMesh, nx, ny, nm, bc);
 	step_time = GetTimer() - start_time;
 
 	/* write initial condition data */
@@ -160,14 +160,14 @@ int main(int argc, char* argv[])
 
 	/* do the work */
 	for (step = 1; step < steps+1; step++) {
-		apply_boundary_conditions(oldMesh, nx, ny, bc);
+		apply_boundary_conditions(oldMesh, nx, ny, nm, bc);
 
 		start_time = GetTimer();
 		compute_convolution(oldMesh, conMesh, mask, nx, ny, nm);
 		conv_time += GetTimer() - start_time;
 
 		start_time = GetTimer();
-		step_in_time(oldMesh, newMesh, conMesh, nx, ny, D, dt, &elapsed);
+		solve_diffusion_equation(oldMesh, newMesh, conMesh, nx, ny, nm, D, dt, &elapsed);
 		step_time += GetTimer() - start_time;
 
 		swap_pointers(&oldData, &newData, &oldMesh, &newMesh);
@@ -181,7 +181,7 @@ int main(int argc, char* argv[])
 
 		if (step % 100 == 0) {
 			start_time = GetTimer();
-			check_solution(oldMesh, nx, ny, dx, dy, elapsed, D, bc, &rss);
+			check_solution(oldMesh, nx, ny, dx, dy, nm, elapsed, D, bc, &rss);
 			soln_time += GetTimer() - start_time;
 
 			fprintf(output, "%i,%f,%f,%f,%f,%f,%f,%f\n", step, elapsed, rss, conv_time, step_time, file_time, soln_time, GetTimer());

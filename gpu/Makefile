@@ -1,25 +1,16 @@
 # Makefile for GPU diffusion code
 # implementation-independent headers
 
-all: cuda/diffusion openacc/diffusion opencl/diffusion
+all: acc/diffusion cuda/diffusion
+
+acc/diffusion:
+	$(MAKE) -C acc
 
 cuda/diffusion:
 	$(MAKE) -C cuda
 
-#openacc/diffusion:
-#	$(MAKE) -C openacc
-
-#opencl/diffusion:
-#	$(MAKE) -C opencl
-
-run:
-	$(MAKE) -C cuda run
-#	$(MAKE) -C openacc run; $(MAKE) -C opencl run
-
 clean:
-	$(MAKE) -C cuda clean
-#	$(MAKE) -C openacc clean; $(MAKE) -C opencl clean
+	$(MAKE) -C acc clean; $(MAKE) -C cuda clean
 
 squeaky:
-	$(MAKE) -C cuda squeaky
-#	$(MAKE) -C openacc squeaky; $(MAKE) -C opencl squeaky
+	$(MAKE) -C acc squeaky; $(MAKE) -C cuda squeaky

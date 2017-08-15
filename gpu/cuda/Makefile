@@ -15,7 +15,7 @@ diffusion: ../main.c $(OBJS)
 boundaries.o: boundaries.c
 	$(NVCXX) $(NVCXXFLAGS) -c $<
 
-discretization.o: discretization.c
+discretization.o: discretization.cu
 	$(NVCXX) $(NVCXXFLAGS) -c $<
 
 mesh.o: ../mesh.c

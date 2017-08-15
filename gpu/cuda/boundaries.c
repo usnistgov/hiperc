@@ -21,28 +21,28 @@ void set_boundaries(double bc[2][2])
 	bc[1][1] = chi; /* right boundary */
 }
 
-void apply_initial_conditions(double** A, int nx, int ny, double bc[2][2])
+void apply_initial_conditions(double** A, int nx, int ny, int nm, double bc[2][2])
 {
 	#pragma omp parallel
 	{
 		int i, j;
 
 		#pragma omp for collapse(2)
-		for (j = 1; j < ny; j++)
-			for (i = 1; i < nx; i++)
+		for (j = nm/2; j < ny; j++)
+			for (i = nm/2; i < nx; i++)
 				A[j][i] = bc[0][0];
 
 		#pragma omp for nowait
-		for (j = 1; j < ny/2; j++)
-			A[j][1] = bc[1][0]; /* left half-wall */
+		for (j = nm/2; j < ny/2; j++)
+			A[j][nm/2] = bc[1][0]; /* left half-wall */
 
 		#pragma omp for
-		for (j = ny/2; j < ny-1; j++)
-			A[j][nx-2] = bc[1][1]; /* right half-wall */
+		for (j = ny/2; j < ny-nm/2; j++)
+			A[j][nx-nm/2-1] = bc[1][1]; /* right half-wall */
 	}
 }
 
-void apply_boundary_conditions(double** A, int nx, int ny, double bc[2][2])
+void apply_boundary_conditions(double** A, int nx, int ny, int nm, double bc[2][2])
 {
 	#pragma omp parallel
 	{
@@ -50,24 +50,24 @@ void apply_boundary_conditions(double** A, int nx, int ny, double bc[2][2])
 		int i, j;
 
 		#pragma omp for
-		for (j = 1; j < ny/2; j++)
-			A[j][1] = bc[1][0]; /* left value */
+		for (j = nm/2; j < ny/2; j++)
+			A[j][nm/2] = bc[1][0]; /* left value */
 
 		#pragma omp for
-		for (j = ny/2; j < ny-1; j++)
-			A[j][nx-2] = bc[1][1]; /* right value */
+		for (j = ny/2; j < ny-nm/2; j++)
+			A[j][nx-nm/2-1] = bc[1][1]; /* right value */
 
 		#pragma omp for nowait
-		for (j = 1; j < ny-1; j++) {
-			A[j][0] = A[j][1]; /* left condition */
-			A[j][nx-1] = A[j][nx-2]; /* right condition */
+		for (j = nm/2; j < ny-nm/2; j++) {
+			A[j][nm/2-1] = A[j][nm/2]; /* left condition */
+			A[j][nx-nm/2] = A[j][nx-nm/2-1]; /* right condition */
 		}
 
 		/* bottom boundary */
 		#pragma omp for nowait
-		for (i = 1; i < nx-1; i++) {
-			A[0][i] = A[1][i]; /* top condition */
-			A[ny-1][i] = A[ny-2][i]; /* bottom condition */
+		for (i = nm/2; i < nx-nm/2; i++) {
+			A[nm/2-1][i] = A[nm/2][i]; /* top condition */
+			A[ny-nm/2][i] = A[ny-nm/2-1][i]; /* bottom condition */
 		}
 	}
 }

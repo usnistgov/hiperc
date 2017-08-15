@@ -9,7 +9,7 @@ Diffusion and phase-field models for accelerator architectures
      - [x] serial
      - [x] OpenMP
      - [x] Threading Building Blocks
-   - [ ] gpu
+   - [x] gpu
      - [x] OpenACC
      - [x] CUDA
    - [ ] phi
@@ -118,8 +118,9 @@ repository should be addressed to trevor.keller@nist.gov (Trevor Keller).
 
 ### Hardware Cheatsheet
 
-| System | CPU                    | Threads | RAM   | GPU                         | Cores | Phi      | Cores    |
-| :----: | :--------------------: | ------: | ----: | :-------------------------: | ----: | :------: | -------: |
-| Huginn | Intel Xeon E5-1650 v3  | 12      | 64 GB | 1&times; NVIDIA Quadro K620 | 384   | &empty;  | &empty;  |
-| rgpu2  | Intel Xeon E5-2697A v4 | 32      | 64 GB | 2&times; NVIDIA Tesla K40m  | 2880  | &empty;  | &empty;  |
-| rgpu3  | Intel Xeon E5-2697A v4 | 32      | 64 GB | 2&times; NVIDIA Tesla K40m  | 2880  | &empty;  | &empty;  |
+| System | CPU                    | Threads | GPU                | Cores | Arch  | Phi     | Cores   |
+| :----: | :--------------------: | ------: | :----------------: | ----: | :---: | :-----: | ------: |
+| Huginn | Intel Xeon E5-1650 v3  | 12      | NVIDIA Quadro K620 | 384   | sm_50 | &empty; | &empty; |
+| rgpu   | Intel Xeon E5620       | 16      | NVIDIA Tesla C2075 | 2880  | sm_20 | &empty; | &empty; |
+| rgpu2  | Intel Xeon E5-2697A v4 | 32      | NVIDIA Tesla K80   | 2880  | sm_35 | &empty; | &empty; |
+| rgpu3  | Intel Xeon E5-2697A v4 | 32      | NVIDIA Tesla K80   | 2880  | sm_35 | &empty; | &empty; |

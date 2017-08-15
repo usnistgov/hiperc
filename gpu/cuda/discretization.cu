@@ -10,7 +10,9 @@
 #include <omp.h>
 #include <cuda.h>
 
+extern "C" {
 #include "diffusion.h"
+}
 
 /* CUDA allocates memory tiles on the GPU statically, so their sizes must be hard coded */
 #define MAX_TILE_W 32

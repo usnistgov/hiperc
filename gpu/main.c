@@ -140,12 +140,12 @@ int main(int argc, char* argv[])
 	dt = (linStab * h * h) / (4.0 * D);
 
 	/* initialize memory */
-	make_arrays(&oldMesh, &newMesh, &conMesh, &mask, &oldData, &newData, &conData, &maskData, nx, ny);
+	make_arrays(&oldMesh, &newMesh, &conMesh, &mask, &oldData, &newData, &conData, &maskData, nx, ny, nm);
 	set_mask(dx, dy, nm, mask);
 	set_boundaries(bc);
 
 	start_time = GetTimer();
-	apply_initial_conditions(oldMesh, nx, ny, bc);
+	apply_initial_conditions(oldMesh, nx, ny, nm, bc);
 	step_time = GetTimer() - start_time;
 
 	/* write initial condition data */
@@ -166,7 +166,7 @@ int main(int argc, char* argv[])
 
 	/* do the work */
 	for (step = 1; step < steps+1; step++) {
-		apply_boundary_conditions(oldMesh, nx, ny, bc);
+		apply_boundary_conditions(oldMesh, nx, ny, nm, bc);
 
 		start_time = GetTimer();
 		compute_convolution(oldMesh, conMesh, mask, nx, ny, nm, bs);

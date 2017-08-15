@@ -11,7 +11,9 @@
 
 #include "diffusion.h"
 
-void make_arrays(double*** A, double*** B, double*** C, double*** M, double** dataA, double** dataB, double** dataC, double** dataM, int nx, int ny)
+void make_arrays(double*** A, double*** B, double*** C, double*** M,
+                 double** dataA, double** dataB, double** dataC, double** dataM,
+                 int nx, int ny, int nm)
 {
 	int j;
 
@@ -23,13 +25,13 @@ void make_arrays(double*** A, double*** B, double*** C, double*** M, double** da
 	(*dataA) = (double *)calloc(nx * ny, sizeof(double));
 	(*dataB) = (double *)calloc(nx * ny, sizeof(double));
 	(*dataC) = (double *)calloc(nx * ny, sizeof(double));
-	(*dataM) = (double *)calloc(3 * 3, sizeof(double));
+	(*dataM) = (double *)calloc(nm * nm, sizeof(double));
 
 	/* map 2D arrays onto 1D data */
 	(*A) = (double **)calloc(nx, sizeof(double *));
 	(*B) = (double **)calloc(nx, sizeof(double *));
 	(*C) = (double **)calloc(nx, sizeof(double *));
-	(*M) = (double **)calloc(3, sizeof(double *));
+	(*M) = (double **)calloc(nm, sizeof(double *));
 
 	for (j = 0; j < ny; j++) {
 		(*A)[j] = &((*dataA)[nx * j]);
@@ -37,8 +39,8 @@ void make_arrays(double*** A, double*** B, double*** C, double*** M, double** da
 		(*C)[j] = &((*dataC)[nx * j]);
 	}
 
-	for (j = 0; j < 3; j++) {
-		(*M)[j] = &((*dataM)[3 * j]);
+	for (j = 0; j < nm; j++) {
+		(*M)[j] = &((*dataM)[nm * j]);
 	}
 }
 
@@ -60,10 +62,6 @@ void swap_pointers(double** dataA, double** dataB, double*** A, double*** B)
 	double* dataC;
 	double** C;
 
-	#ifdef DEBUG
-	printf("Ai=%li, Bi=%li", (*dataA), (*dataB));
-	#endif
-
 	dataC = (*dataA);
 	(*dataA) = (*dataB);
 	(*dataB) = dataC;
@@ -71,9 +69,4 @@ void swap_pointers(double** dataA, double** dataB, double*** A, double*** B)
 	C = (*A);
 	(*A) = (*B);
 	(*B) = C;
-
-	#ifdef DEBUG
-	printf(", Af=%li, Bf=%li\n", (*dataA), (*dataB));
-	#endif
-
 }

@@ -22,7 +22,7 @@ void set_threads(int n)
 	omp_set_num_threads(n);
 }
 
-/* round a/b up to the next integer */
+/* round a/b up to the next integer, copied from CUDA Toolkit examples */
 inline int iDivUp(int a, int b){
 	return (a % b != 0) ? (a / b + 1) : (a / b);
 }
@@ -64,7 +64,7 @@ __global__ void convolution_kernel(double* A, double* C, const double* M, int nx
 	src_row = dst_row - nm/2;
 	src_col = dst_col - nm/2;
 
-	/* copy tile from A: __shared__ gives acces to all threads working on this tile */
+	/* copy tile from A: __shared__ gives access to all threads working on this tile */
 	__shared__ double N_ds[MAX_TILE_H + MAX_MASK_W - 1][MAX_TILE_W + MAX_MASK_W - 1];
 
 	if ((src_row >= 0) && (src_row < ny) &&
@@ -94,9 +94,9 @@ __global__ void convolution_kernel(double* A, double* C, const double* M, int nx
 
 void compute_convolution(double** A, double** C, double** M, int nx, int ny, int nm, int bs)
 {
-	/* Rejoice: easily CUDA-able! */
 	double* d_A, *d_C, *d_M;
 
+	/* divide matrices into blocks of (bs x bs) threads */
 	dim3 threads(bs, bs);
 	dim3 blocks(iDivUp(nx, threads.x), iDivUp(ny, threads.y));
 
@@ -121,19 +121,50 @@ void compute_convolution(double** A, double** C, double** M, int nx, int ny, int
 	cudaFree(d_M);
 }
 
+__global__ void solver_kernel(double* A, double* B, double* C, int nx, int ny, int nm, double D, double dt)
+{
+	int tx, ty, dst_row, dst_col;
+
+	/* determine indices on which to operate */
+	tx = threadIdx.x;
+	ty = threadIdx.y;
+
+	dst_row = blockIdx.y * blockDim.y + ty;
+	dst_col = blockIdx.x * blockDim.x + tx;
+
+	/* compute the convolution */
+	if (dst_row < ny && dst_col < nx) {
+		B[dst_row*nx + dst_col] = A[dst_row*nx + dst_col] + dt * D * C[dst_row*nx + dst_col];
+	}
+}
+
 void step_in_time(double** A, double** B, double** C, int nx, int ny, int nm, int bs, double D, double dt, double* elapsed)
 {
-	/* Rejoice: easily CUDA-able! */
+	double* d_A, *d_B, *d_C,;
 
-	#pragma omp parallel
-	{
-		int i, j;
+	/* divide matrices into blocks of (bs x bs) threads */
+	dim3 threads(bs, bs);
+	dim3 blocks(iDivUp(nx, threads.x), iDivUp(ny, threads.y));
 
-		#pragma omp for collapse(2)
-		for (j = nm/2; j < ny-nm/2; j++)
-			for (i = nm/2; i < nx-nm/2; i++)
-				B[j][i] = A[j][i] + dt * D * C[j][i];
-	}
+	/* allocate memory on device */
+	cudaMalloc((void **) &d_A, nx * ny * sizeof(double));
+	cudaMalloc((void **) &d_B, nx * ny * sizeof(double));
+	cudaMalloc((void **) &d_C, nx * ny * sizeof(double));
+
+	/* transfer data from host in to device */
+	cudaMemcpy(d_A, A[0], nx * ny * sizeof(double), cudaMemcpyHostToDevice);
+	cudaMemcpy(d_C, C[0], nx * ny * sizeof(double), cudaMemcpyHostToDevice);
+
+	/* compute result */
+	solver_kernel<<<blocks, threads>>>(d_A, d_B, d_C, nx, ny, nm, D, dt);
+
+	/* transfer from device out from host */
+	cudaMemcpy(B[0], d_B, nx * ny * sizeof(double), cudaMemcpyDeviceToHost);
+
+	/* free memory on device */
+	cudaFree(d_A);
+	cudaFree(d_B);
+	cudaFree(d_C);
 
 	*elapsed += dt;
 }

@@ -121,7 +121,7 @@ void compute_convolution(double** A, double** C, double** M, int nx, int ny, int
 	cudaFree(d_M);
 }
 
-__global__ void solver_kernel(double* A, double* B, double* C, int nx, int ny, int nm, double D, double dt)
+__global__ void diffusion_kernel(double* A, double* B, double* C, int nx, int ny, int nm, double D, double dt)
 {
 	int tx, ty, dst_row, dst_col;
 
@@ -138,9 +138,9 @@ __global__ void solver_kernel(double* A, double* B, double* C, int nx, int ny, i
 	}
 }
 
-void step_in_time(double** A, double** B, double** C, int nx, int ny, int nm, int bs, double D, double dt, double* elapsed)
+void solve_diffusion_equation(double** A, double** B, double** C, int nx, int ny, int nm, int bs, double D, double dt, double* elapsed)
 {
-	double* d_A, *d_B, *d_C,;
+	double* d_A, *d_B, *d_C;
 
 	/* divide matrices into blocks of (bs x bs) threads */
 	dim3 threads(bs, bs);
@@ -156,7 +156,7 @@ void step_in_time(double** A, double** B, double** C, int nx, int ny, int nm, in
 	cudaMemcpy(d_C, C[0], nx * ny * sizeof(double), cudaMemcpyHostToDevice);
 
 	/* compute result */
-	solver_kernel<<<blocks, threads>>>(d_A, d_B, d_C, nx, ny, nm, D, dt);
+	diffusion_kernel<<<blocks, threads>>>(d_A, d_B, d_C, nx, ny, nm, D, dt);
 
 	/* transfer from device out from host */
 	cudaMemcpy(B[0], d_B, nx * ny * sizeof(double), cudaMemcpyDeviceToHost);

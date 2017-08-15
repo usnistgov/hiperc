@@ -50,7 +50,7 @@ void compute_convolution(double** A, double** C, double** M, int nx, int ny, int
 	}
 }
 
-void step_in_time(double** A, double** B, double** C, int nx, int ny, double D, double dt, double* elapsed)
+void solve_diffusion_equation(double** A, double** B, double** C, int nx, int ny, double D, double dt, double* elapsed)
 {
 	#pragma omp parallel
 	{

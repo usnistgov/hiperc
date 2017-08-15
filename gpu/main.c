@@ -173,7 +173,7 @@ int main(int argc, char* argv[])
 		conv_time += GetTimer() - start_time;
 
 		start_time = GetTimer();
-		step_in_time(oldMesh, newMesh, conMesh, nx, ny, nm, bs, D, dt, &elapsed);
+		solve_diffusion_equation(oldMesh, newMesh, conMesh, nx, ny, nm, bs, D, dt, &elapsed);
 		step_time += GetTimer() - start_time;
 
 		swap_pointers(&oldData, &newData, &oldMesh, &newMesh);

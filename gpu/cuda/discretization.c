@@ -8,12 +8,27 @@
 
 #include <math.h>
 #include <omp.h>
+#ifndef MCUDA
+#include <cuda.h>
+#include <cutil.h>
+#else
+#include <mcuda.h>
+#endif
 
 #include "diffusion.h"
+
+/* CUDA allocates memory tiles on the GPU statically, so their sizes must be hard coded */
+#define TILE_W 32
+#define TILE_H 32
 
 void set_threads(int n)
 {
 	omp_set_num_threads(n);
+}
+
+/* round a/b up to the next integer */
+inline int iDivUp(int a, int b){
+	return (a % b != 0) ? (a / b + 1) : (a / b);
 }
 
 void set_mask(double dx, double dy, int* nm, double** M)
@@ -28,30 +43,79 @@ void set_mask(double dx, double dy, int* nm, double** M)
 	M[2][1] =  1. / (dy * dy); /* down */
 }
 
-void compute_convolution(double** A, double** C, double** M, int nx, int ny, int nm)
+__global__ void convolution_kernel(double* A, double* B, double* C, const double __restrict__ *M, int nx, int ny, int nm)
 {
-	#pragma omp parallel
-	{
-		int i, j, mi, mj;
-		double value;
+	/* DANGER: the source (book) example was written for image data, which is row-major. Check loop indices! */
 
-		#pragma omp for collapse(2)
-		for (j = 1; j < ny-1; j++) {
-			for (i = 1; i < nx-1; i++) {
-				value = 0.;
-				for (mj = -nm; mj < nm+1; mj++) {
-					for (mi = -nm; mi < nm+1; mi++) {
-						value += M[mj+nm][mi+nm] * A[j+mj][i+mi];
-					}
-				}
-				C[j][i] = value;
+	/* one CUDA core operates on one array index */
+	int i, j, tx, ty, src_row, dst_row, src_col, dst_col;
+	double value = 0.;
+
+	/* determine indices on which to operate */
+	tx = threadIdx.x;
+	ty = threadIdx.y;
+	dst_row = blockIdx.x * DST_TILE_W + ty;
+	dst_col = blockIdx.y * DST_TILE_H + tx;
+	src_row = dst_row - nm/2;
+	src_col = dst_col - nm/2;
+
+	/* copy A data into this thread's tile buffer */
+	__shared__ double N_ds[TILE_H + MAX_MASK_H - 1][TILE_W + MAX_MASK_W - 1];
+
+	if ((src_row >= 0) && (src_row < ny)) && (src_col >= 0) && (src_col < nx)) {
+		N_ds[ty][tx] = A[src_row*nx + src_col];
+	} else {
+		N_ds[ty][tx] = 0.;
+	}
+
+	/* compute the convolution */
+	if (ty < DST_TILE_W && tx < DST_TILE_WIDTH) {
+		for (j = 0; j < nm; j++) {
+			for (i = 0; i < nm; i++) {
+				value += M[j][i] * N_ds[j+tx][i+ty];
 			}
+		}
+		/* record value */
+		if (dst_row < ny && dst_col < nx) {
+			C[dst_row*nx + dst_col] = value;
 		}
 	}
 }
 
+void compute_convolution(double** A, double** C, double** M, int nx, int ny, int nm, int bs)
+{
+	/* Rejoice: easily CUDA-able! */
+	double** d_A, **d_C, **d_M;
+
+	dim3 threads(bs, bs);
+	dim3 blocks(iDivUp(nx, threads.x), iDivUp(ny, threads.y));
+
+	/* allocate memory on device */
+	cudaMalloc((void **)&d_A, nx * ny * sizeof(double));
+	cudaMalloc((void **)&d_C, nx * ny * sizeof(double));
+	cudaMalloc((void **)&d_M, nm * nm * sizeof(double));
+
+	/* transfer data from host in to device */
+	cudaMemcpy(d_A, A, nx * ny * sizeof(double), cudaMemcpyHostToDevice);
+	cudaMemcpy(d_C, C, nx * ny * sizeof(double), cudaMemcpyHostToDevice);
+	cudaMemcpy(d_M, M, nm * nm * sizeof(double), cudaMemcpyHostToDevice);
+
+	/* compute result */
+	convolution_kernel<<<blocks, threads>>>(d_A, d_C, d_M, nx, ny, nm);
+
+	/* transfer from device out from host */
+	cudaMemcpy(C, d_C, nx * ny * sizeof(double), cudaMemcpyDeviceToHost);
+
+	/* free memory on device */
+	cudaFree(d_A);
+	cudaFree(d_C);
+	cudaFree(d_M);
+}
+
 void step_in_time(double** A, double** B, double** C, int nx, int ny, double D, double dt, double* elapsed)
 {
+	/* Rejoice: easily CUDA-able! */
+
 	#pragma omp parallel
 	{
 		int i, j;
@@ -65,8 +129,10 @@ void step_in_time(double** A, double** B, double** C, int nx, int ny, double D, 
 	*elapsed += dt;
 }
 
-void check_solution(double** A, int nx, int ny, double dx, double dy, double elapsed, double D, double bc[2][2], double* rss)
+void check_solution(double** A, int nx, int ny, double dx, double dy, int bs, double elapsed, double D, double bc[2][2], double* rss)
 {
+	/* Not easily CUDA-able without a prefix-sum formulation */
+
 	/* OpenCL does not have a GPU-based erf() definition, using Maclaurin series approximation */
 	double sum=0.;
 	#pragma omp parallel reduction(+:sum)

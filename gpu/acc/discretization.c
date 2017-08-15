@@ -32,7 +32,7 @@ void set_mask(double dx, double dy, int* nm, double** M)
 	M[2][1] =  1. / (dy2); /* down */
 }
 
-void compute_convolution(double** A, double** C, double** M, int nx, int ny, int nm)
+void compute_convolution(double** A, double** C, double** M, int nx, int ny, int nm, int bs)
 {
 	#pragma acc data copyin(A[0:ny][0:nx], M[0:nm][0:nm]) copyout(C[0:ny][0:nx])
 	{
@@ -58,7 +58,7 @@ void compute_convolution(double** A, double** C, double** M, int nx, int ny, int
 	}
 }
 
-void step_in_time(double** A, double** B, double** C, int nx, int ny, double D, double dt, double* elapsed)
+void step_in_time(double** A, double** B, double** C, int nx, int ny, int bs, double D, double dt, double* elapsed)
 {
 	#pragma acc data copyin(A[0:ny][0:nx], C[0:ny][0:nx]) copyout(B[0:ny][0:nx])
 	{
@@ -79,7 +79,7 @@ void step_in_time(double** A, double** B, double** C, int nx, int ny, double D, 
 	*elapsed += dt;
 }
 
-void check_solution(double** A, int nx, int ny, double dx, double dy, double elapsed, double D, double bc[2][2], double* rss)
+void check_solution(double** A, int nx, int ny, double dx, double dy, int bs, double elapsed, double D, double bc[2][2], double* rss)
 {
 	/* OpenCL does not have a GPU-based erf() definition, using Maclaurin series approximation */
 	double sum=0.;

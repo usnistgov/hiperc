@@ -33,9 +33,10 @@ To build this code, you must have installed
 
 These are usually available through the package manager. For example,
 ```apt-get install make libpng12-dev nvidia-cuda-dev opencl-headers nvidia-opencl-dev```.
-Note that CUDA is not compatible with all GPU architectures.
-Proof-of-concept GPU code can be run on [Amazon's EC2](https://aws.amazon.com/ec2/Elastic-GPUs/)
-and equivalent HPC cloud computing platforms.
+Note that CUDA is not compatible with all GPU architectures. CUDA hardware can be
++emulated on the CPU using the [MCUDA framework](http://impact.crhc.illinois.edu/mcuda.aspx).
+Proof-of-concept trials on GPU hardware can be run on [Amazon's EC2](
+https://aws.amazon.com/ec2/Elastic-GPUs/) and equivalent HPC cloud computing platforms.
 
 ### Disclaimer
 

@@ -11,6 +11,7 @@ Diffusion and phase-field models for accelerator architectures
      - [x] Threading Building Blocks
    - [ ] gpu
      - [x] OpenACC
+     - [ ] C++ AMP
      - [ ] CUDA
    - [ ] phi
      - [ ] Knights Landing
@@ -94,9 +95,11 @@ with varying coding complexity and hardware dependencies:
 
 Generically speaking, OpenMP and OpenACC provide low barriers for entry into acceleration;
 CUDA and Xeon Phi require high investments for hardware and compilers, but offer the greatest
-capabilities for performance and optimization of a specific application.
-Proof-of-concept code for GPU and KNL can be run on [Amazon's EC2](https://aws.amazon.com/ec2/Elastic-GPUs/),
-[Rescale's ScaleX](http://www.rescale.com/products/), and equivalent HPC cloud computing platforms.
+capabilities for performance and optimization of a specific application. CUDA hardware can be
+emulated on the CPU using the [MCUDA framework](http://impact.crhc.illinois.edu/mcuda.aspx).
+Proof-of-concept trials on GPU and KNL hardware can be run on [Amazon's EC2](
+https://aws.amazon.com/ec2/Elastic-GPUs/), [Rescale's ScaleX](http://www.rescale.com/products/),
+and equivalent HPC cloud computing platforms.
 
 ### Disclaimer
 

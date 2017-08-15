@@ -1,6 +1,8 @@
-# accelerator-testing
+# phasefield-accelerator-benchmarks
 
-Diffusion and phase-field models for accelerator architectures
+Ever wonder if a GPU or Xeon Phi accelerator card would make your code faster?
+Fast enough to justify the expense to your manager, adviser, or funding agency?
+This project can help answer your questions!
 
 ## Work in Progress
 
@@ -27,8 +29,8 @@ Diffusion and phase-field problems depend extensively on the divergence of gradi
 When *D* is constant, this simplifies to
 > &part;*c*/&part;*t* = *D*&nabla;&sup2;*c*
 
-In 1D, the Laplacian can be discretized:
-> &part;*c*/&part;*t* &asymp; *D*(*c*&#8314; - 2*c*&#8304; + *c*&#8315;)/(*h*&sup2;)
+This equation can be discretized, *e.g.* in 1D:
+> &Delta;*c*/&Delta;*t* &asymp; *D*(*c*&#8314; - 2*c*&#8304; + *c*&#8315;)/(&Delta;*x*)&sup2;
 
 This discretization is a special case of [convolution](https://en.wikipedia.org/wiki/Discrete_Laplace_operator#Image_Processing),
 wherein a constant kernel of weighting coefficients is applied to an input dataset to produce a transformed output.

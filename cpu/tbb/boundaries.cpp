@@ -3,7 +3,7 @@
 	Role: implementation of boundary condition functions with TBB threading
 
 	Questions/comments to trevor.keller@nist.gov
-	Bugs/requests to https://github.com/tkphd/accelerator-testing
+	Bugs/requests to https://github.com/usnistgov/phasefield-accelerator-benchmarks
 */
 
 #include <math.h>

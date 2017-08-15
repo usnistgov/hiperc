@@ -11,8 +11,7 @@ Diffusion and phase-field models for accelerator architectures
      - [x] Threading Building Blocks
    - [ ] gpu
      - [x] OpenACC
-     - [ ] C++ AMP
-     - [ ] CUDA
+     - [x] CUDA
    - [ ] phi
      - [ ] Knights Landing
  - [ ] spinodal

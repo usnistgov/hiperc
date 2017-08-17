@@ -31,6 +31,7 @@ void compute_convolution(double** A, double** C, double** M, int nx, int ny, int
 void solve_diffusion_equation(double** A, double** B, double** C,
                               int nx, int ny, int nm, int bs,
                               double D, double dt, double *elapsed);
+void analytical_value(double x, double t, double D, double bc[2][2], double* c);
 void check_solution(double** A,
                     int nx, int ny, double dx, double dy, int nm, int bs,
                     double elapsed, double D, double bc[2][2], double* rss);

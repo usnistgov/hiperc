@@ -72,15 +72,25 @@ __global__ void convolution_kernel(double* A, double* C, int nx, int ny, int nm)
 		* N_ds is the shared tile data array... dunno where the name comes from yet
 	*/
 
-	int i, j, tx, ty, dst_row, dst_col, src_row, src_col;
+	int i, j, tx, ty,
+	    dst_row, dst_col, dst_tile_w, dst_tile_h,
+	    src_row, src_col, src_tile_w, src_tile_h;
 	double value=0.;
+
+	/* source tile width includes the halo cells */
+	src_tile_w = blockDim.x;
+	src_tile_h = blockDim.y;
+
+	/* destination tile width excludes the halo cells */
+	dst_tile_w = src_tile_w - nm + 1;
+	dst_tile_h = src_tile_h - nm + 1;
 
 	/* determine indices on which to operate */
 	tx = threadIdx.x;
 	ty = threadIdx.y;
 
-	dst_row = blockDim.y * blockIdx.y + ty;
-	dst_col = blockDim.x * blockIdx.x + tx;
+	dst_row = blockIdx.y * dst_tile_h + ty;
+	dst_col = blockIdx.x * dst_tile_w + tx;
 
 	src_row = dst_row - nm/2;
 	src_col = dst_col - nm/2;
@@ -88,12 +98,10 @@ __global__ void convolution_kernel(double* A, double* C, int nx, int ny, int nm)
 	/* copy tile from A: __shared__ gives access to all threads working on this tile */
 	__shared__ double N_ds[MAX_TILE_H + MAX_MASK_W - 1][MAX_TILE_W + MAX_MASK_W - 1];
 
-	__syncthreads();
-
-	if ((dst_row > 0) && (src_row < ny) &&
-	    (dst_col > 0) && (src_col < nx)) {
+	if ((src_row >= 0) && (src_row < ny) &&
+	    (src_col >= 0) && (src_col < nx)) {
 		/* if src_row==0, then dst_row==nm/2: this is a halo row, still contributing to the output */
-		N_ds[ty][tx] = A[src_row*nx + src_col];
+		N_ds[ty][tx] = A[src_row * nx + src_col];
 	} else {
 		/* points outside the halo should be switched off */
 		N_ds[ty][tx] = 0.;
@@ -103,17 +111,15 @@ __global__ void convolution_kernel(double* A, double* C, int nx, int ny, int nm)
 	__syncthreads();
 
 	/* compute the convolution */
-	if (tx < blockDim.x && ty < blockDim.y) {
+	if (tx < dst_tile_w && ty < dst_tile_h) {
 		for (j = 0; j < nm; j++) {
 			for (i = 0; i < nm; i++) {
-				value += Mc[j*nm + i] * N_ds[j+ty][i+tx];
+				value += Mc[j * nm + i] * N_ds[j+ty][i+tx];
 			}
 		}
-
 		/* record value */
-		if ((dst_row > 0 && dst_row < ny-1) &&
-		     dst_col > 0 && dst_col < nx-1) {
-			C[dst_row*nx + dst_col] = value;
+		if (dst_row < ny && dst_col < nx) {
+			C[dst_row * nx + dst_col] = value;
 		}
 	}
 
@@ -151,7 +157,7 @@ void compute_convolution(double** A, double** C, double** M, int nx, int ny, int
 }
 
 __global__ void diffusion_kernel(double* A, double* B, double* C,
-                                 int nx, int ny, int nm, int bs, double D, double dt)
+                                 int nx, int ny, int nm, double D, double dt)
 {
 	int tx, ty, row, col;
 
@@ -163,9 +169,8 @@ __global__ void diffusion_kernel(double* A, double* B, double* C,
 	col = blockDim.x * blockIdx.x + tx;
 
 	/* explicit Euler solution to the equation of motion */
-	if ((row > 0 && row < ny) &&
-	    (col > 0 && col < nx)) {
-		B[row*nx + col] = A[row*nx + col] + dt * D * C[row*nx + col];
+	if (row < ny && col < nx) {
+		B[row * nx + col] = A[row * nx + col] + dt * D * C[row * nx + col];
 	}
 
 	/* wait for all threads to finish writing */
@@ -191,7 +196,7 @@ void solve_diffusion_equation(double** A, double** B, double** C,
 	dim3 blocks(ceil(double(nx)/threads.x), ceil(double(ny)/threads.y), 1);
 
 	/* compute result */
-	diffusion_kernel<<<blocks, threads>>>(d_A, d_B, d_C, nx, ny, nm, bs, D, dt);
+	diffusion_kernel<<<blocks, threads>>>(d_A, d_B, d_C, nx, ny, nm, D, dt);
 
 	/* transfer from device out from host */
 	cudaMemcpy(B[0], d_B, nx * ny * sizeof(double), cudaMemcpyDeviceToHost);
@@ -204,18 +209,20 @@ void solve_diffusion_equation(double** A, double** B, double** C,
 	*elapsed += dt;
 }
 
+void analytical_value(double x, double t, double D, double bc[2][2], double* c)
+{
+	*c = bc[1][0] * (1.0 - erf(x / sqrt(4. * D * t)));
+}
+
 void check_solution(double** A,
                     int nx, int ny, double dx, double dy, int nm, int bs,
                     double elapsed, double D, double bc[2][2], double* rss)
 {
-	/* Not easily CUDA-able without a prefix-sum formulation */
-
-	/* OpenCL does not have a GPU-based erf() definition, using Maclaurin series approximation */
 	double sum=0.;
 	#pragma omp parallel reduction(+:sum)
 	{
 		int i, j;
-		double ca, cal, car, cn, poly_erf, r, trss, z, z2;
+		double r, cal, car, ca, cn, trss;
 
 		#pragma omp for collapse(2)
 		for (j = nm/2; j < ny-nm/2; j++) {
@@ -224,28 +231,18 @@ void check_solution(double** A,
 				cn = A[j][i];
 
 				/* shortest distance to left-wall source */
-				r = (j < ny/2) ? dx * (i - nm/2) :
-				    sqrt(dx*dx * (i - nm/2) * (i - nm/2) + dy*dy * (j - ny/2) * (j - ny/2));
-				z = r / sqrt(4. * D * elapsed);
-				z2 = z * z;
-				poly_erf = (z > 1.5) ? 1. :
-				           2. * z * (1. + z2 * (-1./3 + z2 * (1./10 + z2 * (-1./42 + z2 / 216)))) / sqrt(M_PI);
-				cal = bc[1][0] * (1. - poly_erf);
+				r = (j < ny/2) ? dx * (i - nm/2) : sqrt(dx*dx * (i - nm/2) * (i - nm/2) + dy*dy * (j - ny/2) * (j - ny/2));
+				analytical_value(r, elapsed, D, bc, &cal);
 
 				/* shortest distance to right-wall source */
-				r = (j >= ny/2) ? dx * (nx-nm+1 - i) :
-				    sqrt(dx*dx * (nx-nm+1 - i)*(nx-nm+1 - i) + dy*dy * (ny/2 - j)*(ny/2 - j));
-				z = r / sqrt(4. * D * elapsed);
-				z2 = z * z;
-				poly_erf = (z > 1.5) ? 1. :
-				           2. * z * (1. + z2 * (-1./3 + z2 * (1./10 + z2 * (-1./42 + z2 / 216)))) / sqrt(M_PI);
-				car = bc[1][0] * (1. - poly_erf);
+				r = (j >= ny/2) ? dx * (nx-nm/2-1 - i) : sqrt(dx*dx * (nx-nm/2-1 - i)*(nx-nm/2-1 - i) + dy*dy * (ny/2 - j)*(ny/2 - j));
+				analytical_value(r, elapsed, D, bc, &car);
 
 				/* superposition of analytical solutions */
 				ca = cal + car;
 
 				/* residual sum of squares (RSS) */
-				trss = (ca - cn) * (ca - cn) / (double)((nx-nm+1) * (ny-nm+1));
+				trss = (ca - cn) * (ca - cn) / (double)((nx-nm/2-1) * (ny-nm/2-1));
 				sum += trss;
 			}
 		}
@@ -253,3 +250,4 @@ void check_solution(double** A,
 
 	*rss = sum;
 }
+

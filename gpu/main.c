@@ -23,7 +23,7 @@ int main(int argc, char* argv[])
 	int ith=0, inx=0, iny=0, ibs=0, idx=0, idy=0, ins=0, inc=0, idc=0, ico=0;
 
 	/* declare mesh and mask sizes */
-	int nx=512, ny=512, nm=3, bs=16, nth=4;
+	int nx=512, ny=512, nm=3, bs=32, nth=4;
 
 	/* declare mesh resolution */
 	double dx=0.5, dy=0.5, h=0.5;

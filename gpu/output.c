@@ -100,6 +100,8 @@ void write_png(double** A, int nx, int ny, int step)
 		}
 	}
 
+	printf("Data spans [%.2e, %.2e]\n", min, max);
+
 	/* rescale data into buffer */
 	n = 0;
 	for (j = ny-2; j > 0; j--) {

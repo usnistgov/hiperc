@@ -32,6 +32,14 @@ void apply_initial_conditions(double** A, int nx, int ny, int nm, double bc[2][2
 			for (i = nm/2; i < nx; i++)
 				A[j][i] = bc[0][0];
 
+		#pragma omp for collapse(2)
+		for (j = ny/2 - 8*nm; j < ny/2 + 8*nm; j++) {
+			for (i = nx/2 - 8*nm; i < nx/2 + 8*nm; i++) {
+				if ((i-nx/2)*(i-nx/2) + (j-ny/2)*(j-ny/2) < 64*nm*nm)
+					A[j][i] = bc[1][0];
+			}
+		}
+
 		#pragma omp for nowait
 		for (j = nm/2; j < ny/2; j++)
 			A[j][nm/2] = bc[1][0]; /* left half-wall */

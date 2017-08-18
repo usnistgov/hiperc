@@ -150,7 +150,6 @@ int main(int argc, char* argv[])
 
 	/* write initial condition data */
 	start_time = GetTimer();
-	write_csv(oldMesh, nx, ny, dx, dy, 0);
 	write_png(oldMesh, nx, ny, 0);
 	file_time = GetTimer() - start_time;
 
@@ -180,7 +179,6 @@ int main(int argc, char* argv[])
 
 		if (step % checks == 0) {
 			start_time = GetTimer();
-			write_csv(oldMesh, nx, ny, dx, dy, step);
 			write_png(oldMesh, nx, ny, step);
 			file_time += GetTimer() - start_time;
 		}
@@ -193,6 +191,8 @@ int main(int argc, char* argv[])
 			fprintf(output, "%i,%f,%f,%f,%f,%f,%f,%f\n", step, elapsed, rss, conv_time, step_time, file_time, soln_time, GetTimer());
 		}
 	}
+
+	write_csv(oldMesh, nx, ny, dx, dy, step);
 
 	/* clean up */
 	fclose(output);

@@ -24,7 +24,7 @@ To test the code, ```make run``` from this directory (```gpu```).
 To build this code, you must have installed
  * [GNU make](https://www.gnu.org/software/make/);
  * the [PNG library](http://www.libpng.org/pub/png/libpng.html);
- * the [CUDA toolkit](https://developer.nvidia.com/cuda-llvm-compiler);
+ * the [CUDA toolkit](https://developer.nvidia.com/cuda-toolkit);
  * the [PGI compiler](http://www.pgroup.com/products/community.htm); 
  * the [OpenCL library](https://www.khronos.org/opencl/);
  * the OpenCL runtime for [AMD](http://developer.amd.com/tools-and-sdks/opencl-zone/),
@@ -69,17 +69,29 @@ necessarily the best available for the purpose.
  └── timer.c
 ```
 
-The interface (prototypes for all functions) is defined in the top-level ```diffusion.h```.
-The mesh, output, and timer functions contain no specialized code, and therefore
-```mesh.c```, ```output.c```, and ```timer.c``` reside alongside ```diffusion.h``` and ```main.c```.
-The implementation of boundary conditions and discretized mathematics depend strongly on
-the parallelization scheme, so each sub-directory contains specialized versions of ```boundaries.c```
-and ```discretization.c```. When ```make``` is called, each ```.c``` file gets compiled into an object ```.o``` in the
-sub-directory, allowing for different compilers in each case. 
+The interface (prototypes for all functions) is defined in the top-level
+```diffusion.h```. The mesh, output, and timer functions contain no specialized
+code, and therefore ```mesh.c```, ```output.c```, and ```timer.c``` reside
+alongside ```diffusion.h``` and ```main.c```. The implementation of boundary
+conditions and discretized mathematics depend strongly on the parallelization
+scheme, so each sub-directory contains specialized versions of ```boundaries.c```
+and ```discretization.c```. When ```make``` is called, each ```.c``` file gets
+compiled into an object ```.o``` in the sub-directory, allowing for different
+compilers in each case. 
 
 The default input file ```params.txt``` defines nine values via key-value pairs,
-with one pair per line. The two-character keys are predefined, and must be one of
-```{nt, nx, ny, dx, dy, ns, nc, dc, co}```. Descriptive comments follow the value on each line.
-If you wish to change parameters (D, runtime, etc.), either modify ```params.txt``` in place and
-```make run```, or create your own copy of ```params.txt``` and execute ```./diffusion newparams```.
-The file name and extension make no difference, so long as it contains plain text.
+with one pair per line. The two-character keys are predefined, and must be one
+of ```{nt, nx, ny, dx, dy, ns, nc, dc, co}```. Descriptive comments follow the
+value on each line. If you wish to change parameters (D, runtime, etc.), either
+modify ```params.txt``` in place and ```make run```, or create your own copy of
+```params.txt``` and execute ```./diffusion newparams```. The file name and
+extension make no difference, so long as it contains plain text.
+
+If you read the ```Makefile```s, you will see that these GPU codes also invoke
+OpenMP (via compiler flags ```-fopenmp``` or ```-mp```). This is because some
+operations &mdash; namely array allocation and application of boundary
+conditions &mdash; cannot be performed efficiently on the GPU, due to the high
+expense of transferring data in and out compared to the small amount of work
+to be done. These programs therefore implement an "OpenMP + X" programming
+model, where CPU threading is used to modify a few values and GPU processing
+is used to perform the real work.

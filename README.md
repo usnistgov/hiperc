@@ -63,7 +63,30 @@ wherein a constant kernel of weighting coefficients is applied to an input datas
   </tr>
 </table>
 
+In addition, computing values for the next timestep given values from the
+previous timestep and the Laplacian values is a vector-add operation.
 Accelerators and coprocessors are well-suited to this type of computation.
+Therefore, to demonstrate the use of this hardware in materials science
+applications, these examples flow according to the following pseudocode:
+```
+Start
+  Allocate arrays using CPU
+  Apply initial conditions to grid marked "old" using CPU
+  While elapsed time is less than final time
+  Do
+    Apply boundary conditions using CPU
+    Compute Laplacian using "old" values using accelerator
+    Solve for "new" values using "old" and Laplacian values using accelerator
+    Increment elapsed time by one timestep
+    If elapsed time is an even increment of a specified interval
+    Then
+      Write an image file to disk
+    Endif
+  Done
+  Write final values to disk in comma-separated value format
+  Free arrays
+Finish
+```
 
 ## Accelerator Languages
 

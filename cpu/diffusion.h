@@ -9,36 +9,39 @@
 #ifndef _DIFFUSION_H_
 #define _DIFFUSION_H_
 
+/* enable easy switching between single- and double-precision */
+typedef double fp_t;
+
 /* Parallelism */
 void set_threads(int n);
 
 /* Mesh handling */
-void make_arrays(double*** A, double*** B, double*** C, double*** M,
-                 double** dataA, double** dataB, double** dataC, double** dataM,
+void make_arrays(fp_t*** A, fp_t*** B, fp_t*** C, fp_t*** M,
+                 fp_t** dataA, fp_t** dataB, fp_t** dataC, fp_t** dataM,
                  int nx, int ny, int nm);
-void free_arrays(double** A, double** B, double** C, double** M,
-                 double* dataA, double* dataB, double* dataC, double* dataM);
-void swap_pointers(double** dataA, double** dataB, double*** A, double*** B);
+void free_arrays(fp_t** A, fp_t** B, fp_t** C, fp_t** M,
+                 fp_t* dataA, fp_t* dataB, fp_t* dataC, fp_t* dataM);
+void swap_pointers(fp_t** dataA, fp_t** dataB, fp_t*** A, fp_t*** B);
 
 /* Boundary conditions */
-void set_boundaries(double bc[2][2]);
-void apply_initial_conditions(double** A, int nx, int ny, int nm, double bc[2][2]);
-void apply_boundary_conditions(double** A, int nx, int ny, int nm, double bc[2][2]);
+void set_boundaries(fp_t bc[2][2]);
+void apply_initial_conditions(fp_t** A, int nx, int ny, int nm, fp_t bc[2][2]);
+void apply_boundary_conditions(fp_t** A, int nx, int ny, int nm, fp_t bc[2][2]);
 
 /* Discretized mathematical operations */
-void set_mask(double dx, double dy, int nm, double** M);
-void compute_convolution(double** A, double** C, double** M, int nx, int ny, int nm);
-void solve_diffusion_equation(double** A, double** B, double** C,
+void set_mask(fp_t dx, fp_t dy, int nm, fp_t** M);
+void compute_convolution(fp_t** A, fp_t** C, fp_t** M, int nx, int ny, int nm);
+void solve_diffusion_equation(fp_t** A, fp_t** B, fp_t** C,
                               int nx, int ny, int nm,
-                              double D, double dt, double *elapsed);
-void analytical_value(double x, double t, double D, double bc[2][2], double* c);
-void check_solution(double** A,
-                    int nx, int ny, double dx, double dy, int nm,
-                    double elapsed, double D, double bc[2][2], double* rss);
+                              fp_t D, fp_t dt, fp_t *elapsed);
+void analytical_value(fp_t x, fp_t t, fp_t D, fp_t bc[2][2], fp_t* c);
+void check_solution(fp_t** A,
+                    int nx, int ny, fp_t dx, fp_t dy, int nm,
+                    fp_t elapsed, fp_t D, fp_t bc[2][2], fp_t* rss);
 
 /* Output results */
-void write_csv(double** A, int nx, int ny, double dx, double dy, int step);
-void write_png(double** A, int nx, int ny, int step);
+void write_csv(fp_t** A, int nx, int ny, fp_t dx, fp_t dy, int step);
+void write_png(fp_t** A, int nx, int ny, int step);
 
 /* Time function calls */
 void StartTimer();

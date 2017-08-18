@@ -26,19 +26,19 @@ int main(int argc, char* argv[])
 	int nx=512, ny=512, nm=3, bs=32, nth=4;
 
 	/* declare mesh resolution */
-	double dx=0.5, dy=0.5, h=0.5;
+	fp_t dx=0.5, dy=0.5, h=0.5;
 
 	/* declare mesh parameters */
-	double **oldMesh, **newMesh, **conMesh, **mask;
-	double *oldData, *newData, *conData, *maskData;
+	fp_t **oldMesh, **newMesh, **conMesh, **mask;
+	fp_t *oldData, *newData, *conData, *maskData;
 	int step=0, steps=100000, checks=10000;
-	double bc[2][2];
+	fp_t bc[2][2];
 
 	/* declare timers */
 	double start_time=0., conv_time=0., step_time=0., file_time=0., soln_time=0.;
 
 	/* declare materials and numerical parameters */
-	double D=0.00625, linStab=0.1, dt=1., elapsed=0., rss=0.;
+	fp_t D=0.00625, linStab=0.1, dt=1., elapsed=0., rss=0.;
 
 	StartTimer();
 

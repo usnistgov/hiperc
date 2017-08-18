@@ -51,11 +51,11 @@ necessarily the best available for the purpose.
 
 ```
  gpu
- ├── acc
+ ├── cuda
  │   ├── boundaries.c
  │   ├── discretization.c
  │   └── Makefile
- ├── cuda
+ ├── openacc
  │   ├── boundaries.c
  │   ├── discretization.c
  │   └── Makefile

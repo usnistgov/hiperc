@@ -21,14 +21,14 @@ extern "C" {
 #define MAX_MASK_W 3
 #define MAX_MASK_SIZE (MAX_MASK_W * MAX_MASK_W)
 
-__constant__ double Mc[MAX_MASK_SIZE];
+__constant__ fp_t Mc[MAX_MASK_SIZE];
 
 void set_threads(int n)
 {
 	omp_set_num_threads(n);
 }
 
-void five_point_Laplacian_stencil(double dx, double dy, double** M)
+void five_point_Laplacian_stencil(fp_t dx, fp_t dy, fp_t** M)
 {
 	M[0][1] =  1. / (dy * dy); /* up */
 	M[1][0] =  1. / (dx * dx); /* left */
@@ -37,7 +37,7 @@ void five_point_Laplacian_stencil(double dx, double dy, double** M)
 	M[2][1] =  1. / (dy * dy); /* down */
 }
 
-void nine_point_Laplacian_stencil(double dx, double dy, double** M)
+void nine_point_Laplacian_stencil(fp_t dx, fp_t dy, fp_t** M)
 {
 	M[0][0] =   1. / (6. * dx * dy);
 	M[0][1] =   4. / (6. * dy * dy);
@@ -52,12 +52,12 @@ void nine_point_Laplacian_stencil(double dx, double dy, double** M)
 	M[2][2] =   1. / (6. * dx * dy);
 }
 
-void set_mask(double dx, double dy, int nm, double** M)
+void set_mask(fp_t dx, fp_t dy, int nm, fp_t** M)
 {
 	five_point_Laplacian_stencil(dx, dy, M);
 }
 
-__global__ void convolution_kernel(double* A, double* C, int nx, int ny, int nm)
+__global__ void convolution_kernel(fp_t* A, fp_t* C, int nx, int ny, int nm)
 {
 	/* Notes:
 		* The source matrix (A) and destination matrix (C) must be identical in size
@@ -70,7 +70,7 @@ __global__ void convolution_kernel(double* A, double* C, int nx, int ny, int nm)
 	int i, j, tx, ty,
 	    dst_row, dst_col, dst_tile_w, dst_tile_h,
 	    src_row, src_col, src_tile_w, src_tile_h;
-	double value=0.;
+	fp_t value=0.;
 
 	/* source tile width includes the halo cells */
 	src_tile_w = blockDim.x;
@@ -91,7 +91,7 @@ __global__ void convolution_kernel(double* A, double* C, int nx, int ny, int nm)
 	src_col = dst_col - nm/2;
 
 	/* copy tile from A: __shared__ gives access to all threads working on this tile */
-	__shared__ double N_ds[MAX_TILE_H + MAX_MASK_W - 1][MAX_TILE_W + MAX_MASK_W - 1];
+	__shared__ fp_t N_ds[MAX_TILE_H + MAX_MASK_W - 1][MAX_TILE_W + MAX_MASK_W - 1];
 
 	if ((src_row >= 0) && (src_row < ny) &&
 	    (src_col >= 0) && (src_col < nx)) {
@@ -122,9 +122,9 @@ __global__ void convolution_kernel(double* A, double* C, int nx, int ny, int nm)
 	__syncthreads();
 }
 
-void compute_convolution(double** A, double** C, double** M, int nx, int ny, int nm, int bs)
+void compute_convolution(fp_t** A, fp_t** C, fp_t** M, int nx, int ny, int nm, int bs)
 {
-	double* d_A, *d_C;
+	fp_t* d_A, *d_C;
 
 	if (bs > MAX_TILE_W) {
 		printf("Error: requested block size %i exceeds the statically allocated array size.\n", bs);
@@ -132,32 +132,32 @@ void compute_convolution(double** A, double** C, double** M, int nx, int ny, int
 	}
 
 	/* allocate memory on device */
-	cudaMalloc((void **) &d_A, nx * ny * sizeof(double));
-	cudaMalloc((void **) &d_C, nx * ny * sizeof(double));
+	cudaMalloc((void **) &d_A, nx * ny * sizeof(fp_t));
+	cudaMalloc((void **) &d_C, nx * ny * sizeof(fp_t));
 
 	/* transfer data from host in to device */
-	cudaMemcpy(d_A, A[0], nx * ny * sizeof(double), cudaMemcpyHostToDevice);
+	cudaMemcpy(d_A, A[0], nx * ny * sizeof(fp_t), cudaMemcpyHostToDevice);
 
 	/* transfer mask in to constant device memory */
-	cudaMemcpyToSymbol(Mc, M[0], nm * nm * sizeof(double));
+	cudaMemcpyToSymbol(Mc, M[0], nm * nm * sizeof(fp_t));
 
 	/* divide matrices into blocks of (bs x bs) threads */
 	dim3 threads(bs - nm/2, bs - nm/2, 1);
-	dim3 blocks(ceil(double(nx)/threads.x)+1, ceil(double(ny)/threads.y)+1, 1);
+	dim3 blocks(ceil(fp_t(nx)/threads.x)+1, ceil(fp_t(ny)/threads.y)+1, 1);
 
 	/* compute result */
 	convolution_kernel<<<blocks, threads>>>(d_A, d_C, nx, ny, nm);
 
 	/* transfer from device out from host */
-	cudaMemcpy(C[0], d_C, nx * ny * sizeof(double), cudaMemcpyDeviceToHost);
+	cudaMemcpy(C[0], d_C, nx * ny * sizeof(fp_t), cudaMemcpyDeviceToHost);
 
 	/* free memory on device */
 	cudaFree(d_A);
 	cudaFree(d_C);
 }
 
-__global__ void diffusion_kernel(double* A, double* B, double* C,
-                                 int nx, int ny, int nm, double D, double dt)
+__global__ void diffusion_kernel(fp_t* A, fp_t* B, fp_t* C,
+                                 int nx, int ny, int nm, fp_t D, fp_t dt)
 {
 	int tx, ty, row, col;
 
@@ -177,29 +177,29 @@ __global__ void diffusion_kernel(double* A, double* B, double* C,
 	__syncthreads();
 }
 
-void solve_diffusion_equation(double** A, double** B, double** C,
-                              int nx, int ny, int nm, int bs, double D, double dt, double* elapsed)
+void solve_diffusion_equation(fp_t** A, fp_t** B, fp_t** C,
+                              int nx, int ny, int nm, int bs, fp_t D, fp_t dt, fp_t* elapsed)
 {
-	double* d_A, *d_B, *d_C;
+	fp_t* d_A, *d_B, *d_C;
 
 	/* allocate memory on device */
-	cudaMalloc((void **) &d_A, nx * ny * sizeof(double));
-	cudaMalloc((void **) &d_B, nx * ny * sizeof(double));
-	cudaMalloc((void **) &d_C, nx * ny * sizeof(double));
+	cudaMalloc((void **) &d_A, nx * ny * sizeof(fp_t));
+	cudaMalloc((void **) &d_B, nx * ny * sizeof(fp_t));
+	cudaMalloc((void **) &d_C, nx * ny * sizeof(fp_t));
 
 	/* transfer data from host in to device */
-	cudaMemcpy(d_A, A[0], nx * ny * sizeof(double), cudaMemcpyHostToDevice);
-	cudaMemcpy(d_C, C[0], nx * ny * sizeof(double), cudaMemcpyHostToDevice);
+	cudaMemcpy(d_A, A[0], nx * ny * sizeof(fp_t), cudaMemcpyHostToDevice);
+	cudaMemcpy(d_C, C[0], nx * ny * sizeof(fp_t), cudaMemcpyHostToDevice);
 
 	/* divide matrices into blocks of (bs x bs) threads */
 	dim3 threads(bs - nm/2, bs - nm/2, 1);
-	dim3 blocks(ceil(double(nx)/threads.x)+1, ceil(double(ny)/threads.y)+1, 1);
+	dim3 blocks(ceil(fp_t(nx)/threads.x)+1, ceil(fp_t(ny)/threads.y)+1, 1);
 
 	/* compute result */
 	diffusion_kernel<<<blocks, threads>>>(d_A, d_B, d_C, nx, ny, nm, D, dt);
 
 	/* transfer from device out from host */
-	cudaMemcpy(B[0], d_B, nx * ny * sizeof(double), cudaMemcpyDeviceToHost);
+	cudaMemcpy(B[0], d_B, nx * ny * sizeof(fp_t), cudaMemcpyDeviceToHost);
 
 	/* free memory on device */
 	cudaFree(d_A);
@@ -209,20 +209,20 @@ void solve_diffusion_equation(double** A, double** B, double** C,
 	*elapsed += dt;
 }
 
-void analytical_value(double x, double t, double D, double bc[2][2], double* c)
+void analytical_value(fp_t x, fp_t t, fp_t D, fp_t bc[2][2], fp_t* c)
 {
 	*c = bc[1][0] * (1. - erf(x / sqrt(4. * D * t)));
 }
 
-void check_solution(double** A,
-                    int nx, int ny, double dx, double dy, int nm, int bs,
-                    double elapsed, double D, double bc[2][2], double* rss)
+void check_solution(fp_t** A,
+                    int nx, int ny, fp_t dx, fp_t dy, int nm, int bs,
+                    fp_t elapsed, fp_t D, fp_t bc[2][2], fp_t* rss)
 {
-	double sum=0.;
+	fp_t sum=0.;
 	#pragma omp parallel reduction(+:sum)
 	{
 		int i, j;
-		double r, cal, car, ca, cn, trss;
+		fp_t r, cal, car, ca, cn, trss;
 
 		#pragma omp for collapse(2)
 		for (j = nm/2; j < ny-nm/2; j++) {
@@ -242,7 +242,7 @@ void check_solution(double** A,
 				ca = cal + car;
 
 				/* residual sum of squares (RSS) */
-				trss = (ca - cn) * (ca - cn) / (double)((nx-nm/2-1) * (ny-nm/2-1));
+				trss = (ca - cn) * (ca - cn) / (fp_t)((nx-nm/2-1) * (ny-nm/2-1));
 				sum += trss;
 			}
 		}

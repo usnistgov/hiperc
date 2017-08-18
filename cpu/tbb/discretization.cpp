@@ -20,7 +20,7 @@ void set_threads(int n)
 	tbb::task_scheduler_init init(n);
 }
 
-void five_point_Laplacian_stencil(double dx, double dy, double** M)
+void five_point_Laplacian_stencil(fp_t dx, fp_t dy, fp_t** M)
 {
 	M[0][1] =  1. / (dy * dy); /* up */
 	M[1][0] =  1. / (dx * dx); /* left */
@@ -29,7 +29,7 @@ void five_point_Laplacian_stencil(double dx, double dy, double** M)
 	M[2][1] =  1. / (dy * dy); /* down */
 }
 
-void nine_point_Laplacian_stencil(double dx, double dy, double** M)
+void nine_point_Laplacian_stencil(fp_t dx, fp_t dy, fp_t** M)
 {
 	M[0][0] =   1. / (6. * dx * dy);
 	M[0][1] =   4. / (6. * dy * dy);
@@ -44,12 +44,12 @@ void nine_point_Laplacian_stencil(double dx, double dy, double** M)
 	M[2][2] =   1. / (6. * dx * dy);
 }
 
-void set_mask(double dx, double dy, int nm, double** M)
+void set_mask(fp_t dx, fp_t dy, int nm, fp_t** M)
 {
 	five_point_Laplacian_stencil(dx, dy, M);
 }
 
-void compute_convolution(double** A, double** C, double** M, int nx, int ny, int nm)
+void compute_convolution(fp_t** A, fp_t** C, fp_t** M, int nx, int ny, int nm)
 {
 	const int tbb_bs = 16;
 
@@ -57,7 +57,7 @@ void compute_convolution(double** A, double** C, double** M, int nx, int ny, int
 		[=](const tbb::blocked_range2d<int>& r) {
 			for (int j = r.cols().begin(); j != r.cols().end(); j++) {
 				for (int i = r.rows().begin(); i != r.rows().end(); i++) {
-					double value = 0.0;
+					fp_t value = 0.0;
 					for (int mj = -nm/2; mj < nm/2+1; mj++) {
 						for (int mi = -nm/2; mi < nm/2+1; mi++) {
 							value += M[mj+nm/2][mi+nm/2] * A[j+mj][i+mi];
@@ -70,8 +70,8 @@ void compute_convolution(double** A, double** C, double** M, int nx, int ny, int
 	);
 }
 
-void solve_diffusion_equation(double** A, double** B, double** C,
-                              int nx, int ny, int nm, double D, double dt, double* elapsed)
+void solve_diffusion_equation(fp_t** A, fp_t** B, fp_t** C,
+                              int nx, int ny, int nm, fp_t D, fp_t dt, fp_t* elapsed)
 {
 	const int tbb_bs = 16;
 
@@ -88,27 +88,27 @@ void solve_diffusion_equation(double** A, double** B, double** C,
 	*elapsed += dt;
 }
 
-void analytical_value(double x, double t, double D, double chi, double* c)
+void analytical_value(fp_t x, fp_t t, fp_t D, fp_t chi, fp_t* c)
 {
 	*c = chi * (1.0 - erf(x / sqrt(4.0 * D * t)));
 }
 
 class ResidualSumOfSquares2D {
-	double** my_A;
+	fp_t** my_A;
 	int my_nx;
 	int my_ny;
-	double my_dx;
-	double my_dy;
+	fp_t my_dx;
+	fp_t my_dy;
 	int my_nm;
-	double my_elapsed;
-	double my_D;
-	double my_c;
+	fp_t my_elapsed;
+	fp_t my_D;
+	fp_t my_c;
 
 	public:
-		double my_rss;
+		fp_t my_rss;
 
 		/* constructors */
-		ResidualSumOfSquares2D(double** A, int nx, int ny, double dx, double dy, int nm, double elapsed, double D, double c)
+		ResidualSumOfSquares2D(fp_t** A, int nx, int ny, fp_t dx, fp_t dy, int nm, fp_t elapsed, fp_t D, fp_t c)
 		                      : my_A(A), my_nx(nx), my_ny(ny), my_dx(dx), my_dy(dy), my_nm(nm), my_elapsed(elapsed), my_D(D), my_c(c), my_rss(0.0) {}
 		ResidualSumOfSquares2D(ResidualSumOfSquares2D& a, tbb::split)
 		                      : my_A(a.my_A), my_nx(a.my_nx), my_ny(a.my_ny), my_dx(a.my_dx), my_dy(a.my_dy), my_nm(a.my_nm), my_elapsed(a.my_elapsed), my_D(a.my_D), my_c(a.my_c), my_rss(0.0) {}
@@ -116,20 +116,20 @@ class ResidualSumOfSquares2D {
 		/* modifier */
 		void operator()(const tbb::blocked_range2d<int>& r)
 		{
-			double** A = my_A;
+			fp_t** A = my_A;
 			int nx = my_nx;
 			int ny = my_ny;
-			double dx = my_dx;
-			double dy = my_dy;
+			fp_t dx = my_dx;
+			fp_t dy = my_dy;
 			int nm = my_nm;
-			double elapsed = my_elapsed;
-			double D = my_D;
-			double c = my_c;
-			double sum = my_rss;
+			fp_t elapsed = my_elapsed;
+			fp_t D = my_D;
+			fp_t c = my_c;
+			fp_t sum = my_rss;
 
 			for (int j = r.cols().begin(); j != r.cols().end(); j++) {
 				for (int i = r.rows().begin(); i != r.rows().end(); i++) {
-					double x, cal, car, ca, cn;
+					fp_t x, cal, car, ca, cn;
 
 					/* numerical solution */
 					cn = A[j][i];
@@ -150,7 +150,7 @@ class ResidualSumOfSquares2D {
 					ca = cal + car;
 
 					/* residual sum of squares (RSS) */
-					sum += (ca - cn) * (ca - cn) / (double)((nx-nm/2-1) * (ny-nm/2-1));
+					sum += (ca - cn) * (ca - cn) / (fp_t)((nx-nm/2-1) * (ny-nm/2-1));
 				}
 			}
 			my_rss = sum;
@@ -163,7 +163,7 @@ class ResidualSumOfSquares2D {
 		}
 };
 
-void check_solution(double** A, int nx, int ny, double dx, double dy, int nm, double elapsed, double D, double bc[2][2], double* rss)
+void check_solution(fp_t** A, int nx, int ny, fp_t dx, fp_t dy, int nm, fp_t elapsed, fp_t D, fp_t bc[2][2], fp_t* rss)
 {
 	const int tbb_bs = 16;
 

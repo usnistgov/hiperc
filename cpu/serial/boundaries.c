@@ -10,17 +10,17 @@
 
 #include "diffusion.h"
 
-void set_boundaries(double bc[2][2])
+void set_boundaries(fp_t bc[2][2])
 {
 	/* indexing is A[y][x], so bc = [[ylo,yhi], [xlo,xhi]] */
-	double clo = 0.0, chi = 1.0;
+	fp_t clo = 0.0, chi = 1.0;
 	bc[0][0] = clo; /* bottom boundary */
 	bc[0][1] = clo; /* top boundary */
 	bc[1][0] = chi; /* left boundary */
 	bc[1][1] = chi; /* right boundary */
 }
 
-void apply_initial_conditions(double** A, int nx, int ny, int nm, double bc[2][2])
+void apply_initial_conditions(fp_t** A, int nx, int ny, int nm, fp_t bc[2][2])
 {
 	int i, j;
 
@@ -35,7 +35,7 @@ void apply_initial_conditions(double** A, int nx, int ny, int nm, double bc[2][2
 		A[j][nx-nm/2-1] = bc[1][1]; /* right half-wall */
 }
 
-void apply_boundary_conditions(double** A, int nx, int ny, int nm, double bc[2][2])
+void apply_boundary_conditions(fp_t** A, int nx, int ny, int nm, fp_t bc[2][2])
 {
 	/* Set fixed value (c=1) along left and bottom, zero-flux elsewhere */
 	int i, j;

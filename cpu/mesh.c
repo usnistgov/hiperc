@@ -11,23 +11,23 @@
 
 #include "diffusion.h"
 
-void make_arrays(double*** A, double*** B, double*** C, double*** M,
-                 double** dataA, double** dataB, double** dataC, double** dataM,
+void make_arrays(fp_t*** A, fp_t*** B, fp_t*** C, fp_t*** M,
+                 fp_t** dataA, fp_t** dataB, fp_t** dataC, fp_t** dataM,
                  int nx, int ny, int nm)
 {
 	int j;
 
 	/* allocate 1D data arrays */
-	(*dataA) = (double *)calloc(nx * ny, sizeof(double));
-	(*dataB) = (double *)calloc(nx * ny, sizeof(double));
-	(*dataC) = (double *)calloc(nx * ny, sizeof(double));
-	(*dataM) = (double *)calloc(nm * nm, sizeof(double));
+	(*dataA) = (fp_t *)calloc(nx * ny, sizeof(fp_t));
+	(*dataB) = (fp_t *)calloc(nx * ny, sizeof(fp_t));
+	(*dataC) = (fp_t *)calloc(nx * ny, sizeof(fp_t));
+	(*dataM) = (fp_t *)calloc(nm * nm, sizeof(fp_t));
 
 	/* map 2D arrays onto 1D data */
-	(*A) = (double **)calloc(nx, sizeof(double *));
-	(*B) = (double **)calloc(nx, sizeof(double *));
-	(*C) = (double **)calloc(nx, sizeof(double *));
-	(*M) = (double **)calloc(nm, sizeof(double *));
+	(*A) = (fp_t **)calloc(nx, sizeof(fp_t *));
+	(*B) = (fp_t **)calloc(nx, sizeof(fp_t *));
+	(*C) = (fp_t **)calloc(nx, sizeof(fp_t *));
+	(*M) = (fp_t **)calloc(nm, sizeof(fp_t *));
 
 	for (j = 0; j < ny; j++) {
 		(*A)[j] = &((*dataA)[nx * j]);
@@ -40,7 +40,7 @@ void make_arrays(double*** A, double*** B, double*** C, double*** M,
 	}
 }
 
-void free_arrays(double** A, double** B, double** C, double** M, double* dataA, double* dataB, double* dataC, double* dataM)
+void free_arrays(fp_t** A, fp_t** B, fp_t** C, fp_t** M, fp_t* dataA, fp_t* dataB, fp_t* dataC, fp_t* dataM)
 {
 	free(A);
 	free(B);
@@ -53,10 +53,10 @@ void free_arrays(double** A, double** B, double** C, double** M, double* dataA, 
 	free(dataM);
 }
 
-void swap_pointers(double** dataA, double** dataB, double*** A, double*** B)
+void swap_pointers(fp_t** dataA, fp_t** dataB, fp_t*** A, fp_t*** B)
 {
-	double* dataC;
-	double** C;
+	fp_t* dataC;
+	fp_t** C;
 
 	dataC = (*dataA);
 	(*dataA) = (*dataB);

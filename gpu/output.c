@@ -13,10 +13,10 @@
 
 #include "diffusion.h"
 
-void write_csv(double** A, int nx, int ny, double dx, double dy, int step)
+void write_csv(fp_t** A, int nx, int ny, fp_t dx, fp_t dy, int step)
 {
 	int i, j;
-	double x, y;
+	fp_t x, y;
 	FILE* output;
 	char name[256];
 	char num[20];
@@ -47,12 +47,12 @@ void write_csv(double** A, int nx, int ny, double dx, double dy, int step)
 	fclose(output);
 }
 
-void write_png(double** A, int nx, int ny, int step)
+void write_png(fp_t** A, int nx, int ny, int step)
 {
 	/* After "A simple libpng example program," http://zarb.org/~gc/html/libpng.html
 	   and the libong manual, http://www.libpng.org/pub/png */
 
-	double min, max, *c;
+	fp_t min, max, *c;
 	int i, j, w, h, n;
 	FILE* output;
 	char name[256];

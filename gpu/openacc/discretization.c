@@ -17,7 +17,7 @@ void set_threads(int n)
 	omp_set_num_threads(n);
 }
 
-void five_point_Laplacian_stencil(double dx, double dy, double** M)
+void five_point_Laplacian_stencil(fp_t dx, fp_t dy, fp_t** M)
 {
 	M[0][1] =  1. / (dy * dy); /* up */
 	M[1][0] =  1. / (dx * dx); /* left */
@@ -26,7 +26,7 @@ void five_point_Laplacian_stencil(double dx, double dy, double** M)
 	M[2][1] =  1. / (dy * dy); /* down */
 }
 
-void nine_point_Laplacian_stencil(double dx, double dy, double** M)
+void nine_point_Laplacian_stencil(fp_t dx, fp_t dy, fp_t** M)
 {
 	M[0][0] =   1. / (6. * dx * dy);
 	M[0][1] =   4. / (6. * dy * dy);
@@ -41,19 +41,19 @@ void nine_point_Laplacian_stencil(double dx, double dy, double** M)
 	M[2][2] =   1. / (6. * dx * dy);
 }
 
-void set_mask(double dx, double dy, int nm, double** M)
+void set_mask(fp_t dx, fp_t dy, int nm, fp_t** M)
 {
 	five_point_Laplacian_stencil(dx, dy, M);
 }
 
-void compute_convolution(double** A, double** C, double** M, int nx, int ny, int nm, int bs)
+void compute_convolution(fp_t** A, fp_t** C, fp_t** M, int nx, int ny, int nm, int bs)
 {
 	#pragma acc data copyin(A[0:ny][0:nx], M[0:nm][0:nm]) copyout(C[0:ny][0:nx])
 	{
 		#pragma acc parallel
 		{
 			int i, j, mi, mj;
-			double value;
+			fp_t value;
 
 			#pragma acc loop
 			for (j = nm/2; j < ny-nm/2; j++) {
@@ -72,9 +72,9 @@ void compute_convolution(double** A, double** C, double** M, int nx, int ny, int
 	}
 }
 
-void solve_diffusion_equation(double** A, double** B, double** C,
+void solve_diffusion_equation(fp_t** A, fp_t** B, fp_t** C,
                               int nx, int ny, int nm, int bs,
-                              double D, double dt, double* elapsed)
+                              fp_t D, fp_t dt, fp_t* elapsed)
 {
 	#pragma acc data copyin(A[0:ny][0:nx], C[0:ny][0:nx]) copyout(B[0:ny][0:nx])
 	{
@@ -95,18 +95,18 @@ void solve_diffusion_equation(double** A, double** B, double** C,
 	*elapsed += dt;
 }
 
-void check_solution(double** A,
-                    int nx, int ny, double dx, double dy, int nm, int bs,
-                    double elapsed, double D, double bc[2][2], double* rss)
+void check_solution(fp_t** A,
+                    int nx, int ny, fp_t dx, fp_t dy, int nm, int bs,
+                    fp_t elapsed, fp_t D, fp_t bc[2][2], fp_t* rss)
 {
 	/* OpenCL does not have a GPU-based erf() definition, using Maclaurin series approximation */
-	double sum=0.;
+	fp_t sum=0.;
 	#pragma acc data copyin(A[0:ny][0:nx], bc[0:2][0:2]) copy(sum)
 	{
 		#pragma acc parallel reduction(+:sum)
 		{
 			int i, j;
-			double ca, cal, car, cn, poly_erf, r, trss, z, z2;
+			fp_t ca, cal, car, cn, poly_erf, r, trss, z, z2;
 
 			#pragma acc loop
 			for (j = nm/2; j < ny-nm/2; j++) {
@@ -133,7 +133,7 @@ void check_solution(double** A,
 					ca = cal + car;
 
 					/* residual sum of squares (RSS) */
-					trss = (ca - cn) * (ca - cn) / (double)((nx-nm+1) * (ny-nm+1));
+					trss = (ca - cn) * (ca - cn) / (fp_t)((nx-nm+1) * (ny-nm+1));
 					sum += trss;
 				}
 			}

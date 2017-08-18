@@ -15,7 +15,7 @@ void set_threads(int n)
 	/* nothing to do here */
 }
 
-void five_point_Laplacian_stencil(double dx, double dy, double** M)
+void five_point_Laplacian_stencil(fp_t dx, fp_t dy, fp_t** M)
 {
 	M[0][1] =  1. / (dy * dy); /* up */
 	M[1][0] =  1. / (dx * dx); /* left */
@@ -24,7 +24,7 @@ void five_point_Laplacian_stencil(double dx, double dy, double** M)
 	M[2][1] =  1. / (dy * dy); /* down */
 }
 
-void nine_point_Laplacian_stencil(double dx, double dy, double** M)
+void nine_point_Laplacian_stencil(fp_t dx, fp_t dy, fp_t** M)
 {
 	M[0][0] =   1. / (6. * dx * dy);
 	M[0][1] =   4. / (6. * dy * dy);
@@ -39,15 +39,15 @@ void nine_point_Laplacian_stencil(double dx, double dy, double** M)
 	M[2][2] =   1. / (6. * dx * dy);
 }
 
-void set_mask(double dx, double dy, int nm, double** M)
+void set_mask(fp_t dx, fp_t dy, int nm, fp_t** M)
 {
 	nine_point_Laplacian_stencil(dx, dy, M);
 }
 
-void compute_convolution(double** A, double** C, double** M, int nx, int ny, int nm)
+void compute_convolution(fp_t** A, fp_t** C, fp_t** M, int nx, int ny, int nm)
 {
 	int i, j, mi, mj;
-	double value;
+	fp_t value;
 
 	for (j = nm/2; j < ny-nm/2; j++) {
 		for (i = nm/2; i < nx-nm/2; i++) {
@@ -62,7 +62,7 @@ void compute_convolution(double** A, double** C, double** M, int nx, int ny, int
 	}
 }
 
-void solve_diffusion_equation(double** A, double** B, double** C, int nx, int ny, int nm, double D, double dt, double* elapsed)
+void solve_diffusion_equation(fp_t** A, fp_t** B, fp_t** C, int nx, int ny, int nm, fp_t D, fp_t dt, fp_t* elapsed)
 {
 	int i, j;
 
@@ -73,15 +73,15 @@ void solve_diffusion_equation(double** A, double** B, double** C, int nx, int ny
 	*elapsed += dt;
 }
 
-void analytical_value(double x, double t, double D, double bc[2][2], double* c)
+void analytical_value(fp_t x, fp_t t, fp_t D, fp_t bc[2][2], fp_t* c)
 {
 	*c = bc[1][0] * (1.0 - erf(x / sqrt(4.0 * D * t)));
 }
 
-void check_solution(double** A, int nx, int ny, double dx, double dy, int nm, double elapsed, double D, double bc[2][2], double* rss)
+void check_solution(fp_t** A, int nx, int ny, fp_t dx, fp_t dy, int nm, fp_t elapsed, fp_t D, fp_t bc[2][2], fp_t* rss)
 {
 	int i, j;
-	double r, cal, car, ca, cn;
+	fp_t r, cal, car, ca, cn;
 	*rss = 0.0;
 
 	for (j = nm/2; j < ny-nm/2; j++) {
@@ -101,7 +101,7 @@ void check_solution(double** A, int nx, int ny, double dx, double dy, int nm, do
 			ca = cal + car;
 
 			/* residual sum of squares (RSS) */
-			*rss += (ca - cn) * (ca - cn) / (double)((nx-nm+1) * (ny-nm+1));
+			*rss += (ca - cn) * (ca - cn) / (fp_t)((nx-nm+1) * (ny-nm+1));
 		}
 	}
 }

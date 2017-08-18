@@ -3,7 +3,7 @@
 This directory contains implementations of the diffusion equation for GPUs, with help from the following text:
 > Kirk and Wu. *Programming Massively Parallel Processors: A Hands-On Approach,* 3 Ed. Morgan Kaufmann. New York: 2017.
 
-## Work in Progress
+## Working Code
 
  - [x] OpenACC
  - [x] CUDA

@@ -6,6 +6,7 @@
 	Bugs/requests to https://github.com/usnistgov/phasefield-accelerator-benchmarks
 */
 
+#include <stdio.h>
 #include <math.h>
 #include <omp.h>
 #include <cuda.h>
@@ -29,17 +30,11 @@ void set_threads(int n)
 
 void five_point_Laplacian_stencil(double dx, double dy, double** M)
 {
-	M[0][0] =  0.;
 	M[0][1] =  1. / (dy * dy); /* up */
-	M[0][2] =  0.;
-
 	M[1][0] =  1. / (dx * dx); /* left */
 	M[1][1] = -2. * (dx*dx + dy*dy) / (dx*dx * dy*dy); /* middle */
 	M[1][2] =  1. / (dx * dx); /* right */
-
-	M[2][0] =  0.;
 	M[2][1] =  1. / (dy * dy); /* down */
-	M[2][2] =  0.;
 }
 
 void nine_point_Laplacian_stencil(double dx, double dy, double** M)
@@ -131,6 +126,11 @@ void compute_convolution(double** A, double** C, double** M, int nx, int ny, int
 {
 	double* d_A, *d_C;
 
+	if (bs > MAX_TILE_W) {
+		printf("Error: requested block size %i exceeds the statically allocated array size.\n", bs);
+		exit(-1);
+	}
+
 	/* allocate memory on device */
 	cudaMalloc((void **) &d_A, nx * ny * sizeof(double));
 	cudaMalloc((void **) &d_C, nx * ny * sizeof(double));
@@ -142,8 +142,8 @@ void compute_convolution(double** A, double** C, double** M, int nx, int ny, int
 	cudaMemcpyToSymbol(Mc, M[0], nm * nm * sizeof(double));
 
 	/* divide matrices into blocks of (bs x bs) threads */
-	dim3 threads(bs, bs, 1);
-	dim3 blocks(ceil(double(nx)/threads.x), ceil(double(ny)/threads.y), 1);
+	dim3 threads(bs - nm/2, bs - nm/2, 1);
+	dim3 blocks(ceil(double(nx)/threads.x)+1, ceil(double(ny)/threads.y)+1, 1);
 
 	/* compute result */
 	convolution_kernel<<<blocks, threads>>>(d_A, d_C, nx, ny, nm);
@@ -192,8 +192,8 @@ void solve_diffusion_equation(double** A, double** B, double** C,
 	cudaMemcpy(d_C, C[0], nx * ny * sizeof(double), cudaMemcpyHostToDevice);
 
 	/* divide matrices into blocks of (bs x bs) threads */
-	dim3 threads(bs, bs, 1);
-	dim3 blocks(ceil(double(nx)/threads.x), ceil(double(ny)/threads.y), 1);
+	dim3 threads(bs - nm/2, bs - nm/2, 1);
+	dim3 blocks(ceil(double(nx)/threads.x)+1, ceil(double(ny)/threads.y)+1, 1);
 
 	/* compute result */
 	diffusion_kernel<<<blocks, threads>>>(d_A, d_B, d_C, nx, ny, nm, D, dt);
@@ -211,7 +211,7 @@ void solve_diffusion_equation(double** A, double** B, double** C,
 
 void analytical_value(double x, double t, double D, double bc[2][2], double* c)
 {
-	*c = bc[1][0] * (1.0 - erf(x / sqrt(4. * D * t)));
+	*c = bc[1][0] * (1. - erf(x / sqrt(4. * D * t)));
 }
 
 void check_solution(double** A,
@@ -250,4 +250,3 @@ void check_solution(double** A,
 
 	*rss = sum;
 }
-

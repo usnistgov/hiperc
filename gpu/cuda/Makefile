@@ -2,7 +2,8 @@
 # CUDA implementation
 
 NVCXX = nvcc
-NVCXXFLAGS = -Wno-deprecated-gpu-targets -std=c++11 -gencode arch=compute_35,code=sm_35 \
+NVCXXFLAGS = -gencode arch=compute_35,code=sm_35 -D_FORCE_INLINES \
+             -Wno-deprecated-gpu-targets -std=c++11 \
              --compiler-options="-O2 -Wall -I.. -fopenmp"
 LINKS = -lm -lpng -lcuda
 
@@ -35,4 +36,4 @@ clean:
 	rm -f diffusion *.o
 
 squeaky:
-	rm -f diffusion *.o data.*.csv data.*.png runlog.csv
+	rm -f iffusion *.o data.*.csv data.*.png runlog.csv

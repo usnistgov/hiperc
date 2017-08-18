@@ -31,10 +31,13 @@ To build this code, you must have installed
    [NVIDIA](https://developer.nvidia.com/opencl), or
    [Intel](https://software.intel.com/en-us/articles/opencl-drivers) hardware.
 
-These are usually available through the package manager. For example,
-```apt-get install make libpng12-dev nvidia-cuda-dev opencl-headers nvidia-opencl-dev```.
-Note that CUDA is not compatible with all GPU architectures. CUDA hardware can be
-+emulated on the CPU using the [MCUDA framework](http://impact.crhc.illinois.edu/mcuda.aspx).
+```make``` and ```libpng``` can be installed through your operating system's
+package manager, *e.g.* ```apt-get install make libpng12-dev```. The other
+software (CUDA, OpenCL, and PGI compiler) should be installed using up-to-date
+distributions from their websites since the packaged versions are often several
+versions behind, and GPU hardware support evolves quickly. Note that CUDA is
+not compatible with all GPU architectures. CUDA hardware can be emulated on the
+CPU using the [MCUDA framework](http://impact.crhc.illinois.edu/mcuda.aspx).
 Proof-of-concept trials on GPU hardware can be run on [Amazon's EC2](
 https://aws.amazon.com/ec2/Elastic-GPUs/) and equivalent HPC cloud computing platforms.
 
@@ -53,7 +56,7 @@ necessarily the best available for the purpose.
  gpu
  ├── cuda
  │   ├── boundaries.c
- │   ├── discretization.c
+ │   ├── discretization.cu
  │   └── Makefile
  ├── openacc
  │   ├── boundaries.c

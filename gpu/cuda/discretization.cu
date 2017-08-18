@@ -6,6 +6,7 @@
 	Bugs/requests to https://github.com/usnistgov/phasefield-accelerator-benchmarks
 */
 
+#include <stdio.h>
 #include <math.h>
 #include <omp.h>
 #include <cuda.h>
@@ -18,15 +19,13 @@ extern "C" {
 #define MAX_TILE_W 32
 #define MAX_TILE_H 32
 #define MAX_MASK_W 3
+#define MAX_MASK_SIZE (MAX_MASK_W * MAX_MASK_W)
+
+__constant__ double Mc[MAX_MASK_SIZE];
 
 void set_threads(int n)
 {
 	omp_set_num_threads(n);
-}
-
-/* round a/b up to the next integer, copied from CUDA Toolkit examples */
-inline int iDivUp(int a, int b){
-	return (a % b != 0) ? (a / b + 1) : (a / b);
 }
 
 void five_point_Laplacian_stencil(double dx, double dy, double** M)
@@ -58,7 +57,7 @@ void set_mask(double dx, double dy, int nm, double** M)
 	five_point_Laplacian_stencil(dx, dy, M);
 }
 
-__global__ void convolution_kernel(double* A, double* C, const double* M, int nx, int ny, int nm)
+__global__ void convolution_kernel(double* A, double* C, int nx, int ny, int nm)
 {
 	/* Notes:
 		* The source matrix (A) and destination matrix (C) must be identical in size
@@ -68,15 +67,25 @@ __global__ void convolution_kernel(double* A, double* C, const double* M, int nx
 		* N_ds is the shared tile data array... dunno where the name comes from yet
 	*/
 
-	int i, j, tx, ty, dst_row, dst_col, src_row, src_col;
-	double value = 0.;
+	int i, j, tx, ty,
+	    dst_row, dst_col, dst_tile_w, dst_tile_h,
+	    src_row, src_col, src_tile_w, src_tile_h;
+	double value=0.;
+
+	/* source tile width includes the halo cells */
+	src_tile_w = blockDim.x;
+	src_tile_h = blockDim.y;
+
+	/* destination tile width excludes the halo cells */
+	dst_tile_w = src_tile_w - nm + 1;
+	dst_tile_h = src_tile_h - nm + 1;
 
 	/* determine indices on which to operate */
 	tx = threadIdx.x;
 	ty = threadIdx.y;
 
-	dst_row = blockIdx.y * blockDim.y + ty;
-	dst_col = blockIdx.x * blockDim.x + tx;
+	dst_row = blockIdx.y * dst_tile_h + ty;
+	dst_col = blockIdx.x * dst_tile_w + tx;
 
 	src_row = dst_row - nm/2;
 	src_col = dst_col - nm/2;
@@ -87,8 +96,9 @@ __global__ void convolution_kernel(double* A, double* C, const double* M, int nx
 	if ((src_row >= 0) && (src_row < ny) &&
 	    (src_col >= 0) && (src_col < nx)) {
 		/* if src_row==0, then dst_row==nm/2: this is a halo row, still contributing to the output */
-		N_ds[ty][tx] = A[src_row*nx + src_col];
+		N_ds[ty][tx] = A[src_row * nx + src_col];
 	} else {
+		/* points outside the halo should be switched off */
 		N_ds[ty][tx] = 0.;
 	}
 
@@ -96,38 +106,47 @@ __global__ void convolution_kernel(double* A, double* C, const double* M, int nx
 	__syncthreads();
 
 	/* compute the convolution */
-	if (tx < MAX_TILE_W && ty < MAX_TILE_H) {
+	if (tx < dst_tile_w && ty < dst_tile_h) {
 		for (j = 0; j < nm; j++) {
 			for (i = 0; i < nm; i++) {
-				value += M[j*nm+i] * N_ds[j+ty][i+tx];
+				value += Mc[j * nm + i] * N_ds[j+ty][i+tx];
 			}
 		}
 		/* record value */
 		if (dst_row < ny && dst_col < nx) {
-			C[dst_row*nx + dst_col] = value;
+			C[dst_row * nx + dst_col] = value;
 		}
 	}
+
+	/* wait for all threads to finish writing */
+	__syncthreads();
 }
 
 void compute_convolution(double** A, double** C, double** M, int nx, int ny, int nm, int bs)
 {
-	double* d_A, *d_C, *d_M;
+	double* d_A, *d_C;
 
-	/* divide matrices into blocks of (bs x bs) threads */
-	dim3 threads(bs, bs);
-	dim3 blocks(iDivUp(nx, threads.x), iDivUp(ny, threads.y));
+	if (bs > MAX_TILE_W) {
+		printf("Error: requested block size %i exceeds the statically allocated array size.\n", bs);
+		exit(-1);
+	}
 
 	/* allocate memory on device */
 	cudaMalloc((void **) &d_A, nx * ny * sizeof(double));
 	cudaMalloc((void **) &d_C, nx * ny * sizeof(double));
-	cudaMalloc((void **) &d_M, nm * nm * sizeof(double));
 
 	/* transfer data from host in to device */
 	cudaMemcpy(d_A, A[0], nx * ny * sizeof(double), cudaMemcpyHostToDevice);
-	cudaMemcpy(d_M, M[0], nm * nm * sizeof(double), cudaMemcpyHostToDevice);
+
+	/* transfer mask in to constant device memory */
+	cudaMemcpyToSymbol(Mc, M[0], nm * nm * sizeof(double));
+
+	/* divide matrices into blocks of (bs x bs) threads */
+	dim3 threads(bs - nm/2, bs - nm/2, 1);
+	dim3 blocks(ceil(double(nx)/threads.x)+1, ceil(double(ny)/threads.y)+1, 1);
 
 	/* compute result */
-	convolution_kernel<<<blocks, threads>>>(d_A, d_C, d_M, nx, ny, nm);
+	convolution_kernel<<<blocks, threads>>>(d_A, d_C, nx, ny, nm);
 
 	/* transfer from device out from host */
 	cudaMemcpy(C[0], d_C, nx * ny * sizeof(double), cudaMemcpyDeviceToHost);
@@ -135,35 +154,33 @@ void compute_convolution(double** A, double** C, double** M, int nx, int ny, int
 	/* free memory on device */
 	cudaFree(d_A);
 	cudaFree(d_C);
-	cudaFree(d_M);
 }
 
-__global__ void diffusion_kernel(double* A, double* B, double* C, int nx, int ny, int nm, double D, double dt)
+__global__ void diffusion_kernel(double* A, double* B, double* C,
+                                 int nx, int ny, int nm, double D, double dt)
 {
-	int tx, ty, dst_row, dst_col;
+	int tx, ty, row, col;
 
 	/* determine indices on which to operate */
 	tx = threadIdx.x;
 	ty = threadIdx.y;
 
-	dst_row = blockIdx.y * blockDim.y + ty;
-	dst_col = blockIdx.x * blockDim.x + tx;
+	row = blockDim.y * blockIdx.y + ty;
+	col = blockDim.x * blockIdx.x + tx;
 
-	/* compute the convolution */
-	if (dst_row < ny && dst_col < nx) {
-		B[dst_row*nx + dst_col] = A[dst_row*nx + dst_col] + dt * D * C[dst_row*nx + dst_col];
+	/* explicit Euler solution to the equation of motion */
+	if (row < ny && col < nx) {
+		B[row * nx + col] = A[row * nx + col] + dt * D * C[row * nx + col];
 	}
+
+	/* wait for all threads to finish writing */
+	__syncthreads();
 }
 
 void solve_diffusion_equation(double** A, double** B, double** C,
-                              int nx, int ny, int nm, int bs,
-                              double D, double dt, double* elapsed)
+                              int nx, int ny, int nm, int bs, double D, double dt, double* elapsed)
 {
 	double* d_A, *d_B, *d_C;
-
-	/* divide matrices into blocks of (bs x bs) threads */
-	dim3 threads(bs, bs);
-	dim3 blocks(iDivUp(nx, threads.x), iDivUp(ny, threads.y));
 
 	/* allocate memory on device */
 	cudaMalloc((void **) &d_A, nx * ny * sizeof(double));
@@ -173,6 +190,10 @@ void solve_diffusion_equation(double** A, double** B, double** C,
 	/* transfer data from host in to device */
 	cudaMemcpy(d_A, A[0], nx * ny * sizeof(double), cudaMemcpyHostToDevice);
 	cudaMemcpy(d_C, C[0], nx * ny * sizeof(double), cudaMemcpyHostToDevice);
+
+	/* divide matrices into blocks of (bs x bs) threads */
+	dim3 threads(bs - nm/2, bs - nm/2, 1);
+	dim3 blocks(ceil(double(nx)/threads.x)+1, ceil(double(ny)/threads.y)+1, 1);
 
 	/* compute result */
 	diffusion_kernel<<<blocks, threads>>>(d_A, d_B, d_C, nx, ny, nm, D, dt);
@@ -188,18 +209,20 @@ void solve_diffusion_equation(double** A, double** B, double** C,
 	*elapsed += dt;
 }
 
+void analytical_value(double x, double t, double D, double bc[2][2], double* c)
+{
+	*c = bc[1][0] * (1. - erf(x / sqrt(4. * D * t)));
+}
+
 void check_solution(double** A,
                     int nx, int ny, double dx, double dy, int nm, int bs,
                     double elapsed, double D, double bc[2][2], double* rss)
 {
-	/* Not easily CUDA-able without a prefix-sum formulation */
-
-	/* OpenCL does not have a GPU-based erf() definition, using Maclaurin series approximation */
 	double sum=0.;
 	#pragma omp parallel reduction(+:sum)
 	{
 		int i, j;
-		double ca, cal, car, cn, poly_erf, r, trss, z, z2;
+		double r, cal, car, ca, cn, trss;
 
 		#pragma omp for collapse(2)
 		for (j = nm/2; j < ny-nm/2; j++) {
@@ -209,23 +232,17 @@ void check_solution(double** A,
 
 				/* shortest distance to left-wall source */
 				r = (j < ny/2) ? dx * (i - nm/2) : sqrt(dx*dx * (i - nm/2) * (i - nm/2) + dy*dy * (j - ny/2) * (j - ny/2));
-				z = r / sqrt(4. * D * elapsed);
-				z2 = z * z;
-				poly_erf = (z < 1.5) ? 2. * z * (1. + z2 * (-1./3 + z2 * (1./10 + z2 * (-1./42 + z2 / 216)))) / sqrt(M_PI) : 1.;
-				cal = bc[1][0] * (1. - poly_erf);
+				analytical_value(r, elapsed, D, bc, &cal);
 
 				/* shortest distance to right-wall source */
-				r = (j >= ny/2) ? dx * (nx-nm+1 - i) : sqrt(dx*dx * (nx-nm+1 - i)*(nx-nm+1 - i) + dy*dy * (ny/2 - j)*(ny/2 - j));
-				z = r / sqrt(4. * D * elapsed);
-				z2 = z * z;
-				poly_erf = (z < 1.5) ? 2. * z * (1. + z2 * (-1./3 + z2 * (1./10 + z2 * (-1./42 + z2 / 216)))) / sqrt(M_PI) : 1.;
-				car = bc[1][0] * (1. - poly_erf);
+				r = (j >= ny/2) ? dx * (nx-nm/2-1 - i) : sqrt(dx*dx * (nx-nm/2-1 - i)*(nx-nm/2-1 - i) + dy*dy * (ny/2 - j)*(ny/2 - j));
+				analytical_value(r, elapsed, D, bc, &car);
 
 				/* superposition of analytical solutions */
 				ca = cal + car;
 
 				/* residual sum of squares (RSS) */
-				trss = (ca - cn) * (ca - cn) / (double)((nx-nm+1) * (ny-nm+1));
+				trss = (ca - cn) * (ca - cn) / (double)((nx-nm/2-1) * (ny-nm/2-1));
 				sum += trss;
 			}
 		}

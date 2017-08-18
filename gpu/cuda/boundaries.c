@@ -32,7 +32,7 @@ void apply_initial_conditions(double** A, int nx, int ny, int nm, double bc[2][2
 			for (i = nm/2; i < nx; i++)
 				A[j][i] = bc[0][0];
 
-		#pragma omp for nowait
+		#pragma omp for
 		for (j = nm/2; j < ny/2; j++)
 			A[j][nm/2] = bc[1][0]; /* left half-wall */
 
@@ -57,17 +57,16 @@ void apply_boundary_conditions(double** A, int nx, int ny, int nm, double bc[2][
 		for (j = ny/2; j < ny-nm/2; j++)
 			A[j][nx-nm/2-1] = bc[1][1]; /* right value */
 
-		#pragma omp for nowait
+		#pragma omp for
 		for (j = nm/2; j < ny-nm/2; j++) {
 			A[j][nm/2-1] = A[j][nm/2]; /* left condition */
 			A[j][nx-nm/2] = A[j][nx-nm/2-1]; /* right condition */
 		}
 
-		/* bottom boundary */
-		#pragma omp for nowait
+		#pragma omp for
 		for (i = nm/2; i < nx-nm/2; i++) {
-			A[nm/2-1][i] = A[nm/2][i]; /* top condition */
-			A[ny-nm/2][i] = A[ny-nm/2-1][i]; /* bottom condition */
+			A[nm/2-1][i] = A[nm/2][i]; /* bottom condition */
+			A[ny-nm/2][i] = A[ny-nm/2-1][i]; /* top condition */
 		}
 	}
 }

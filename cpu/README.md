@@ -43,8 +43,8 @@ These are usually available through the package manager. For example,
  │   ├── discretization.c
  │   └── Makefile
  ├── tbb
- │   ├── boundaries.c
- │   ├── discretization.c
+ │   ├── boundaries.cpp
+ │   ├── discretization.cpp
  │   └── Makefile
  ├── diffusion.h
  ├── main.c

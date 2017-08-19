@@ -9,14 +9,51 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <iso646.h>
 #include <png.h>
 
 #include "diffusion.h"
 
-void write_csv(double** A, int nx, int ny, double dx, double dy, int step)
+void print_progress(const int step, const int steps)
+{
+	/*
+	Prints timestamps and a 20-point progress bar to stdout.
+	Call inside the timestepping loop, near the top, e.g.
+
+	for (int step=0; step<steps; step++) {
+		print_progress(step, steps);
+		take_a_step();
+		elapsed += dt;
+	}
+	*/
+
+	char* timestring;
+	static unsigned long tstart;
+	struct tm* timeinfo;
+	time_t rawtime;
+
+	if (step==0) {
+		tstart = time(NULL);
+		time( &rawtime );
+		timeinfo = localtime( &rawtime );
+		timestring = asctime(timeinfo);
+		timestring[strlen(timestring)-1] = '\0';
+		printf("%s [", timestring);
+		fflush(stdout);
+	} else if (step==steps-1) {
+		unsigned long deltat = time(NULL)-tstart;
+		printf("•] %2luh:%2lum:%2lus\n",deltat/3600,(deltat%3600)/60,deltat%60);
+		fflush(stdout);
+	} else if ((20 * step) % steps == 0) {
+		printf("• ");
+		fflush(stdout);
+	}
+}
+
+void write_csv(fp_t** A, int nx, int ny, fp_t dx, fp_t dy, int step)
 {
 	int i, j;
-	double x, y;
+	fp_t x, y;
 	FILE* output;
 	char name[256];
 	char num[20];
@@ -47,12 +84,12 @@ void write_csv(double** A, int nx, int ny, double dx, double dy, int step)
 	fclose(output);
 }
 
-void write_png(double** A, int nx, int ny, int step)
+void write_png(fp_t** A, int nx, int ny, int step)
 {
 	/* After "A simple libpng example program," http://zarb.org/~gc/html/libpng.html
 	   and the libong manual, http://www.libpng.org/pub/png */
 
-	double min, max, *c;
+	fp_t min, max, *c;
 	int i, j, w, h, n;
 	FILE* output;
 	char name[256];

@@ -165,6 +165,8 @@ int main(int argc, char* argv[])
 
 	/* do the work */
 	for (step = 1; step < steps+1; step++) {
+		print_progress(step-1, steps);
+
 		apply_boundary_conditions(oldMesh, nx, ny, nm, bc);
 
 		start_time = GetTimer();

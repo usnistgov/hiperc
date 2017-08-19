@@ -35,33 +35,78 @@ This equation can be discretized, *e.g.* in 1D:
 This discretization is a special case of [convolution](https://en.wikipedia.org/wiki/Discrete_Laplace_operator#Image_Processing),
 wherein a constant kernel of weighting coefficients is applied to an input dataset to produce a transformed output.
 
-1D Laplacian convolution kernel:
 <table>
-  <tr>
-    <td>1</td>
-    <td>-2</td>
-    <td>1</td>
-  </tr>
+<tr>
+  <td>
+    <table>
+      <caption>
+        1D Laplacian
+      </caption>
+      <tr>
+        <td> 1</td>
+        <td>-2</td>
+        <td> 1</td>
+      </tr>
+    </table>
+  </td>
+  <td>
+    <table>
+      <caption>
+        2D Laplacian *
+      </caption>
+      <tr>
+        <td>
+          <table>
+            <caption>
+              5-point stencil
+            </caption>
+            <tr>
+              <td> 0</td>
+              <td> 1</td>
+              <td> 0</td>
+            </tr>
+            <tr>
+              <td> 1</td>
+              <td>-4</td>
+              <td> 1</td>
+            </tr>
+            <tr>
+              <td> 0</td>
+              <td> 1</td>
+              <td> 0</td>
+            </tr>
+          </table>
+        </td>
+        <td>
+          <table>
+            <caption>
+              9-point stencil
+            </caption>
+            <tr>
+              <td>  1</td>
+              <td>  4</td>
+              <td>  1</td>
+            </tr>
+            <tr>
+              <td>  4</td>
+              <td>-20</td>
+              <td>  4</td>
+            </tr>
+            <tr>
+              <td>  1</td>
+              <td>  4</td>
+              <td>  1</td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+  </td>
 </table>
 
-2D Laplacian convolution kernel:
-<table>
-  <tr>
-    <td>0</td>
-    <td>1</td>
-    <td>0</td>
-  </tr>
-  <tr>
-    <td>1</td>
-    <td>-4</td>
-    <td>1</td>
-  </tr>
-  <tr>
-    <td>0</td>
-    <td>1</td>
-    <td>0</td>
-  </tr>
-</table>
+> \* The 9-point stencil uses first- and second-nearest neighbors. There is
+another form that uses first- and third-nearest neighbors, which would be
+straightforward to implement as a variation on this code.
 
 In addition, computing values for the next timestep given values from the
 previous timestep and the Laplacian values is a vector-add operation.

@@ -219,9 +219,9 @@ list of options:
 - **KNL**: the same monitor used for the CPU should also report load on the
   Knights Landing processor.
 
-As it runs, the code will write a series of PNG image files (```data.00?0000.png```)
+As it runs, the code will write a series of PNG image files (```diffusion.00?0000.png```)
 in the same directory as the running executable resides; at the end, it will
-write the final values to ```data.0100000.csv```. It will also write a
+write the final values to ```diffusion.0100000.csv```. It will also write a
 summary file, ```runlog.csv```, containing the following columns:
  - **iter**: number of completed iterations
  - **sim_time**: elapsed simulation time (with &Delta;t=1, the first two columns are equal)

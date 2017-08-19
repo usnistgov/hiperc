@@ -60,7 +60,7 @@ void write_csv(fp_t** A, int nx, int ny, fp_t dx, fp_t dy, int step)
 
 	/* generate the filename */
 	sprintf(num, "%07i", step);
-	strcpy(name, "data.");
+	strcpy(name, "diffusion.");
 	strcat(name, num);
 	strcat(name, ".csv");
 
@@ -107,7 +107,7 @@ void write_png(fp_t** A, int nx, int ny, int step)
 
 	/* generate the filename */
 	sprintf(num, "%07i", step);
-	strcpy(name, "data.");
+	strcpy(name, "diffusion.");
 	strcat(name, num);
 	strcat(name, ".png");
 

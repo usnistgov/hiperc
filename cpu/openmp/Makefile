@@ -2,7 +2,7 @@
 # OpenMP implementation
 
 CC = gcc
-CFLAGS = -O2 -Wall -pedantic -I../ -fopenmp
+CFLAGS = -O3 -Wall -pedantic -I../ -fopenmp
 LINKS = -lm -lpng
 
 OBJS = boundaries.o discretization.o mesh.o output.o timer.o

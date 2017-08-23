@@ -2,7 +2,7 @@
 # serial implementation (no parallel model)
 
 CC = gcc
-CFLAGS = -O2 -Wall -pedantic -I../
+CFLAGS = -O3 -Wall -pedantic -I../
 LINKS = -lm -lpng
 
 OBJS = boundaries.o discretization.o mesh.o output.o timer.o

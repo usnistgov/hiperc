@@ -4,7 +4,7 @@
 NVCXX = nvcc
 NVCXXFLAGS = -gencode arch=compute_35,code=sm_35 -D_FORCE_INLINES \
              -Wno-deprecated-gpu-targets -std=c++11 \
-             --compiler-options="-O2 -Wall -I.. -fopenmp"
+             --compiler-options="-O3 -Wall -I.. -fopenmp"
 LINKS = -lm -lpng -lcuda
 
 OBJS = boundaries.o discretization.o mesh.o output.o timer.o

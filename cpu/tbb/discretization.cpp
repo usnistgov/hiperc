@@ -44,6 +44,29 @@ void nine_point_Laplacian_stencil(fp_t dx, fp_t dy, fp_t** mask_lap)
 	mask_lap[2][2] =   1. / (6. * dx * dy);
 }
 
+void slow_nine_point_Laplacian_stencil(fp_t dx, fp_t dy, fp_t** mask_lap)
+{
+	/* 4x4 mask, 9 values, truncation error O(dx^4)
+	   Provided for testing and demonstration of scalability, only:
+	   as the name indicates, this 9-point stencil is computationally
+	   more expensive than the 3x3 version. If your code requires O(dx^4)
+	   accuracy, please use nine_point_Laplacian_stencil. */
+
+	mask_lap[0][2] = -1. / (12. * dy * dy);
+
+	mask_lap[1][2] =  4. / (3. * dy * dy);
+
+	mask_lap[2][0] = -1. / (12. * dx * dx);
+	mask_lap[2][1] =  4. / (3. * dx * dx);
+	mask_lap[2][2] = -5. * (dx*dx + dy*dy) / (2. * dx*dx * dy*dy);
+	mask_lap[2][3] =  4. / (3. * dx * dx);
+	mask_lap[2][4] = -1. / (12. * dx * dx);
+
+	mask_lap[3][2] =  4. / (3. * dy * dy);
+
+	mask_lap[4][2] = -1. / (12. * dy * dy);
+}
+
 void set_mask(fp_t dx, fp_t dy, int nm, fp_t** mask_lap)
 {
 	five_point_Laplacian_stencil(dx, dy, mask_lap);
@@ -51,9 +74,7 @@ void set_mask(fp_t dx, fp_t dy, int nm, fp_t** mask_lap)
 
 void compute_convolution(fp_t** conc_old, fp_t** conc_lap, fp_t** mask_lap, int nx, int ny, int nm)
 {
-	const int tbb_bs = 16;
-
-	tbb::parallel_for(tbb::blocked_range2d<int>(nm/2, ny-nm/2, tbb_bs, nm/2, nx-nm/2, tbb_bs),
+	tbb::parallel_for(tbb::blocked_range2d<int>(nm/2, nx-nm/2, nm/2, ny-nm/2),
 		[=](const tbb::blocked_range2d<int>& r) {
 			for (int j = r.cols().begin(); j != r.cols().end(); j++) {
 				for (int i = r.rows().begin(); i != r.rows().end(); i++) {
@@ -73,9 +94,7 @@ void compute_convolution(fp_t** conc_old, fp_t** conc_lap, fp_t** mask_lap, int 
 void solve_diffusion_equation(fp_t** conc_old, fp_t** B, fp_t** conc_lap,
                               int nx, int ny, int nm, fp_t D, fp_t dt, fp_t* elapsed)
 {
-	const int tbb_bs = 16;
-
-	tbb::parallel_for(tbb::blocked_range2d<int>(nm/2, ny-nm/2, tbb_bs, nm/2, nx-nm/2, tbb_bs),
+	tbb::parallel_for(tbb::blocked_range2d<int>(nm/2, nx-nm/2, nm/2, ny-nm/2),
 		[=](const tbb::blocked_range2d<int>& r) {
 			for (int j = r.cols().begin(); j != r.cols().end(); j++) {
 				for (int i = r.rows().begin(); i != r.rows().end(); i++) {
@@ -165,11 +184,9 @@ class ResidualSumOfSquares2D {
 
 void check_solution(fp_t** conc_new, int nx, int ny, fp_t dx, fp_t dy, int nm, fp_t elapsed, fp_t D, fp_t bc[2][2], fp_t* rss)
 {
-	const int tbb_bs = 16;
-
 	ResidualSumOfSquares2D R(conc_new, nx, ny, dx, dy, nm, elapsed, D, bc[1][0]);
 
-	tbb::parallel_reduce(tbb::blocked_range2d<int>(nm/2, ny-nm/2, tbb_bs, nm/2, nx-nm/2, tbb_bs), R);
+	tbb::parallel_reduce(tbb::blocked_range2d<int>(nm/2, nx-nm/2, nm/2, ny-nm/2), R);
 
 	*rss = R.my_rss;
 }

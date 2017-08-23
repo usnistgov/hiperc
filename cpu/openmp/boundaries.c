@@ -28,45 +28,53 @@ void apply_initial_conditions(fp_t** conc, int nx, int ny, int nm, fp_t bc[2][2]
 		int i, j;
 
 		#pragma omp for collapse(2)
-		for (j = nm/2; j < ny; j++)
-			for (i = nm/2; i < nx; i++)
+		for (j = 0; j < ny; j++)
+			for (i = 0; i < nx; i++)
 				conc[j][i] = bc[0][0];
 
-		#pragma omp for nowait
-		for (j = nm/2; j < ny/2; j++)
-			conc[j][nm/2] = bc[1][0]; /* left half-wall */
+		#pragma omp for collapse(2)
+		for (j = 0; j < ny/2; j++)
+			for (i = 0; i < 1+nm/2; i++)
+				conc[j][i] = bc[1][0]; /* left half-wall */
 
-		#pragma omp for
-		for (j = ny/2; j < ny-nm/2; j++)
-			conc[j][nx-nm/2-1] = bc[1][1]; /* right half-wall */
+		#pragma omp for collapse(2)
+		for (j = ny/2; j < ny; j++)
+			for (i = nx-1-nm/2; i < nx; i++)
+				conc[j][i] = bc[1][1]; /* right half-wall */
 	}
 }
 
 void apply_boundary_conditions(fp_t** conc, int nx, int ny, int nm, fp_t bc[2][2])
 {
+	int i, j;
+
 	#pragma omp parallel
 	{
 		/* Set fixed value (c=1) along left and bottom, zero-flux elsewhere */
-		int i, j;
 
-		#pragma omp for
-		for (j = nm/2; j < ny/2; j++)
-			conc[j][nm/2] = bc[1][0]; /* left value */
+		#pragma omp for collapse(2) private(i,j)
+		for (j = 0; j < ny/2; j++)
+			for (i = 0; i < 1+nm/2; i++)
+				conc[j][i] = bc[1][0]; /* left value */
 
-		#pragma omp for
-		for (j = ny/2; j < ny-nm/2; j++)
-			conc[j][nx-nm/2-1] = bc[1][1]; /* right value */
+		#pragma omp for collapse(2) private(i,j)
+		for (j = ny/2; j < ny; j++)
+			for (i = nx-1-nm/2; i < nx; i++)
+				conc[j][i] = bc[1][1]; /* right value */
+	}
 
-		#pragma omp for nowait
-		for (j = nm/2; j < ny-nm/2; j++) {
-			conc[j][nm/2-1] = conc[j][nm/2]; /* left condition */
-			conc[j][nx-nm/2] = conc[j][nx-nm/2-1]; /* right condition */
-		}
+	/* sequence matters: cannot trivially parallelize */
+	for (j = 0; j < ny; j++) {
+		for (i = nm/2; i > 0; i--)
+			conc[j][i-1] = conc[j][i]; /* left condition */
+		for (i = nx-1-nm/2; i < nx-1; i++)
+			conc[j][i+1] = conc[j][i]; /* right condition */
+	}
 
-		#pragma omp for nowait
-		for (i = nm/2; i < nx-nm/2; i++) {
-			conc[nm/2-1][i] = conc[nm/2][i]; /* bottom condition */
-			conc[ny-nm/2][i] = conc[ny-nm/2-1][i]; /* top condition */
-		}
+	for (i = 0; i < nx; i++) {
+		for (j = nm/2; j > 0; j--)
+			conc[j-1][i] = conc[j][i]; /* bottom condition */
+		for (j = ny-1-nm/2; j < ny-1; j++)
+			conc[j+1][i] = conc[j][i]; /* top condition */
 	}
 }

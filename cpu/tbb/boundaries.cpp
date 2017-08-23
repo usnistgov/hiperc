@@ -26,10 +26,8 @@ void set_boundaries(fp_t bc[2][2])
 
 void apply_initial_conditions(fp_t** conc, int nx, int ny, int nm, fp_t bc[2][2])
 {
-	const int tbb_bs = 16;
-
 	/* apply flat field values  (lambda function) */
-	tbb::parallel_for(tbb::blocked_range2d<int>(nm/2, ny, tbb_bs, nm/2, nx, tbb_bs),
+	tbb::parallel_for(tbb::blocked_range2d<int>(0, nx, 0, ny),
 		[=](const tbb::blocked_range2d<int>& r) {
 			for (int j = r.cols().begin(); j != r.cols().end(); j++) {
 				for (int i = r.rows().begin(); i != r.rows().end(); i++) {
@@ -40,19 +38,23 @@ void apply_initial_conditions(fp_t** conc, int nx, int ny, int nm, fp_t bc[2][2]
 	);
 
 	/* apply left boundary values  (lambda function) */
-	tbb::parallel_for(tbb::blocked_range<int>(nm/2, ny/2, tbb_bs),
-		[=](const tbb::blocked_range<int>& r) {
-			for (int j = r.begin(); j != r.end(); j++) {
-				conc[j][nm/2] = bc[1][0];
+	tbb::parallel_for(tbb::blocked_range2d<int>(0, 1+nm/2, 0, ny/2),
+		[=](const tbb::blocked_range2d<int>& r) {
+			for (int j = r.cols().begin(); j != r.cols().end(); j++) {
+				for (int i = r.rows().begin(); i != r.rows().end(); i++) {
+					conc[j][i] = bc[1][0];
+				}
 			}
 		}
 	);
 
 	/* apply right boundary values  (lambda function) */
-	tbb::parallel_for( tbb::blocked_range<int>(ny/2, ny-nm/2, tbb_bs),
-		[=](const tbb::blocked_range<int>& r) {
-			for (int j = r.begin(); j != r.end(); j++) {
-				conc[j][nx-nm/2-1] = bc[1][1];
+	tbb::parallel_for( tbb::blocked_range2d<int>(nx-1-nm/2, nx, ny/2, ny),
+		[=](const tbb::blocked_range2d<int>& r) {
+			for (int j = r.cols().begin(); j != r.cols().end(); j++) {
+				for (int i = r.rows().begin(); i != r.rows().end(); i++) {
+					conc[j][i] = bc[1][1];
+				}
 			}
 		}
 	);
@@ -60,38 +62,40 @@ void apply_initial_conditions(fp_t** conc, int nx, int ny, int nm, fp_t bc[2][2]
 
 void apply_boundary_conditions(fp_t** conc, int nx, int ny, int nm, fp_t bc[2][2])
 {
-	const int tbb_bs = 16;
-
 	/* apply left boundary values  (lambda function) */
-	tbb::parallel_for(tbb::blocked_range<int>(nm/2, ny/2, tbb_bs),
-		[=](const tbb::blocked_range<int>& r) {
-			for (int j = r.begin(); j != r.end(); j++) {
-				conc[j][nm/2] = bc[1][0];
+	tbb::parallel_for(tbb::blocked_range2d<int>(0, 1+nm/2, 0, ny/2),
+		[=](const tbb::blocked_range2d<int>& r) {
+			for (int j = r.cols().begin(); j != r.cols().end(); j++) {
+				for (int i = r.rows().begin(); i != r.rows().end(); i++) {
+					conc[j][i] = bc[1][0];
+				}
 			}
 		}
 	);
 
 	/* apply right boundary values  (lambda function) */
-	tbb::parallel_for( tbb::blocked_range<int>(ny/2, ny-nm/2, tbb_bs),
-		[=](const tbb::blocked_range<int>& r) {
-			for (int j = r.begin(); j != r.end(); j++) {
-				conc[j][nx-nm/2-1] = bc[1][1];
-			}
-		}
-	);
-
-	/* apply no-flux boundary conditions  (lambda function) */
-	tbb::parallel_for(tbb::blocked_range2d<int>(nm/2, ny-nm/2, tbb_bs, nm/2, nx-nm/2, tbb_bs),
+	tbb::parallel_for( tbb::blocked_range2d<int>(nx-1-nm/2, nx, ny/2, ny),
 		[=](const tbb::blocked_range2d<int>& r) {
 			for (int j = r.cols().begin(); j != r.cols().end(); j++) {
-				conc[j][nm/2-1] = conc[j][nm/2]; /* left boundary */
-				conc[j][nx-nm/2] = conc[j][nx-nm/2-1]; /* right boundary */
-			}
-
-			for (int i = r.rows().begin(); i != r.rows().end(); i++) {
-				conc[nm/2-1][i] = conc[nm/2][i]; /* bottom boundary */
-				conc[ny-nm/2][i] = conc[ny-nm/2-1][i]; /* top boundary */
+				for (int i = r.rows().begin(); i != r.rows().end(); i++) {
+					conc[j][i] = bc[1][1];
+				}
 			}
 		}
 	);
+
+	/* apply no-flux boundary conditions  (serial) */
+	for (int j = 0; j < ny; j++) {
+		for (int i = nm/2; i > 0; i--)
+			conc[j][i-1] = conc[j][i]; /* left condition */
+		for (int i = nx-1-nm/2; i < nx-1; i++)
+			conc[j][i+1] = conc[j][i]; /* right condition */
+	}
+
+	for (int i = 0; i < nx; i++) {
+		for (int j = nm/2; j > 0; j--)
+			conc[j-1][i] = conc[j][i]; /* bottom condition */
+		for (int j = ny-1-nm/2; j < ny-1; j++)
+			conc[j+1][i] = conc[j][i]; /* top condition */
+	}
 }

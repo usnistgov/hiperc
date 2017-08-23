@@ -40,6 +40,29 @@ void nine_point_Laplacian_stencil(fp_t dx, fp_t dy, fp_t** mask_lap)
 	mask_lap[2][2] =   1. / (6. * dx * dy);
 }
 
+void slow_nine_point_Laplacian_stencil(fp_t dx, fp_t dy, fp_t** mask_lap)
+{
+	/* 4x4 mask, 9 values, truncation error O(dx^4)
+	   Provided for testing and demonstration of scalability, only:
+	   as the name indicates, this 9-point stencil is computationally
+	   more expensive than the 3x3 version. If your code requires O(dx^4)
+	   accuracy, please use nine_point_Laplacian_stencil. */
+
+	mask_lap[0][2] = -1. / (12. * dy * dy);
+
+	mask_lap[1][2] =  4. / (3. * dy * dy);
+
+	mask_lap[2][0] = -1. / (12. * dx * dx);
+	mask_lap[2][1] =  4. / (3. * dx * dx);
+	mask_lap[2][2] = -5. * (dx*dx + dy*dy) / (2. * dx*dx * dy*dy);
+	mask_lap[2][3] =  4. / (3. * dx * dx);
+	mask_lap[2][4] = -1. / (12. * dx * dx);
+
+	mask_lap[3][2] =  4. / (3. * dy * dy);
+
+	mask_lap[4][2] = -1. / (12. * dy * dy);
+}
+
 void set_mask(fp_t dx, fp_t dy, int nm, fp_t** mask_lap)
 {
 	five_point_Laplacian_stencil(dx, dy, mask_lap);

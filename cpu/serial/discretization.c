@@ -41,7 +41,7 @@ void nine_point_Laplacian_stencil(fp_t dx, fp_t dy, fp_t** mask_lap)
 	mask_lap[2][2] =   1. / (6. * dx * dy);
 }
 
-void expensive_nine_point_Laplacian_stencil(fp_t dx, fp_t dy, fp_t** mask_lap)
+void slow_nine_point_Laplacian_stencil(fp_t dx, fp_t dy, fp_t** mask_lap)
 {
 	/* 4x4 mask, 9 values, truncation error O(dx^4)
 	   Provided for testing and demonstration of scalability, only:

@@ -28,42 +28,42 @@ void set_threads(int n)
 	omp_set_num_threads(n);
 }
 
-void five_point_Laplacian_stencil(fp_t dx, fp_t dy, fp_t** M)
+void five_point_Laplacian_stencil(fp_t dx, fp_t dy, fp_t** mask_lap)
 {
-	M[0][1] =  1. / (dy * dy); /* up */
-	M[1][0] =  1. / (dx * dx); /* left */
-	M[1][1] = -2. * (dx*dx + dy*dy) / (dx*dx * dy*dy); /* middle */
-	M[1][2] =  1. / (dx * dx); /* right */
-	M[2][1] =  1. / (dy * dy); /* down */
+	mask_lap[0][1] =  1. / (dy * dy); /* up */
+	mask_lap[1][0] =  1. / (dx * dx); /* left */
+	mask_lap[1][1] = -2. * (dx*dx + dy*dy) / (dx*dx * dy*dy); /* middle */
+	mask_lap[1][2] =  1. / (dx * dx); /* right */
+	mask_lap[2][1] =  1. / (dy * dy); /* down */
 }
 
-void nine_point_Laplacian_stencil(fp_t dx, fp_t dy, fp_t** M)
+void nine_point_Laplacian_stencil(fp_t dx, fp_t dy, fp_t** mask_lap)
 {
-	M[0][0] =   1. / (6. * dx * dy);
-	M[0][1] =   4. / (6. * dy * dy);
-	M[0][2] =   1. / (6. * dx * dy);
+	mask_lap[0][0] =   1. / (6. * dx * dy);
+	mask_lap[0][1] =   4. / (6. * dy * dy);
+	mask_lap[0][2] =   1. / (6. * dx * dy);
 
-	M[1][0] =   4. / (6. * dx * dx);
-	M[1][1] = -10. * (dx*dx + dy*dy) / (6. * dx*dx * dy*dy);
-	M[1][2] =   4. / (6. * dx * dx);
+	mask_lap[1][0] =   4. / (6. * dx * dx);
+	mask_lap[1][1] = -10. * (dx*dx + dy*dy) / (6. * dx*dx * dy*dy);
+	mask_lap[1][2] =   4. / (6. * dx * dx);
 
-	M[2][0] =   1. / (6. * dx * dy);
-	M[2][1] =   4. / (6. * dy * dy);
-	M[2][2] =   1. / (6. * dx * dy);
+	mask_lap[2][0] =   1. / (6. * dx * dy);
+	mask_lap[2][1] =   4. / (6. * dy * dy);
+	mask_lap[2][2] =   1. / (6. * dx * dy);
 }
 
-void set_mask(fp_t dx, fp_t dy, int nm, fp_t** M)
+void set_mask(fp_t dx, fp_t dy, int nm, fp_t** mask_lap)
 {
-	five_point_Laplacian_stencil(dx, dy, M);
+	five_point_Laplacian_stencil(dx, dy, mask_lap);
 }
 
-__global__ void convolution_kernel(fp_t* A, fp_t* C, int nx, int ny, int nm)
+__global__ void convolution_kernel(fp_t* conc_old, fp_t* conc_lap, int nx, int ny, int nm)
 {
 	/* Notes:
-		* The source matrix (A) and destination matrix (C) must be identical in size
+		* The source matrix (conc_old) and destination matrix (conc_lap) must be identical in size
 		* One CUDA core operates on one array index: there is no nested loop over matrix elements
-		* The halo (nm/2 perimeter cells) in C are unallocated garbage
-		* The same cells in A are boundary values, and contribute to the convolution
+		* The halo (nm/2 perimeter cells) in conc_lap are unallocated garbage
+		* The same cells in conc_old are boundary values, and contribute to the convolution
 		* N_ds is the shared tile data array... dunno where the name comes from yet
 	*/
 
@@ -90,13 +90,13 @@ __global__ void convolution_kernel(fp_t* A, fp_t* C, int nx, int ny, int nm)
 	src_row = dst_row - nm/2;
 	src_col = dst_col - nm/2;
 
-	/* copy tile from A: __shared__ gives access to all threads working on this tile */
+	/* copy tile from conc_old: __shared__ gives access to all threads working on this tile */
 	__shared__ fp_t N_ds[MAX_TILE_H + MAX_MASK_W - 1][MAX_TILE_W + MAX_MASK_W - 1];
 
 	if ((src_row >= 0) && (src_row < ny) &&
 	    (src_col >= 0) && (src_col < nx)) {
 		/* if src_row==0, then dst_row==nm/2: this is a halo row, still contributing to the output */
-		N_ds[ty][tx] = A[src_row * nx + src_col];
+		N_ds[ty][tx] = conc_old[src_row * nx + src_col];
 	} else {
 		/* points outside the halo should be switched off */
 		N_ds[ty][tx] = 0.;
@@ -114,7 +114,7 @@ __global__ void convolution_kernel(fp_t* A, fp_t* C, int nx, int ny, int nm)
 		}
 		/* record value */
 		if (dst_row < ny && dst_col < nx) {
-			C[dst_row * nx + dst_col] = value;
+			conc_lap[dst_row * nx + dst_col] = value;
 		}
 	}
 
@@ -122,9 +122,9 @@ __global__ void convolution_kernel(fp_t* A, fp_t* C, int nx, int ny, int nm)
 	__syncthreads();
 }
 
-void compute_convolution(fp_t** A, fp_t** C, fp_t** M, int nx, int ny, int nm, int bs)
+void compute_convolution(fp_t** conc_old, fp_t** conc_lap, fp_t** mask_lap, int nx, int ny, int nm, int bs)
 {
-	fp_t* d_A, *d_C;
+	fp_t* d_conc_old, *d_conc_lap;
 
 	if (bs > MAX_TILE_W) {
 		printf("Error: requested block size %i exceeds the statically allocated array size.\n", bs);
@@ -132,31 +132,31 @@ void compute_convolution(fp_t** A, fp_t** C, fp_t** M, int nx, int ny, int nm, i
 	}
 
 	/* allocate memory on device */
-	cudaMalloc((void **) &d_A, nx * ny * sizeof(fp_t));
-	cudaMalloc((void **) &d_C, nx * ny * sizeof(fp_t));
+	cudaMalloc((void **) &d_conc_old, nx * ny * sizeof(fp_t));
+	cudaMalloc((void **) &d_conc_lap, nx * ny * sizeof(fp_t));
 
 	/* transfer data from host in to device */
-	cudaMemcpy(d_A, A[0], nx * ny * sizeof(fp_t), cudaMemcpyHostToDevice);
+	cudaMemcpy(d_conc_old, conc_old[0], nx * ny * sizeof(fp_t), cudaMemcpyHostToDevice);
 
 	/* transfer mask in to constant device memory */
-	cudaMemcpyToSymbol(Mc, M[0], nm * nm * sizeof(fp_t));
+	cudaMemcpyToSymbol(Mc, mask_lap[0], nm * nm * sizeof(fp_t));
 
 	/* divide matrices into blocks of (bs x bs) threads */
 	dim3 threads(bs - nm/2, bs - nm/2, 1);
 	dim3 blocks(ceil(fp_t(nx)/threads.x)+1, ceil(fp_t(ny)/threads.y)+1, 1);
 
 	/* compute result */
-	convolution_kernel<<<blocks, threads>>>(d_A, d_C, nx, ny, nm);
+	convolution_kernel<<<blocks, threads>>>(d_conc_old, d_conc_lap, nx, ny, nm);
 
 	/* transfer from device out from host */
-	cudaMemcpy(C[0], d_C, nx * ny * sizeof(fp_t), cudaMemcpyDeviceToHost);
+	cudaMemcpy(conc_lap[0], d_conc_lap, nx * ny * sizeof(fp_t), cudaMemcpyDeviceToHost);
 
 	/* free memory on device */
-	cudaFree(d_A);
-	cudaFree(d_C);
+	cudaFree(d_conc_old);
+	cudaFree(d_conc_lap);
 }
 
-__global__ void diffusion_kernel(fp_t* A, fp_t* B, fp_t* C,
+__global__ void diffusion_kernel(fp_t* conc_old, fp_t* conc_new, fp_t* conc_lap,
                                  int nx, int ny, int nm, fp_t D, fp_t dt)
 {
 	int tx, ty, row, col;
@@ -170,41 +170,41 @@ __global__ void diffusion_kernel(fp_t* A, fp_t* B, fp_t* C,
 
 	/* explicit Euler solution to the equation of motion */
 	if (row < ny && col < nx) {
-		B[row * nx + col] = A[row * nx + col] + dt * D * C[row * nx + col];
+		conc_new[row * nx + col] = conc_old[row * nx + col] + dt * D * conc_lap[row * nx + col];
 	}
 
 	/* wait for all threads to finish writing */
 	__syncthreads();
 }
 
-void solve_diffusion_equation(fp_t** A, fp_t** B, fp_t** C,
+void solve_diffusion_equation(fp_t** conc_old, fp_t** conc_new, fp_t** conc_lap,
                               int nx, int ny, int nm, int bs, fp_t D, fp_t dt, fp_t* elapsed)
 {
-	fp_t* d_A, *d_B, *d_C;
+	fp_t* d_conc_old, *d_conc_new, *d_conc_lap;
 
 	/* allocate memory on device */
-	cudaMalloc((void **) &d_A, nx * ny * sizeof(fp_t));
-	cudaMalloc((void **) &d_B, nx * ny * sizeof(fp_t));
-	cudaMalloc((void **) &d_C, nx * ny * sizeof(fp_t));
+	cudaMalloc((void **) &d_conc_old, nx * ny * sizeof(fp_t));
+	cudaMalloc((void **) &d_conc_new, nx * ny * sizeof(fp_t));
+	cudaMalloc((void **) &d_conc_lap, nx * ny * sizeof(fp_t));
 
 	/* transfer data from host in to device */
-	cudaMemcpy(d_A, A[0], nx * ny * sizeof(fp_t), cudaMemcpyHostToDevice);
-	cudaMemcpy(d_C, C[0], nx * ny * sizeof(fp_t), cudaMemcpyHostToDevice);
+	cudaMemcpy(d_conc_old, conc_old[0], nx * ny * sizeof(fp_t), cudaMemcpyHostToDevice);
+	cudaMemcpy(d_conc_lap, conc_lap[0], nx * ny * sizeof(fp_t), cudaMemcpyHostToDevice);
 
 	/* divide matrices into blocks of (bs x bs) threads */
 	dim3 threads(bs - nm/2, bs - nm/2, 1);
 	dim3 blocks(ceil(fp_t(nx)/threads.x)+1, ceil(fp_t(ny)/threads.y)+1, 1);
 
 	/* compute result */
-	diffusion_kernel<<<blocks, threads>>>(d_A, d_B, d_C, nx, ny, nm, D, dt);
+	diffusion_kernel<<<blocks, threads>>>(d_conc_old, d_conc_new, d_conc_lap, nx, ny, nm, D, dt);
 
 	/* transfer from device out from host */
-	cudaMemcpy(B[0], d_B, nx * ny * sizeof(fp_t), cudaMemcpyDeviceToHost);
+	cudaMemcpy(conc_new[0], d_conc_new, nx * ny * sizeof(fp_t), cudaMemcpyDeviceToHost);
 
 	/* free memory on device */
-	cudaFree(d_A);
-	cudaFree(d_B);
-	cudaFree(d_C);
+	cudaFree(d_conc_old);
+	cudaFree(d_conc_new);
+	cudaFree(d_conc_lap);
 
 	*elapsed += dt;
 }
@@ -214,7 +214,7 @@ void analytical_value(fp_t x, fp_t t, fp_t D, fp_t bc[2][2], fp_t* c)
 	*c = bc[1][0] * (1. - erf(x / sqrt(4. * D * t)));
 }
 
-void check_solution(fp_t** A,
+void check_solution(fp_t** conc_new,
                     int nx, int ny, fp_t dx, fp_t dy, int nm, int bs,
                     fp_t elapsed, fp_t D, fp_t bc[2][2], fp_t* rss)
 {
@@ -228,21 +228,21 @@ void check_solution(fp_t** A,
 		for (j = nm/2; j < ny-nm/2; j++) {
 			for (i = nm/2; i < nx-nm/2; i++) {
 				/* numerical solution */
-				cn = A[j][i];
+				cn = conc_new[j][i];
 
 				/* shortest distance to left-wall source */
 				r = (j < ny/2) ? dx * (i - nm/2) : sqrt(dx*dx * (i - nm/2) * (i - nm/2) + dy*dy * (j - ny/2) * (j - ny/2));
 				analytical_value(r, elapsed, D, bc, &cal);
 
 				/* shortest distance to right-wall source */
-				r = (j >= ny/2) ? dx * (nx-nm/2-1 - i) : sqrt(dx*dx * (nx-nm/2-1 - i)*(nx-nm/2-1 - i) + dy*dy * (ny/2 - j)*(ny/2 - j));
+				r = (j >= ny/2) ? dx * (nx-1-nm/2 - i) : sqrt(dx*dx * (nx-1-nm/2 - i)*(nx-1-nm/2 - i) + dy*dy * (ny/2 - j)*(ny/2 - j));
 				analytical_value(r, elapsed, D, bc, &car);
 
 				/* superposition of analytical solutions */
 				ca = cal + car;
 
 				/* residual sum of squares (RSS) */
-				trss = (ca - cn) * (ca - cn) / (fp_t)((nx-nm/2-1) * (ny-nm/2-1));
+				trss = (ca - cn) * (ca - cn) / (fp_t)((nx-1-nm/2) * (ny-1-nm/2));
 				sum += trss;
 			}
 		}

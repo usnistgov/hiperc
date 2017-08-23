@@ -20,17 +20,16 @@ int main(int argc, char* argv[])
 	/* declare parameter variables */
 	char buffer[256];
 	char* pch;
-	int ith=0, inx=0, iny=0, ibs=0, idx=0, idy=0, ins=0, inc=0, idc=0, ico=0;
+	int ith=0, inx=0, iny=0, idx=0, idy=0, ins=0, inc=0, idc=0, ico=0, ibs=0;
 
 	/* declare mesh and mask sizes */
-	int nx=512, ny=512, nm=3, bs=32, nth=4;
+	int nx=512, ny=512, nm=3, nth=4, bs=32;
 
 	/* declare mesh resolution */
 	fp_t dx=0.5, dy=0.5, h=0.5;
 
 	/* declare mesh parameters */
-	fp_t **oldMesh, **newMesh, **conMesh, **mask;
-	fp_t *oldData, *newData, *conData, *maskData;
+	fp_t **conc_old, **conc_new, **conc_lap, **mask_lap;
 	int step=0, steps=100000, checks=10000;
 	fp_t bc[2][2];
 
@@ -140,17 +139,17 @@ int main(int argc, char* argv[])
 	dt = (linStab * h * h) / (4.0 * D);
 
 	/* initialize memory */
-	make_arrays(&oldMesh, &newMesh, &conMesh, &mask, &oldData, &newData, &conData, &maskData, nx, ny, nm);
-	set_mask(dx, dy, nm, mask);
+	make_arrays(&conc_old, &conc_new, &conc_lap, &mask_lap, nx, ny, nm);
+	set_mask(dx, dy, nm, mask_lap);
 	set_boundaries(bc);
 
 	start_time = GetTimer();
-	apply_initial_conditions(oldMesh, nx, ny, nm, bc);
+	apply_initial_conditions(conc_old, nx, ny, nm, bc);
 	step_time = GetTimer() - start_time;
 
 	/* write initial condition data */
 	start_time = GetTimer();
-	write_png(oldMesh, nx, ny, 0);
+	write_png(conc_old, nx, ny, 0);
 	file_time = GetTimer() - start_time;
 
 	/* prepare to log comparison to analytical solution */
@@ -167,38 +166,38 @@ int main(int argc, char* argv[])
 	for (step = 1; step < steps+1; step++) {
 		print_progress(step-1, steps);
 
-		apply_boundary_conditions(oldMesh, nx, ny, nm, bc);
+		apply_boundary_conditions(conc_old, nx, ny, nm, bc);
 
 		start_time = GetTimer();
-		compute_convolution(oldMesh, conMesh, mask, nx, ny, nm, bs);
+		compute_convolution(conc_old, conc_lap, mask_lap, nx, ny, nm, bs);
 		conv_time += GetTimer() - start_time;
 
 		start_time = GetTimer();
-		solve_diffusion_equation(oldMesh, newMesh, conMesh, nx, ny, nm, bs, D, dt, &elapsed);
+		solve_diffusion_equation(conc_old, conc_new, conc_lap, nx, ny, nm, bs, D, dt, &elapsed);
 		step_time += GetTimer() - start_time;
-
-		swap_pointers(&oldData, &newData, &oldMesh, &newMesh);
 
 		if (step % checks == 0) {
 			start_time = GetTimer();
-			write_png(oldMesh, nx, ny, step);
+			write_png(conc_new, nx, ny, step);
 			file_time += GetTimer() - start_time;
 		}
 
 		if (step % 100 == 0) {
 			start_time = GetTimer();
-			check_solution(oldMesh, nx, ny, dx, dy, nm, bs, elapsed, D, bc, &rss);
+			check_solution(conc_new, nx, ny, dx, dy, nm, bs, elapsed, D, bc, &rss);
 			soln_time += GetTimer() - start_time;
 
 			fprintf(output, "%i,%f,%f,%f,%f,%f,%f,%f\n", step, elapsed, rss, conv_time, step_time, file_time, soln_time, GetTimer());
 		}
+
+		swap_pointers(&conc_old, &conc_new);
 	}
 
-	write_csv(oldMesh, nx, ny, dx, dy, step);
+	write_csv(conc_old, nx, ny, dx, dy, steps);
 
 	/* clean up */
 	fclose(output);
-	free_arrays(oldMesh, newMesh, conMesh, mask, oldData, newData, conData, maskData);
+	free_arrays(conc_old, conc_new, conc_lap, mask_lap);
 
 	return 0;
 }

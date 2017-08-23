@@ -4,6 +4,19 @@ Ever wonder if a GPU or Xeon Phi accelerator card would make your code faster?
 Fast enough to justify the expense to your manager, adviser, or funding agency?
 This project can help answer your questions!
 
+The example codes in this repository implement the same basic algorithm using
+whichever of the mainstream accelerator programming methods apply. Running the
+code on different parallel hardware configurations &mdash; CPU threading, GPU
+offloading, and CPU coprocessing &mdash; provides a benchmark of these tools
+using common computational materials science workloads. Comparing performance
+against the serial baseline will help you make informed decisions about which
+development pathways are appropriate for your scientific computing projects.
+Note that the examples do not depend on a particular simulation framework:
+dependencies are kept minimal, and the C functions are kept as simple as
+possible to enhance readability for study and reusability in other codes.
+The goal here is to learn how to use accelerators for materials science
+simulations, not to enhance or promote any particular software package.
+
 ## Work in Progress
 
  - [ ] diffusion
@@ -170,22 +183,7 @@ Start
 Finish
 ```
 
-## Using the Demonstration Codes
-
-The example codes in this repository implement the same basic algorithm using
-whichever of the mainstream accelerator programming methods apply. Running the
-code on different parallel hardware configurations &mdash; CPU threading, GPU
-offloading, and CPU coprocessing &mdash; provides a benchmark of these tools
-using common computational materials science workloads. Comparing performance
-against the serial baseline will help you make informed decisions about which
-development pathways are appropriate for your scientific computing projects.
-Note that the examples do not depend on a particular simulation framework:
-dependencies are kept minimal, and the C functions are kept as simple as
-possible to enhance readability for study and reusability in other codes.
-The goal here is to learn how to use accelerators for materials science
-simulations, not to enhance or promote any particular software package.
-
-### Running the Codes
+## Running the Demonstration Codes
 
 This repository is hierarchical, with the real codes of interest residing in
 the lowest-ranked folders: ```cpu/serial```, ```cpu/openmp``` and
@@ -232,8 +230,9 @@ summary file, ```runlog.csv```, containing the following columns:
  - **soln_time**: cumulative real time spent computing the analytical solution
  - **run_time**: elapsed real time
 
-At timestep 10,000 the expected ```wrss=0.0029```; the rendered initial and final
-images should look like these (grayscale, ```0``` is black and ```1``` is white):
+At timestep 10,000 the expected ```wrss=0.002895``` using the 5-point stencil;
+the rendered initial and final images should look like these (grayscale,
+```0``` is black and ```1``` is white):
 
 | *t* = 0&middot;&Delta;*t*            | *t*=10000&middot;&Delta;*t*          |
 | :----------------------------------: | :----------------------------------: |
@@ -245,11 +244,12 @@ and upper-right half walls, no flux everywhere else, with an initial value of
 partial exposure (rather than the entire left and right walls) to produce an
 inhomogeneous workload and highlight numerical errors at the boundaries.
 
-If your simulation results do not look like this, or if your final ```wrss```
-deviates from the expected value, something may be wrong with the installation,
-hardware, or implementation. Please [file an issue](
+If your compiler returns warnings or errors, your simulation results do not look
+like this, or if your final ```wrss``` deviates from the expected value,
+something may be wrong with the installation, hardware, or implementation.
+Please [file an issue](
 https://github.com/usnistgov/phasefield-accelerator-benchmarks/issues) and share
-what happened. You might have found a bug!
+what happened. You probably found a bug!
 
 ## Contributions and Contact
 

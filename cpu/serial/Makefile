@@ -36,7 +36,7 @@ cleanobjects:
 	rm -f diffusion *.o
 
 cleanoutputs:
-	rm -f data.*.csv data.*.png runlog.csv
+	rm -f diffusion.*.csv diffusion.*.png runlog.csv
 
 clean: cleanobjects
 

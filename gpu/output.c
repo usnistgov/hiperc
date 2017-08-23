@@ -50,7 +50,7 @@ void print_progress(const int step, const int steps)
 	}
 }
 
-void write_csv(fp_t** A, int nx, int ny, fp_t dx, fp_t dy, int step)
+void write_csv(fp_t** conc, int nx, int ny, fp_t dx, fp_t dy, int step)
 {
 	int i, j;
 	fp_t x, y;
@@ -60,7 +60,7 @@ void write_csv(fp_t** A, int nx, int ny, fp_t dx, fp_t dy, int step)
 
 	/* generate the filename */
 	sprintf(num, "%07i", step);
-	strcpy(name, "data.");
+	strcpy(name, "diffusion.");
 	strcat(name, num);
 	strcat(name, ".csv");
 
@@ -77,14 +77,14 @@ void write_csv(fp_t** A, int nx, int ny, fp_t dx, fp_t dy, int step)
 		y = dy * (j - 1);
 		for (i = 1; i < nx-1; i++)	{
 			x = dx * (i - 1);
-			fprintf(output, "%f,%f,%f\n", x, y, A[j][i]);
+			fprintf(output, "%f,%f,%f\n", x, y, conc[j][i]);
 		}
 	}
 
 	fclose(output);
 }
 
-void write_png(fp_t** A, int nx, int ny, int step)
+void write_png(fp_t** conc, int nx, int ny, int step)
 {
 	/* After "A simple libpng example program," http://zarb.org/~gc/html/libpng.html
 	   and the libong manual, http://www.libpng.org/pub/png */
@@ -107,7 +107,7 @@ void write_png(fp_t** A, int nx, int ny, int step)
 
 	/* generate the filename */
 	sprintf(num, "%07i", step);
-	strcpy(name, "data.");
+	strcpy(name, "diffusion.");
 	strcat(name, num);
 	strcat(name, ".png");
 
@@ -129,7 +129,7 @@ void write_png(fp_t** A, int nx, int ny, int step)
 	max = 1.0;
 	for (j = ny-2; j > 0; j--) {
 		for (i = 1; i < nx-1; i++) {
-			c = &A[j][i];
+			c = &conc[j][i];
 			if (*c < min)
 				min = *c;
 			if (*c > max)
@@ -141,7 +141,7 @@ void write_png(fp_t** A, int nx, int ny, int step)
 	n = 0;
 	for (j = ny-2; j > 0; j--) {
 		for (i = 1; i < nx-1; i++) {
-			buffer[n] = (unsigned char) 255 * (min + (A[j][i] - min) / (max - min));
+			buffer[n] = (unsigned char) 255 * (min + (conc[j][i] - min) / (max - min));
 			n++;
 		}
 	}

@@ -9,6 +9,8 @@ OBJS = boundaries.o discretization.o mesh.o output.o timer.o
 
 all: diffusion
 
+.PHONY: all run clean cleanobjects cleanoutputs cleanall
+
 diffusion: ../main.c $(OBJS)
 	$(CXX) $(CXXFLAGS) $(OBJS) $< -o $@ $(LINKS)
 
@@ -30,8 +32,13 @@ timer.o: ../timer.c
 run: diffusion
 	/usr/bin/time -f' Time (%E wall, %U user, %S sys)' ./diffusion ../params.txt
 
-clean:
+cleanobjects:
 	rm -f diffusion *.o
 
-squeaky:
-	rm -f diffusion *.o data.*.csv data.*.png runlog.csv
+cleanoutputs:
+	rm -f diffusion.*.csv diffusion.*.png runlog.csv
+
+clean: cleanobjects
+
+cleanall: cleanobjects cleanoutputs
+

@@ -17,38 +17,38 @@ void set_threads(int n)
 	omp_set_num_threads(n);
 }
 
-void five_point_Laplacian_stencil(fp_t dx, fp_t dy, fp_t** M)
+void five_point_Laplacian_stencil(fp_t dx, fp_t dy, fp_t** mask_lap)
 {
-	M[0][1] =  1. / (dy * dy); /* up */
-	M[1][0] =  1. / (dx * dx); /* left */
-	M[1][1] = -2. * (dx*dx + dy*dy) / (dx*dx * dy*dy); /* middle */
-	M[1][2] =  1. / (dx * dx); /* right */
-	M[2][1] =  1. / (dy * dy); /* down */
+	mask_lap[0][1] =  1. / (dy * dy); /* up */
+	mask_lap[1][0] =  1. / (dx * dx); /* left */
+	mask_lap[1][1] = -2. * (dx*dx + dy*dy) / (dx*dx * dy*dy); /* middle */
+	mask_lap[1][2] =  1. / (dx * dx); /* right */
+	mask_lap[2][1] =  1. / (dy * dy); /* down */
 }
 
-void nine_point_Laplacian_stencil(fp_t dx, fp_t dy, fp_t** M)
+void nine_point_Laplacian_stencil(fp_t dx, fp_t dy, fp_t** mask_lap)
 {
-	M[0][0] =   1. / (6. * dx * dy);
-	M[0][1] =   4. / (6. * dy * dy);
-	M[0][2] =   1. / (6. * dx * dy);
+	mask_lap[0][0] =   1. / (6. * dx * dy);
+	mask_lap[0][1] =   4. / (6. * dy * dy);
+	mask_lap[0][2] =   1. / (6. * dx * dy);
 
-	M[1][0] =   4. / (6. * dx * dx);
-	M[1][1] = -10. * (dx*dx + dy*dy) / (6. * dx*dx * dy*dy);
-	M[1][2] =   4. / (6. * dx * dx);
+	mask_lap[1][0] =   4. / (6. * dx * dx);
+	mask_lap[1][1] = -10. * (dx*dx + dy*dy) / (6. * dx*dx * dy*dy);
+	mask_lap[1][2] =   4. / (6. * dx * dx);
 
-	M[2][0] =   1. / (6. * dx * dy);
-	M[2][1] =   4. / (6. * dy * dy);
-	M[2][2] =   1. / (6. * dx * dy);
+	mask_lap[2][0] =   1. / (6. * dx * dy);
+	mask_lap[2][1] =   4. / (6. * dy * dy);
+	mask_lap[2][2] =   1. / (6. * dx * dy);
 }
 
-void set_mask(fp_t dx, fp_t dy, int nm, fp_t** M)
+void set_mask(fp_t dx, fp_t dy, int nm, fp_t** mask_lap)
 {
-	five_point_Laplacian_stencil(dx, dy, M);
+	five_point_Laplacian_stencil(dx, dy, mask_lap);
 }
 
-void compute_convolution(fp_t** A, fp_t** C, fp_t** M, int nx, int ny, int nm, int bs)
+void compute_convolution(fp_t** conc_old, fp_t** conc_lap, fp_t** mask_lap, int nx, int ny, int nm, int bs)
 {
-	#pragma acc data copyin(A[0:ny][0:nx], M[0:nm][0:nm]) copyout(C[0:ny][0:nx])
+	#pragma acc data copyin(conc_old[0:ny][0:nx], mask_lap[0:nm][0:nm]) copyout(conc_lap[0:ny][0:nx])
 	{
 		#pragma acc parallel
 		{
@@ -62,21 +62,21 @@ void compute_convolution(fp_t** A, fp_t** C, fp_t** M, int nx, int ny, int nm, i
 					value = 0.;
 					for (mj = -nm/2; mj < 1+nm/2; mj++) {
 						for (mi = -nm/2; mi < 1+nm/2; mi++) {
-							value += M[mj+nm/2][mi+nm/2] * A[j+mj][i+mi];
+							value += mask_lap[mj+nm/2][mi+nm/2] * conc_old[j+mj][i+mi];
 						}
 					}
-					C[j][i] = value;
+					conc_lap[j][i] = value;
 				}
 			}
 		}
 	}
 }
 
-void solve_diffusion_equation(fp_t** A, fp_t** B, fp_t** C,
+void solve_diffusion_equation(fp_t** conc_old, fp_t** conc_new, fp_t** conc_lap,
                               int nx, int ny, int nm, int bs,
                               fp_t D, fp_t dt, fp_t* elapsed)
 {
-	#pragma acc data copyin(A[0:ny][0:nx], C[0:ny][0:nx]) copyout(B[0:ny][0:nx])
+	#pragma acc data copyin(conc_old[0:ny][0:nx], conc_lap[0:ny][0:nx]) copyout(conc_new[0:ny][0:nx])
 	{
 		#pragma acc parallel
 		{
@@ -86,7 +86,7 @@ void solve_diffusion_equation(fp_t** A, fp_t** B, fp_t** C,
 			for (j = nm/2; j < ny-nm/2; j++) {
 				#pragma acc loop
 				for (i = nm/2; i < nx-nm/2; i++) {
-					B[j][i] = A[j][i] + dt * D * C[j][i];
+					conc_new[j][i] = conc_old[j][i] + dt * D * conc_lap[j][i];
 				}
 			}
 		}
@@ -95,13 +95,13 @@ void solve_diffusion_equation(fp_t** A, fp_t** B, fp_t** C,
 	*elapsed += dt;
 }
 
-void check_solution(fp_t** A,
+void check_solution(fp_t** conc_new,
                     int nx, int ny, fp_t dx, fp_t dy, int nm, int bs,
                     fp_t elapsed, fp_t D, fp_t bc[2][2], fp_t* rss)
 {
 	/* OpenCL does not have a GPU-based erf() definition, using Maclaurin series approximation */
 	fp_t sum=0.;
-	#pragma acc data copyin(A[0:ny][0:nx], bc[0:2][0:2]) copy(sum)
+	#pragma acc data copyin(conc_new[0:ny][0:nx], bc[0:2][0:2]) copy(sum)
 	{
 		#pragma acc parallel reduction(+:sum)
 		{
@@ -113,7 +113,7 @@ void check_solution(fp_t** A,
 				#pragma acc loop
 				for (i = nm/2; i < nx-nm/2; i++) {
 					/* numerical solution */
-					cn = A[j][i];
+					cn = conc_new[j][i];
 
 					/* shortest distance to left-wall source */
 					r = (j < ny/2) ? dx * (i - nm/2) : sqrt(dx*dx * (i - nm/2) * (i - nm/2) + dy*dy * (j - ny/2) * (j - ny/2));
@@ -123,7 +123,7 @@ void check_solution(fp_t** A,
 					cal = bc[1][0] * (1. - poly_erf);
 
 					/* shortest distance to right-wall source */
-					r = (j >= ny/2) ? dx * (nx-nm+1 - i) : sqrt(dx*dx * (nx-nm+1 - i)*(nx-nm+1 - i) + dy*dy * (ny/2 - j)*(ny/2 - j));
+					r = (j >= ny/2) ? dx * (nx-1-nm/2 - i) : sqrt(dx*dx * (nx-1-nm/2 - i)*(nx-1-nm/2 - i) + dy*dy * (ny/2 - j)*(ny/2 - j));
 					z = r / sqrt(4. * D * elapsed);
 					z2 = z * z;
 					poly_erf = (z < 1.5) ? 2. * z * (1. + z2 * (-1./3 + z2 * (1./10 + z2 * (-1./42 + z2 / 216)))) / sqrt(M_PI) : 1.;
@@ -133,7 +133,7 @@ void check_solution(fp_t** A,
 					ca = cal + car;
 
 					/* residual sum of squares (RSS) */
-					trss = (ca - cn) * (ca - cn) / (fp_t)((nx-nm+1) * (ny-nm+1));
+					trss = (ca - cn) * (ca - cn) / (fp_t)((nx-1-nm/2) * (ny-1-nm/2));
 					sum += trss;
 				}
 			}

@@ -11,58 +11,55 @@
 
 #include "diffusion.h"
 
-void make_arrays(fp_t*** A, fp_t*** B, fp_t*** C, fp_t*** M,
-                 fp_t** dataA, fp_t** dataB, fp_t** dataC, fp_t** dataM,
+void make_arrays(fp_t*** conc_old, fp_t*** conc_new, fp_t*** conc_lap, fp_t*** mask_lap,
                  int nx, int ny, int nm)
 {
 	int j;
 
+	/* create 2D pointers */
+	*conc_old = (fp_t **)calloc(nx, sizeof(fp_t *));
+	*conc_new = (fp_t **)calloc(nx, sizeof(fp_t *));
+	*conc_lap = (fp_t **)calloc(nx, sizeof(fp_t *));
+	*mask_lap = (fp_t **)calloc(nm, sizeof(fp_t *));
+
 	/* allocate 1D data arrays */
-	(*dataA) = (fp_t *)calloc(nx * ny, sizeof(fp_t));
-	(*dataB) = (fp_t *)calloc(nx * ny, sizeof(fp_t));
-	(*dataC) = (fp_t *)calloc(nx * ny, sizeof(fp_t));
-	(*dataM) = (fp_t *)calloc(nm * nm, sizeof(fp_t));
+	(*conc_old)[0] = (fp_t *)calloc(nx * ny, sizeof(fp_t));
+	(*conc_new)[0] = (fp_t *)calloc(nx * ny, sizeof(fp_t));
+	(*conc_lap)[0] = (fp_t *)calloc(nx * ny, sizeof(fp_t));
+	(*mask_lap)[0] = (fp_t *)calloc(nm * nm, sizeof(fp_t));
 
-	/* map 2D arrays onto 1D data */
-	(*A) = (fp_t **)calloc(nx, sizeof(fp_t *));
-	(*B) = (fp_t **)calloc(nx, sizeof(fp_t *));
-	(*C) = (fp_t **)calloc(nx, sizeof(fp_t *));
-	(*M) = (fp_t **)calloc(nm, sizeof(fp_t *));
-
-	for (j = 0; j < ny; j++) {
-		(*A)[j] = &((*dataA)[nx * j]);
-		(*B)[j] = &((*dataB)[nx * j]);
-		(*C)[j] = &((*dataC)[nx * j]);
+	/* map 2D pointers onto 1D arrays */
+	for (j = 1; j < ny; j++) {
+		(*conc_old)[j] = &(*conc_old[0])[nx * j];
+		(*conc_new)[j] = &(*conc_new[0])[nx * j];
+		(*conc_lap)[j] = &(*conc_lap[0])[nx * j];
 	}
 
-	for (j = 0; j < nm; j++) {
-		(*M)[j] = &((*dataM)[nm * j]);
+	for (j = 1; j < nm; j++) {
+		(*mask_lap)[j] = &(*mask_lap[0])[nm * j];
 	}
 }
 
-void free_arrays(fp_t** A, fp_t** B, fp_t** C, fp_t** M, fp_t* dataA, fp_t* dataB, fp_t* dataC, fp_t* dataM)
+void free_arrays(fp_t** conc_old, fp_t** conc_new, fp_t** conc_lap, fp_t** mask_lap)
 {
-	free(A);
-	free(B);
-	free(C);
-	free(M);
+	free(conc_old[0]);
+	free(conc_old);
 
-	free(dataA);
-	free(dataB);
-	free(dataC);
-	free(dataM);
+	free(conc_new[0]);
+	free(conc_new);
+
+	free(conc_lap[0]);
+	free(conc_lap);
+
+	free(mask_lap[0]);
+	free(mask_lap);
 }
 
-void swap_pointers(fp_t** dataA, fp_t** dataB, fp_t*** A, fp_t*** B)
+void swap_pointers(fp_t*** conc_old, fp_t*** conc_new)
 {
-	fp_t* dataC;
-	fp_t** C;
+	fp_t** temp;
 
-	dataC = (*dataA);
-	(*dataA) = (*dataB);
-	(*dataB) = dataC;
-
-	C = (*A);
-	(*A) = (*B);
-	(*B) = C;
+	temp = (*conc_old);
+	(*conc_old) = (*conc_new);
+	(*conc_new) = temp;
 }

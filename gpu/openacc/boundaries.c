@@ -21,7 +21,7 @@ void set_boundaries(fp_t bc[2][2])
 	bc[1][1] = chi; /* right boundary */
 }
 
-void apply_initial_conditions(fp_t** A, int nx, int ny, int nm, fp_t bc[2][2])
+void apply_initial_conditions(fp_t** conc, int nx, int ny, int nm, fp_t bc[2][2])
 {
 	#pragma omp parallel
 	{
@@ -30,19 +30,19 @@ void apply_initial_conditions(fp_t** A, int nx, int ny, int nm, fp_t bc[2][2])
 		#pragma omp for collapse(2)
 		for (j = nm/2; j < ny; j++)
 			for (i = nm/2; i < nx; i++)
-				A[j][i] = bc[0][0];
+				conc[j][i] = bc[0][0];
 
 		#pragma omp for nowait
 		for (j = nm/2; j < ny/2; j++)
-			A[j][nm/2] = bc[1][0]; /* left half-wall */
+			conc[j][nm/2] = bc[1][0]; /* left half-wall */
 
 		#pragma omp for
 		for (j = ny/2; j < ny-nm/2; j++)
-			A[j][nx-2] = bc[1][1]; /* right half-wall */
+			conc[j][nx-2] = bc[1][1]; /* right half-wall */
 	}
 }
 
-void apply_boundary_conditions(fp_t** A, int nx, int ny, int nm, fp_t bc[2][2])
+void apply_boundary_conditions(fp_t** conc, int nx, int ny, int nm, fp_t bc[2][2])
 {
 	#pragma omp parallel
 	{
@@ -51,22 +51,22 @@ void apply_boundary_conditions(fp_t** A, int nx, int ny, int nm, fp_t bc[2][2])
 
 		#pragma omp for
 		for (j = nm/2; j < ny/2; j++)
-			A[j][nm/2] = bc[1][0]; /* left value */
+			conc[j][nm/2] = bc[1][0]; /* left value */
 
 		#pragma omp for
 		for (j = ny/2; j < ny-nm/2; j++)
-			A[j][nx-nm/1-1] = bc[1][1]; /* right value */
+			conc[j][nx-nm/1-1] = bc[1][1]; /* right value */
 
 		#pragma omp for nowait
 		for (j = nm/2; j < ny-nm/2; j++) {
-			A[j][nm/2-1] = A[j][nm/2]; /* left condition */
-			A[j][nx-nm/2] = A[j][nx-nm/1-1]; /* right condition */
+			conc[j][nm/2-1] = conc[j][nm/2]; /* left condition */
+			conc[j][nx-nm/2] = conc[j][nx-nm/1-1]; /* right condition */
 		}
 
 		#pragma omp for nowait
 		for (i = nm/2; i < nx-nm/2; i++) {
-			A[nm/2-1][i] = A[nm/2][i]; /* bottom condition */
-			A[ny-nm/2][i] = A[ny-nm/1-1][i]; /* top condition */
+			conc[nm/2-1][i] = conc[nm/2][i]; /* bottom condition */
+			conc[ny-nm/2][i] = conc[ny-nm/1-1][i]; /* top condition */
 		}
 	}
 }

@@ -1,15 +1,17 @@
 # Makefile for CPU diffusion code
 # implementation-independent headers
 
-all: serial/diffusion openmp/diffusion tbb/diffusion
+all: serial openmp tbb
 
-serial/diffusion:
+.PHONY: all serial openmp tbb run clean cleanall
+
+serial:
 	$(MAKE) -C serial
 
-openmp/diffusion:
+openmp:
 	$(MAKE) -C openmp
 
-tbb/diffusion:
+tbb:
 	$(MAKE) -C tbb
 
 run:
@@ -18,5 +20,6 @@ run:
 clean:
 	$(MAKE) -C serial clean; $(MAKE) -C openmp clean; $(MAKE) -C tbb clean
 
-squeaky:
-	$(MAKE) -C serial squeaky; $(MAKE) -C openmp squeaky; $(MAKE) -C tbb squeaky
+cleanall:
+	$(MAKE) -C serial cleanall; $(MAKE) -C openmp cleanall; $(MAKE) -C tbb cleanall
+

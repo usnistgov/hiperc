@@ -28,42 +28,42 @@
 
 #include "diffusion.h"
 
+/**
+ \brief Run simulation using input parameters specified on the command line
+
+ Program will write a series of PNG image files to visualize scalar composition
+ field, plus a final CSV raw data file and CSV runtime log tabulating the
+ iteration counter (iter), elapsed simulation time (sim_time), system free
+ energy (energy), error relative to analytical solution (wrss), time spent
+ performing convolution (conv_time), time spent updating fields (step_time),
+ time spent writing to disk (IO_time), time spent generating analytical values
+ (soln_time), and total elapsed (run_time).
+*/
 int main(int argc, char* argv[])
 {
-	/* declare file handles */
 	FILE * input, * output;
-
-	/* declare parameter variables */
 	char buffer[256];
 	char* pch;
 	int ith=0, inx=0, iny=0, idx=0, idy=0, ins=0, inc=0, idc=0, ico=0, ibs=0;
 
-	/* declare mesh and mask sizes */
-	int nx=512, ny=512, nm=3, nth=4, bs=32;
-
-	/* declare mesh resolution */
-	fp_t dx=0.5, dy=0.5, h=0.5;
-
-	/* declare mesh parameters */
+	/* declare mesh size and resolution */
 	fp_t **conc_old, **conc_new, **conc_lap, **mask_lap;
-	int step=0, steps=100000, checks=10000;
+	int nx=512, ny=512, nm=3, nth=4, bs=32;
+	fp_t dx=0.5, dy=0.5, h=0.5;
 	fp_t bc[2][2];
-
-	/* declare timers */
-	double start_time=0., conv_time=0., step_time=0., file_time=0., soln_time=0.;
 
 	/* declare materials and numerical parameters */
 	fp_t D=0.00625, linStab=0.1, dt=1., elapsed=0., rss=0.;
+	int step=0, steps=100000, checks=10000;
+	double start_time=0., conv_time=0., step_time=0., file_time=0., soln_time=0.;
 
 	StartTimer();
 
-	/* check for proper invocation */
 	if (argc != 2) {
 		printf("Error: improper arguments supplied.\nUsage: ./%s filename\n", argv[0]);
 		exit(-1);
 	}
 
-	/* Read grid size and mesh resolution from file */
 	input = fopen(argv[1], "r");
 	if (input == NULL) {
 		printf("Warning: unable to open parameter file %s. Marching with default values.\n", argv[1]);
@@ -74,13 +74,10 @@ int main(int argc, char* argv[])
 			/* process key-value pairs line-by-line */
 			if (fgets(buffer, 256, input) != NULL)
 			{
-				/* tokenize the key */
 				pch = strtok(buffer, " ");
 
 				if (strcmp(pch, "nt") == 0) {
-					/* tokenize the value */
 					pch = strtok(NULL, " ");
-					/* set the value */
 					nth = atof(pch);
 					ith = 1;
 				} else if (strcmp(pch, "nx") == 0) {
@@ -149,7 +146,6 @@ int main(int argc, char* argv[])
 		}
 	}
 
-	/* set numerical parameters */
 	set_threads(nth);
 	h = (dx > dy) ? dy : dx;
 	dt = (linStab * h * h) / (4.0 * D);

@@ -34,6 +34,9 @@
 #include <sys/time.h>
 #endif
 
+/**
+ Platform-dependent data type of hardware time value
+*/
 #ifdef WIN32
 double PCFreq = 0.0;
 __int64 timerStart = 0;
@@ -41,6 +44,9 @@ __int64 timerStart = 0;
 struct timeval timerStart;
 #endif
 
+/**
+ \brief Set CPU frequency and begin timing
+*/
 void StartTimer()
 {
 #ifdef WIN32
@@ -57,7 +63,9 @@ void StartTimer()
 #endif
 }
 
-/* time elapsed in seconds */
+/**
+ \brief Return elapsed time in seconds
+*/
 double GetTimer()
 {
 #ifdef WIN32

@@ -27,6 +27,13 @@
 
 #include "diffusion.h"
 
+/**
+ \brief Allocate 2D arrays to store scalar composition values
+
+ Arrays are allocated as 1D arrays, then 2D pointer arrays are mapped over the
+ top. This facilitates use of either 1D or 2D data access, depending on whether
+ the task is spatially dependent or not.
+*/
 void make_arrays(fp_t*** conc_old, fp_t*** conc_new, fp_t*** conc_lap, fp_t*** mask_lap,
                  int nx, int ny, int nm)
 {
@@ -42,13 +49,13 @@ void make_arrays(fp_t*** conc_old, fp_t*** conc_new, fp_t*** conc_lap, fp_t*** m
 	*conc_lap = (fp_t **)calloc(nx, sizeof(fp_t *));
 	*mask_lap = (fp_t **)calloc(nm, sizeof(fp_t *));
 
-	/* allocate 1D data arrays */
+	/* allocate 1D data */
 	(*conc_old)[0] = (fp_t *)calloc(nx * ny, sizeof(fp_t));
 	(*conc_new)[0] = (fp_t *)calloc(nx * ny, sizeof(fp_t));
 	(*conc_lap)[0] = (fp_t *)calloc(nx * ny, sizeof(fp_t));
 	(*mask_lap)[0] = (fp_t *)calloc(nm * nm, sizeof(fp_t));
 
-	/* map 2D pointers onto 1D arrays */
+	/* map 2D pointers onto 1D data */
 	for (j = 1; j < ny; j++) {
 		(*conc_old)[j] = &(*conc_old[0])[nx * j];
 		(*conc_new)[j] = &(*conc_new[0])[nx * j];
@@ -60,6 +67,9 @@ void make_arrays(fp_t*** conc_old, fp_t*** conc_new, fp_t*** conc_lap, fp_t*** m
 	}
 }
 
+/**
+ \brief Free dynamically allocated memory
+*/
 void free_arrays(fp_t** conc_old, fp_t** conc_new, fp_t** conc_lap, fp_t** mask_lap)
 {
 	free(conc_old[0]);
@@ -75,6 +85,13 @@ void free_arrays(fp_t** conc_old, fp_t** conc_new, fp_t** conc_lap, fp_t** mask_
 	free(mask_lap);
 }
 
+/**
+ \brief Swap pointers to data underlying two arrays
+
+ Rather than copy data from conc_old into conc_new, an expensive operation,
+ simply trade the top-most pointers. New becomes old with no data lost and
+ in almost no time.
+*/
 void swap_pointers(fp_t*** conc_old, fp_t*** conc_new)
 {
 	fp_t** temp;

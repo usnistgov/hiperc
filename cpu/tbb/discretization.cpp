@@ -31,8 +31,7 @@
 #include <tbb/parallel_for.h>
 #include <tbb/parallel_reduce.h>
 #include <tbb/blocked_range2d.h>
-
-#include "diffusion.h"
+#include "discretization.h"
 
 /**
  \brief Requested number of TBB threads to use in parallel code sections

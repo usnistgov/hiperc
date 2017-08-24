@@ -30,8 +30,7 @@
 #include <tbb/parallel_for.h>
 #include <tbb/blocked_range.h>
 #include <tbb/blocked_range2d.h>
-
-#include "diffusion.h"
+#include "boundaries.h"
 
 /**
  \brief Set values to be used along the simulation domain boundaries

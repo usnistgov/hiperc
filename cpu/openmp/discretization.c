@@ -27,8 +27,7 @@
 
 #include <math.h>
 #include <omp.h>
-
-#include "diffusion.h"
+#include "discretization.h"
 
 /**
  \brief Set number of OpenMP threads to use in parallel code sections

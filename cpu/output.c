@@ -30,7 +30,7 @@
 #include <iso646.h>
 #include <png.h>
 
-#include "diffusion.h"
+#include "output.h"
 
 /**
  \brief Prints timestamps and a 20-point progress bar to stdout

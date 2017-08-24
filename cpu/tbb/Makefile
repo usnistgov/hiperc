@@ -2,7 +2,7 @@
 # Threading Building Blocks implementation
 
 CXX = g++
-CXXFLAGS = -O3 -Wall -pedantic -std=c++11 -I../
+CXXFLAGS = -O3 -Wall -pedantic -std=c++11 -I. -I..
 LINKS = -lm -lpng -ltbb
 
 OBJS = boundaries.o discretization.o mesh.o output.o timer.o

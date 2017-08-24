@@ -25,7 +25,10 @@
 #ifndef _DIFFUSION_H_
 #define _DIFFUSION_H_
 
-/* enable easy switching between single- and double-precision */
+/**
+ Specify the basic data type to achieve the desired accuracy in floating-point
+ arithmetic: float for single-precision, double for double-precision.
+*/
 typedef double fp_t;
 
 /* Mesh handling: implemented in mesh.c */

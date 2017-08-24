@@ -30,9 +30,13 @@
 
 #include "diffusion.h"
 
+/**
+ \brief Set values to be used along the simulation domain boundaries
+
+ Indexing is row-major, i.e. A[y][x], so bc = [[ylo,yhi], [xlo,xhi]].
+*/
 void set_boundaries(fp_t bc[2][2])
 {
-	/* indexing is A[y][x], so bc = [[ylo,yhi], [xlo,xhi]] */
 	fp_t clo = 0.0, chi = 1.0;
 	bc[0][0] = clo; /* bottom boundary */
 	bc[0][1] = clo; /* top boundary */
@@ -40,6 +44,15 @@ void set_boundaries(fp_t bc[2][2])
 	bc[1][1] = chi; /* right boundary */
 }
 
+/**
+ \brief Initialize flat composition field with fixed boundary conditions
+
+ The boundary conditions are fixed values of 1 along the lower-left half and
+ upper-right half walls, no flux everywhere else, with an initial value of 0
+ everywhere. These conditions represent a carburizing process, with partial
+ exposure (rather than the entire left and right walls) to produce an
+ inhomogeneous workload and highlight numerical errors at the boundaries.
+*/
 void apply_initial_conditions(fp_t** conc, int nx, int ny, int nm, fp_t bc[2][2])
 {
 	/* apply flat field values  (lambda function) */
@@ -76,6 +89,9 @@ void apply_initial_conditions(fp_t** conc, int nx, int ny, int nm, fp_t bc[2][2]
 	);
 }
 
+/**
+ \brief Set fixed value (c=1) along left and bottom, zero-flux elsewhere
+*/
 void apply_boundary_conditions(fp_t** conc, int nx, int ny, int nm, fp_t bc[2][2])
 {
 	/* apply left boundary values  (lambda function) */

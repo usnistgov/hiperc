@@ -18,7 +18,7 @@
  **********************************************************************************/
 
 /**
- \file  diffusion.h
+ \file  gpu/diffusion.h
  \brief Declaration of diffusion equation function prototypes for CPU benchmarks
 */
 

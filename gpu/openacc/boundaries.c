@@ -18,7 +18,7 @@
  **********************************************************************************/
 
 /**
- \file  boundaries.cpp
+ \file  gpu/openacc/boundaries.c
  \brief Implementation of boundary condition functions with OpenMP threading
 */
 

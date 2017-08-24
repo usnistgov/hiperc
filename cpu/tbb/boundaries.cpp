@@ -18,7 +18,7 @@
  **********************************************************************************/
 
 /**
- \file  boundaries.cpp
+ \file  cpu/tbb/boundaries.cpp
  \brief Implementation of boundary condition functions with TBB threading
 */
 

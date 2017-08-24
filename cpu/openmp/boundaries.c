@@ -18,7 +18,7 @@
  **********************************************************************************/
 
 /**
- \file  boundaries.c
+ \file  cpu/openmp/boundaries.c
  \brief Implementation of boundary condition functions with OpenMP threading
 */
 

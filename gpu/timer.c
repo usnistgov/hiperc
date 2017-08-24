@@ -15,7 +15,7 @@
  */
 
 /**
- \file   timer.c
+ \file   gpu/timer.c
  \brief  High-resolution cross-platform machine time reader
  \author NVIDIA
 */

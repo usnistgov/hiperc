@@ -1,5 +1,6 @@
 *.aux
 *.csv
+*.db
 *.log
 *.o
 *.out
@@ -9,3 +10,5 @@
 diffusion
 spinodal
 ripening
+html
+latex

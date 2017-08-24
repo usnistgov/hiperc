@@ -18,7 +18,7 @@
  **********************************************************************************/
 
 /**
- \file  boundaries.c
+ \file  cpu/serial/boundaries.c
  \brief Implementation of boundary condition functions without threading
 */
 

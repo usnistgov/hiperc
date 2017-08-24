@@ -18,7 +18,7 @@
  **********************************************************************************/
 
 /**
- \file  discretization.c
+ \file  cpu/openmp/discretization.c
  \brief Implementation of boundary condition functions with OpenMP threading
 */
 

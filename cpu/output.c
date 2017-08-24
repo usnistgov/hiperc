@@ -18,7 +18,7 @@
  **********************************************************************************/
 
 /**
- \file  output.c
+ \file  cpu/output.c
  \brief Implementation of file output functions
 */
 

@@ -18,7 +18,7 @@
  **********************************************************************************/
 
 /**
- \file  mesh.c
+ \file  cpu/mesh.c
  \brief Implemenatation of mesh handling functions
 */
 

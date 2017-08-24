@@ -18,7 +18,7 @@
  **********************************************************************************/
 
 /**
- \file  discretization.c
+ \file  cpu/serial/discretization.c
  \brief Implementation of boundary condition functions without threading
 */
 

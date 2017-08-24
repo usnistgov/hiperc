@@ -18,7 +18,7 @@
  **********************************************************************************/
 
 /**
- \file  main.c
+ \file  cpu/main.c
  \brief Implementation of semi-infinite diffusion equation
 */
 

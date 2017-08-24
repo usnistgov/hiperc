@@ -18,7 +18,7 @@
  **********************************************************************************/
 
 /**
- \file  boundaries.c
+ \file  gpu/cuda/boundaries.c
  \brief Implementation of boundary condition functions with OpenMP threading
 */
 

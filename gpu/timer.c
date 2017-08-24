@@ -14,6 +14,8 @@
  *  limitations under the License.
  */
 
+/** \addtogroup GPU \{ */
+
 /**
  \file   gpu/timer.c
  \brief  High-resolution cross-platform machine time reader
@@ -82,3 +84,4 @@ double GetTimer()
 
 #endif /* _TIMER_H_ */
 
+/** \} */

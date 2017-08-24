@@ -17,6 +17,8 @@
  Questions/comments to Trevor Keller (trevor.keller@nist.gov)
  **********************************************************************************/
 
+/** \addtogroup CPU \{ */
+
 /**
  \file  cpu/main.c
  \brief Implementation of semi-infinite diffusion equation
@@ -208,3 +210,5 @@ int main(int argc, char* argv[])
 
 	return 0;
 }
+
+/** \} */

@@ -17,6 +17,13 @@
  Questions/comments to Trevor Keller (trevor.keller@nist.gov)
  **********************************************************************************/
 
+/** \defgroup CPU Benchmarks using CPU hardware */
+/** \defgroup serial Serial implementation */
+/** \defgroup openmp OpenMP implementation */
+/** \defgroup tbb Threading Building Blocks implementation */
+
+/** \addtogroup CPU \{ */
+
 /**
  \file  cpu/diffusion.h
  \brief Declaration of diffusion equation function prototypes for CPU benchmarks
@@ -64,3 +71,5 @@ void StartTimer();
 double GetTimer();
 
 #endif /* _DIFFUSION_H_ */
+
+/** \} */

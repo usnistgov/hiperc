@@ -17,6 +17,8 @@
  Questions/comments to Trevor Keller (trevor.keller@nist.gov)
  **********************************************************************************/
 
+/** \addtogroup CPU \{ */
+
 /**
  \file  cpu/mesh.c
  \brief Implemenatation of mesh handling functions
@@ -96,3 +98,5 @@ void swap_pointers(fp_t*** conc_old, fp_t*** conc_new)
 	(*conc_old) = (*conc_new);
 	(*conc_new) = temp;
 }
+
+/** \} */

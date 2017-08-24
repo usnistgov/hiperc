@@ -17,6 +17,8 @@
  Questions/comments to Trevor Keller (trevor.keller@nist.gov)
  **********************************************************************************/
 
+/** \addtogroup GPU \{ */
+
 /**
  \file  gpu/output.c
  \brief Implementation of file output functions
@@ -215,3 +217,5 @@ void write_png(fp_t** conc, int nx, int ny, int step)
 	free(row_pointers);
 	free(buffer);
 }
+
+/** \} */

@@ -17,6 +17,9 @@
  Questions/comments to Trevor Keller (trevor.keller@nist.gov)
  **********************************************************************************/
 
+/** \addtogroup CPU \{ */
+/** \addtogroup openmp \{ */
+
 /**
  \file  cpu/openmp/discretization.c
  \brief Implementation of boundary condition functions with OpenMP threading
@@ -202,3 +205,6 @@ void check_solution(fp_t** conc_new,
 
 	*rss = sum;
 }
+
+/** \} */
+/** \} */

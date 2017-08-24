@@ -13,14 +13,13 @@
  This software can be redistributed and/or modified freely provided that any
  derivative works bear some notice that they are derived from it, and any modified
  versions bear some notice that they have been modified.
+
+ Questions/comments to Trevor Keller (trevor.keller@nist.gov)
  **********************************************************************************/
 
-/*
-	File: discretization.cpp
-	Role: implementation of discretized mathematical operations with TBB threading
-
-	Questions/comments to trevor.keller@nist.gov
-	Bugs/requests to https://github.com/usnistgov/phasefield-accelerator-benchmarks
+/**
+ \file  discretization.cpp
+ \brief Implementation of boundary condition functions with TBB threading
 */
 
 #include <math.h>

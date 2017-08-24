@@ -14,6 +14,12 @@
  *  limitations under the License.
  */
 
+/**
+ \file   timer.c
+ \brief  High-resolution cross-platform machine time reader
+ \author NVIDIA
+*/
+
 /* Modified to report time in seconds, not milliseconds, by Trevor Keller on 8/12/2017 */
 
 #ifndef _TIMER_H_

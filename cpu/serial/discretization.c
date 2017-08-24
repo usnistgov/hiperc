@@ -29,7 +29,7 @@
 /**
  \brief Set number of OpenMP threads to use in parallel code sections
 
- \warning Serial code contains no parallel code: this setting has no effect.
+ \warning Serial code contains no parallel sections: this setting has no effect.
 */
 void set_threads(int n)
 {
@@ -39,7 +39,7 @@ void set_threads(int n)
 /**
  \brief Write 5-point Laplacian stencil into convolution mask
 
- 3x3 mask, 5 values, truncation error O(dx^2)
+ \f$3\times3\f$ mask, 5 values, truncation error \f$\mathcal{O}(\Delta x^2)\f$
 */
 void five_point_Laplacian_stencil(fp_t dx, fp_t dy, fp_t** mask_lap)
 {
@@ -53,7 +53,7 @@ void five_point_Laplacian_stencil(fp_t dx, fp_t dy, fp_t** mask_lap)
 /**
  \brief Write 9-point Laplacian stencil into convolution mask
 
- 3x3 mask, 9 values, truncation error O(dx^4)
+ \f$3\times3\f$ mask, 9 values, truncation error \f$\mathcal{O}(\Delta x^4)\f$
 */
 void nine_point_Laplacian_stencil(fp_t dx, fp_t dy, fp_t** mask_lap)
 {
@@ -73,11 +73,11 @@ void nine_point_Laplacian_stencil(fp_t dx, fp_t dy, fp_t** mask_lap)
 /**
  \brief Write 9-point Laplacian stencil into convolution mask
 
- 4x4 mask, 9 values, truncation error O(dx^4)
+ \f$4\times4\f$ mask, 9 values, truncation error \f$\mathcal{O}(\Delta x^4)\f$
  Provided for testing and demonstration of scalability, only:
  as the name indicates, this 9-point stencil is computationally
- more expensive than the 3x3 version. If your code requires O(dx^4)
- accuracy, please use nine_point_Laplacian_stencil.
+ more expensive than the \f$3\times3\f$ version. If your code requires \f$\mathcal{O}(\Delta x^4)\f$
+ accuracy, please use nine_point_Laplacian_stencil().
 */
 void slow_nine_point_Laplacian_stencil(fp_t dx, fp_t dy, fp_t** mask_lap)
 {
@@ -111,7 +111,7 @@ void set_mask(fp_t dx, fp_t dy, int nm, fp_t** mask_lap)
  If the convolution mask is the Laplacian stencil, the convolution evaluates
  the discrete Laplacian of the composition field. Other masks are possible, for
  example the Sobel filters for edge detection. This function is general
- purpose: as long as the dimensions nx, ny, and nm are properly specified, the
+ purpose: as long as the dimensions \c nx, \c ny, and \c nm are properly specified, the
  convolution will be correctly computed.
 */
 void compute_convolution(fp_t** conc_old, fp_t** conc_lap, fp_t** mask_lap, int nx, int ny, int nm)

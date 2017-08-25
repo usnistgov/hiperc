@@ -8,17 +8,19 @@ HIDE_UNDOC_MEMBERS    = YES
 HIDE_UNDOC_CLASSES    = NO
 SOURCE_BROWSER        = YES
 INPUT                 = ../cpu ../gpu
-FILE_PATTERNS         = *.c *.cpp *.cu *.h
 RECURSIVE             = YES
+FILE_PATTERNS         = *.c *.cpp *.cu *.h
 EXCLUDE_PATTERNS      = *.git
+EXTENSION_MAPPING     = cu=C++
 ALPHABETICAL_INDEX    = YES
 COLS_IN_ALPHA_INDEX   = 3
 ENABLE_PREPROCESSING  = YES
 WARNINGS              = YES
+GENERATE_HTML         = NO
+GENERATE_XML          = YES
 GENERATE_LATEX        = YES
 COMPACT_LATEX         = YES
 PDF_HYPERLINKS        = YES
 USE_PDFLATEX          = YES
 LATEX_BATCHMODE       = YES
 SEARCHENGINE          = YES
-EXTENSION_MAPPING     = cu=C++ cuh=C++ cuhpp=C++

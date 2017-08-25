@@ -17,8 +17,13 @@
  Questions/comments to Trevor Keller (trevor.keller@nist.gov)
  **********************************************************************************/
 
-/** \addtogroup GPU \{ */
-/** \addtogroup cuda \{ */
+/** \addtogroup GPU
+ \{
+*/
+
+/** \addtogroup cuda
+ \{
+*/
 
 /**
  \file  gpu/cuda/boundaries.c

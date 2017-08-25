@@ -17,8 +17,13 @@
  Questions/comments to Trevor Keller (trevor.keller@nist.gov)
  **********************************************************************************/
 
-/** \addtogroup CPU \{ */
-/** \addtogroup tbb \{ */
+/** \addtogroup CPU
+ \{
+*/
+
+/** \addtogroup tbb
+ \{
+*/
 
 /**
  \file  cpu/tbb/boundaries.cpp

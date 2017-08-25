@@ -21,7 +21,9 @@
 /** \defgroup cuda CUDA implementation */
 /** \defgroup openacc OpenAcc implementation */
 
-/** \addtogroup GPU \{ */
+/** \addtogroup GPU
+ \{
+*/
 
 /**
  \file  gpu/type.h

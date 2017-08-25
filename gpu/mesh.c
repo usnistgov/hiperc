@@ -17,7 +17,9 @@
  Questions/comments to Trevor Keller (trevor.keller@nist.gov)
  **********************************************************************************/
 
-/** \addtogroup GPU \{ */
+/** \addtogroup GPU
+ \{
+*/
 
 /**
  \file  gpu/mesh.c

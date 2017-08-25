@@ -17,7 +17,9 @@
  Questions/comments to Trevor Keller (trevor.keller@nist.gov)
  **********************************************************************************/
 
-/** \addtogroup CPU \{ */
+/** \addtogroup CPU
+ \{
+*/
 
 /**
  \file  cpu/output.h

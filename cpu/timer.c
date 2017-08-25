@@ -14,7 +14,9 @@
  *  limitations under the License.
  */
 
-/** \addtogroup CPU \{ */
+/** \addtogroup CPU
+ \{
+*/
 
 /**
  \file   cpu/timer.c

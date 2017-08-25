@@ -17,8 +17,13 @@
  Questions/comments to Trevor Keller (trevor.keller@nist.gov)
  **********************************************************************************/
 
-/** \addtogroup CPU \{ */
-/** \addtogroup serial \{ */
+/** \addtogroup CPU
+ \{
+*/
+
+/** \addtogroup serial
+ \{
+*/
 
 /**
  \file  cpu/serial/boundaries.c

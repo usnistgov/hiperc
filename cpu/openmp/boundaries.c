@@ -17,8 +17,13 @@
  Questions/comments to Trevor Keller (trevor.keller@nist.gov)
  **********************************************************************************/
 
-/** \addtogroup CPU \{ */
-/** \addtogroup openmp \{ */
+/** \addtogroup CPU
+ \{
+*/
+
+/** \addtogroup openmp
+ \{
+*/
 
 /**
  \file  cpu/openmp/boundaries.c

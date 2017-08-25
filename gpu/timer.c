@@ -14,7 +14,9 @@
  *  limitations under the License.
  */
 
-/** \addtogroup GPU \{ */
+/** \addtogroup GPU
+ \{
+*/
 
 /**
  \file   gpu/timer.c

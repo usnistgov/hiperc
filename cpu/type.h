@@ -22,7 +22,9 @@
 /** \defgroup openmp OpenMP implementation */
 /** \defgroup tbb Threading Building Blocks implementation */
 
-/** \addtogroup CPU \{ */
+/** \addtogroup CPU
+ \{
+*/
 
 /**
  \file  cpu/type.h

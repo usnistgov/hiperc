@@ -17,8 +17,13 @@
  Questions/comments to Trevor Keller (trevor.keller@nist.gov)
  **********************************************************************************/
 
-/** \addtogroup GPU \{ */
-/** \addtogroup openacc \{ */
+/** \addtogroup GPU
+ \{
+*/
+
+/** \addtogroup openacc
+ \{
+*/
 
 /**
  \file  gpu/openacc/boundaries.c

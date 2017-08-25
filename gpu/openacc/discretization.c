@@ -176,6 +176,13 @@ void solve_diffusion_equation(fp_t** conc_old, fp_t** conc_new, fp_t** conc_lap,
  \brief Compare numerical and analytical solutions of the diffusion equation
 
  Returns the residual sum of squares (RSS), normalized to the domain size.
+
+ For 1D diffusion through a semi-infinite domain with initial and far-field
+ composition \f$ c_{\infty} \f$ and boundary value \f$ c(x=0, t) = c_0 \f$
+ with constant diffusivity \e D, the solution to Fick's second law is
+ \f[ c(x,t) = c_0 - (c_0 - c_{\infty})\mathrm{erf}\left(\frac{x}{\sqrt{4Dt}}\right) \f]
+ which reduces, when \f$ c_{\infty} = 0 \f$, to
+ \f[ c(x,t) = c_0\left[1 - \mathrm{erf}\left(\frac{x}{\sqrt{4Dt}}\right)\right]. \f]
 */
 void check_solution(fp_t** conc_new,
                     int nx, int ny, fp_t dx, fp_t dy, int nm, int bs,

@@ -27,8 +27,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
-#include "diffusion.h"
+#include "type.h"
+#include "mesh.h"
+#include "output.h"
+#include "timer.h"
+#include "boundaries.h"
+#include "discretization.h"
 
 /**
  \brief Run simulation using input parameters specified on the command line

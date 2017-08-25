@@ -26,8 +26,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-
-#include "diffusion.h"
+#include "mesh.h"
 
 /**
  \brief Allocate 2D arrays to store scalar composition values

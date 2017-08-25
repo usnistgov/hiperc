@@ -22,12 +22,13 @@
  \author NVIDIA
 */
 
-/* Modified to report time in seconds, not milliseconds, by Trevor Keller on 8/12/2017 */
-
-#ifndef _TIMER_H_
-#define _TIMER_H_
+/* Modified by Trevor Keller as follows:
+ * 12 August 2017: report time in seconds, not milliseconds
+ * 24 August 2017: include header file defining functions
+ */
 
 #include <stdlib.h>
+#include "timer.h"
 
 #ifdef WIN32
 #define WIN32_LEAN_AND_MEAN
@@ -81,7 +82,5 @@ double GetTimer()
     return timerElapsed.tv_sec+timerElapsed.tv_usec/1000000.0;
 #endif
 }
-
-#endif /* _TIMER_H_ */
 
 /** \} */

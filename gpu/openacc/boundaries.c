@@ -27,8 +27,7 @@
 
 #include <math.h>
 #include <omp.h>
-
-#include "diffusion.h"
+#include "boundaries.h"
 
 /**
  \brief Set values to be used along the simulation domain boundaries

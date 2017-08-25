@@ -31,7 +31,7 @@
 #include <cuda.h>
 
 extern "C" {
-#include "diffusion.h"
+#include "discretization.h"
 }
 
 /**
@@ -209,7 +209,7 @@ __global__ void convolution_kernel(fp_t* conc_old, fp_t* conc_lap, int nx, int n
  the discrete Laplacian of the composition field. Other masks are possible, for
  example the Sobel filters for edge detection. This function is general
  purpose: as long as the dimensions \c nx, \c ny, and \c nm are properly specified, the
- convolution will be correctly computed. 
+ convolution will be correctly computed.
 */
 void compute_convolution(fp_t** conc_old, fp_t** conc_lap, fp_t** mask_lap, int nx, int ny, int nm, int bs)
 {

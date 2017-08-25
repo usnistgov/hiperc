@@ -17,6 +17,14 @@
  Questions/comments to Trevor Keller (trevor.keller@nist.gov)
  **********************************************************************************/
 
+/** \addtogroup CPU
+ \{
+*/
+
+/** \addtogroup tbb
+ \{
+*/
+
 /**
  \file  cpu/tbb/discretization.cpp
  \brief Implementation of boundary condition functions with TBB threading
@@ -28,14 +36,23 @@
 #include <tbb/parallel_for.h>
 #include <tbb/parallel_reduce.h>
 #include <tbb/blocked_range2d.h>
+#include "discretization.h"
 
-#include "diffusion.h"
+/**
+ \brief Requested number of TBB threads to use in parallel code sections
 
+ \warning This setting does not appear to have any effect.
+*/
 void set_threads(int n)
 {
 	tbb::task_scheduler_init init(n);
 }
 
+/**
+ \brief Write 5-point Laplacian stencil into convolution mask
+
+ \f$3\times3\f$ mask, 5 values, truncation error \f$\mathcal{O}(\Delta x^2)\f$
+*/
 void five_point_Laplacian_stencil(fp_t dx, fp_t dy, fp_t** mask_lap)
 {
 	mask_lap[0][1] =  1. / (dy * dy); /* up */
@@ -45,6 +62,11 @@ void five_point_Laplacian_stencil(fp_t dx, fp_t dy, fp_t** mask_lap)
 	mask_lap[2][1] =  1. / (dy * dy); /* down */
 }
 
+/**
+ \brief Write 9-point Laplacian stencil into convolution mask
+
+ \f$3\times3\f$ mask, 9 values, truncation error \f$\mathcal{O}(\Delta x^4)\f$
+*/
 void nine_point_Laplacian_stencil(fp_t dx, fp_t dy, fp_t** mask_lap)
 {
 	mask_lap[0][0] =   1. / (6. * dx * dy);
@@ -60,14 +82,17 @@ void nine_point_Laplacian_stencil(fp_t dx, fp_t dy, fp_t** mask_lap)
 	mask_lap[2][2] =   1. / (6. * dx * dy);
 }
 
+/**
+ \brief Write 9-point Laplacian stencil into convolution mask
+
+ \f$4\times4\f$ mask, 9 values, truncation error \f$\mathcal{O}(\Delta x^4)\f$
+ Provided for testing and demonstration of scalability, only:
+ as the name indicates, this 9-point stencil is computationally
+ more expensive than the \f$3\times3\f$ version. If your code requires \f$\mathcal{O}(\Delta x^4)\f$
+ accuracy, please use nine_point_Laplacian_stencil().
+*/
 void slow_nine_point_Laplacian_stencil(fp_t dx, fp_t dy, fp_t** mask_lap)
 {
-	/* 4x4 mask, 9 values, truncation error O(dx^4)
-	   Provided for testing and demonstration of scalability, only:
-	   as the name indicates, this 9-point stencil is computationally
-	   more expensive than the 3x3 version. If your code requires O(dx^4)
-	   accuracy, please use nine_point_Laplacian_stencil. */
-
 	mask_lap[0][2] = -1. / (12. * dy * dy);
 
 	mask_lap[1][2] =  4. / (3. * dy * dy);
@@ -83,11 +108,23 @@ void slow_nine_point_Laplacian_stencil(fp_t dx, fp_t dy, fp_t** mask_lap)
 	mask_lap[4][2] = -1. / (12. * dy * dy);
 }
 
+/**
+ \brief Specify which stencil to use for the Laplacian
+*/
 void set_mask(fp_t dx, fp_t dy, int nm, fp_t** mask_lap)
 {
 	five_point_Laplacian_stencil(dx, dy, mask_lap);
 }
 
+/**
+ \brief Perform the convolution of the mask matrix with the composition matrix
+
+ If the convolution mask is the Laplacian stencil, the convolution evaluates
+ the discrete Laplacian of the composition field. Other masks are possible, for
+ example the Sobel filters for edge detection. This function is general
+ purpose: as long as the dimensions \c nx, \c ny, and \c nm are properly specified, the
+ convolution will be correctly computed.
+*/
 void compute_convolution(fp_t** conc_old, fp_t** conc_lap, fp_t** mask_lap, int nx, int ny, int nm)
 {
 	tbb::parallel_for(tbb::blocked_range2d<int>(nm/2, nx-nm/2, nm/2, ny-nm/2),
@@ -107,6 +144,9 @@ void compute_convolution(fp_t** conc_old, fp_t** conc_lap, fp_t** mask_lap, int 
 	);
 }
 
+/**
+ \brief Update the scalar composition field using old and Laplacian values
+*/
 void solve_diffusion_equation(fp_t** conc_old, fp_t** B, fp_t** conc_lap,
                               int nx, int ny, int nm, fp_t D, fp_t dt, fp_t* elapsed)
 {
@@ -123,11 +163,24 @@ void solve_diffusion_equation(fp_t** conc_old, fp_t** B, fp_t** conc_lap,
 	*elapsed += dt;
 }
 
+/**
+ \brief Analytical solution of the diffusion equation for a carburizing process
+
+ For 1D diffusion through a semi-infinite domain with initial and far-field
+ composition \f$ c_{\infty} \f$ and boundary value \f$ c(x=0, t) = c_0 \f$
+ with constant diffusivity \e D, the solution to Fick's second law is
+ \f[ c(x,t) = c_0 - (c_0 - c_{\infty})\mathrm{erf}\left(\frac{x}{\sqrt{4Dt}}\right) \f]
+ which reduces, when \f$ c_{\infty} = 0 \f$, to
+ \f[ c(x,t) = c_0\left[1 - \mathrm{erf}\left(\frac{x}{\sqrt{4Dt}}\right)\right]. \f]
+*/
 void analytical_value(fp_t x, fp_t t, fp_t D, fp_t chi, fp_t* c)
 {
 	*c = chi * (1.0 - erf(x / sqrt(4.0 * D * t)));
 }
 
+/**
+ \brief Comparison algorithm for execution on the block of threads
+*/
 class ResidualSumOfSquares2D {
 	fp_t** my_conc_new;
 	int my_nx;
@@ -198,6 +251,11 @@ class ResidualSumOfSquares2D {
 		}
 };
 
+/**
+ \brief Compare numerical and analytical solutions of the diffusion equation
+
+ Returns the residual sum of squares (RSS), normalized to the domain size.
+*/
 void check_solution(fp_t** conc_new, int nx, int ny, fp_t dx, fp_t dy, int nm, fp_t elapsed, fp_t D, fp_t bc[2][2], fp_t* rss)
 {
 	ResidualSumOfSquares2D R(conc_new, nx, ny, dx, dy, nm, elapsed, D, bc[1][0]);
@@ -206,3 +264,6 @@ void check_solution(fp_t** conc_new, int nx, int ny, fp_t dx, fp_t dy, int nm, f
 
 	*rss = R.my_rss;
 }
+
+/** \} */
+/** \} */

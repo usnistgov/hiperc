@@ -17,6 +17,10 @@
  Questions/comments to Trevor Keller (trevor.keller@nist.gov)
  **********************************************************************************/
 
+/** \addtogroup GPU
+ \{
+*/
+
 /**
  \file  gpu/output.c
  \brief Implementation of file output functions
@@ -27,22 +31,22 @@
 #include <string.h>
 #include <iso646.h>
 #include <png.h>
+#include "output.h"
 
-#include "diffusion.h"
+/**
+ \brief Prints timestamps and a 20-point progress bar to stdout
 
+ Call inside the timestepping loop, near the top, e.g.
+ \code
+ for (int step=0; step<steps; step++) {
+    print_progress(step, steps);
+    take_a_step();
+    elapsed += dt;
+ }
+ \endcode
+*/
 void print_progress(const int step, const int steps)
 {
-	/*
-	Prints timestamps and a 20-point progress bar to stdout.
-	Call inside the timestepping loop, near the top, e.g.
-
-	for (int step=0; step<steps; step++) {
-		print_progress(step, steps);
-		take_a_step();
-		elapsed += dt;
-	}
-	*/
-
 	char* timestring;
 	static unsigned long tstart;
 	struct tm* timeinfo;
@@ -66,6 +70,9 @@ void print_progress(const int step, const int steps)
 	}
 }
 
+/**
+ \brief Writes scalar composition field to diffusion.???????.csv
+*/
 void write_csv(fp_t** conc, int nx, int ny, fp_t dx, fp_t dy, int step)
 {
 	int i, j;
@@ -100,6 +107,9 @@ void write_csv(fp_t** conc, int nx, int ny, fp_t dx, fp_t dy, int step)
 	fclose(output);
 }
 
+/**
+ \brief Writes scalar composition field to diffusion.???????.png
+*/
 void write_png(fp_t** conc, int nx, int ny, int step)
 {
 	/* After "A simple libpng example program," http://zarb.org/~gc/html/libpng.html
@@ -208,3 +218,5 @@ void write_png(fp_t** conc, int nx, int ny, int step)
 	free(row_pointers);
 	free(buffer);
 }
+
+/** \} */

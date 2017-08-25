@@ -14,18 +14,23 @@
  *  limitations under the License.
  */
 
+/** \addtogroup CPU
+ \{
+*/
+
 /**
  \file   cpu/timer.c
  \brief  High-resolution cross-platform machine time reader
  \author NVIDIA
 */
 
-/* Modified to report time in seconds, not milliseconds, by Trevor Keller on 8/12/2017 */
-
-#ifndef _TIMER_H_
-#define _TIMER_H_
+/* Modified by Trevor Keller as follows:
+ * 8/12/2017: report time in seconds, not milliseconds
+ * 8/24/2017: include header file defining functions
+ */
 
 #include <stdlib.h>
+#include "timer.h"
 
 #ifdef WIN32
 #define WIN32_LEAN_AND_MEAN
@@ -34,6 +39,9 @@
 #include <sys/time.h>
 #endif
 
+/**
+ Platform-dependent data type of hardware time value
+*/
 #ifdef WIN32
 double PCFreq = 0.0;
 __int64 timerStart = 0;
@@ -41,6 +49,9 @@ __int64 timerStart = 0;
 struct timeval timerStart;
 #endif
 
+/**
+ \brief Set CPU frequency and begin timing
+*/
 void StartTimer()
 {
 #ifdef WIN32
@@ -57,7 +68,9 @@ void StartTimer()
 #endif
 }
 
-/* time elapsed in seconds */
+/**
+ \brief Return elapsed time in seconds
+*/
 double GetTimer()
 {
 #ifdef WIN32
@@ -72,5 +85,4 @@ double GetTimer()
 #endif
 }
 
-#endif /* _TIMER_H_ */
-
+/** \} */

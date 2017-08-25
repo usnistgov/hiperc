@@ -17,6 +17,14 @@
  Questions/comments to Trevor Keller (trevor.keller@nist.gov)
  **********************************************************************************/
 
+/** \addtogroup CPU
+ \{
+*/
+
+/** \addtogroup openmp
+ \{
+*/
+
 /**
  \file  cpu/openmp/boundaries.c
  \brief Implementation of boundary condition functions with OpenMP threading
@@ -24,12 +32,15 @@
 
 #include <math.h>
 #include <omp.h>
+#include "boundaries.h"
 
-#include "diffusion.h"
+/**
+ \brief Set values to be used along the simulation domain boundaries
 
+ Indexing is row-major, i.e. \f$A[y][x]\f$, so \f$\mathrm{bc} = [[y_{lo},y_{hi}], [x_{lo},x_{hi}]]\f$.
+*/
 void set_boundaries(fp_t bc[2][2])
 {
-	/* indexing is A[y][x], so bc = [[ylo,yhi], [xlo,xhi]] */
 	fp_t clo = 0.0, chi = 1.0;
 	bc[0][0] = clo; /* bottom boundary */
 	bc[0][1] = clo; /* top boundary */
@@ -37,6 +48,15 @@ void set_boundaries(fp_t bc[2][2])
 	bc[1][1] = chi; /* right boundary */
 }
 
+/**
+ \brief Initialize flat composition field with fixed boundary conditions
+
+ The boundary conditions are fixed values of \f$c_{hi}\f$ along the lower-left half and
+ upper-right half walls, no flux everywhere else, with an initial values of \f$c_{lo}\f$
+ everywhere. These conditions represent a carburizing process, with partial
+ exposure (rather than the entire left and right walls) to produce an
+ inhomogeneous workload and highlight numerical errors at the boundaries.
+*/
 void apply_initial_conditions(fp_t** conc, int nx, int ny, int nm, fp_t bc[2][2])
 {
 	#pragma omp parallel
@@ -60,14 +80,15 @@ void apply_initial_conditions(fp_t** conc, int nx, int ny, int nm, fp_t bc[2][2]
 	}
 }
 
+/**
+ \brief Set fixed value (\f$c_{hi}\f$) along left and bottom, zero-flux elsewhere
+*/
 void apply_boundary_conditions(fp_t** conc, int nx, int ny, int nm, fp_t bc[2][2])
 {
 	int i, j;
 
 	#pragma omp parallel
 	{
-		/* Set fixed value (c=1) along left and bottom, zero-flux elsewhere */
-
 		#pragma omp for collapse(2) private(i,j)
 		for (j = 0; j < ny/2; j++)
 			for (i = 0; i < 1+nm/2; i++)
@@ -94,3 +115,6 @@ void apply_boundary_conditions(fp_t** conc, int nx, int ny, int nm, fp_t bc[2][2
 			conc[j+1][i] = conc[j][i]; /* top condition */
 	}
 }
+
+/** \} */
+/** \} */

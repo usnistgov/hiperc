@@ -17,47 +17,36 @@
  Questions/comments to Trevor Keller (trevor.keller@nist.gov)
  **********************************************************************************/
 
-/**
- \file  gpu/diffusion.h
- \brief Declaration of diffusion equation function prototypes for CPU benchmarks
+/** \addtogroup CPU
+ \{
 */
 
-#ifndef _DIFFUSION_H_
-#define _DIFFUSION_H_
+/** \addtogroup serial
+ \{
+*/
 
-/* enable easy switching between single- and double-precision */
-typedef double fp_t;
+/**
+ \file  cpu/serial/discretization.h
+ \brief Declaration of discretized mathematical function prototypes for CPU benchmarks
+*/
 
-/* Mesh handling: implemented in mesh.c */
-void make_arrays(fp_t*** conc_old, fp_t*** conc_new, fp_t*** conc_lap, fp_t*** mask_lap,
-                 int nx, int ny, int nm);
-void free_arrays(fp_t** conc_old, fp_t** conc_new, fp_t** conc_lap, fp_t** mask_lap);
-void swap_pointers(fp_t*** conc_old, fp_t*** conc_new);
+#include "type.h"
 
-/* Boundary conditions: implemented in boundaries.c */
-void set_boundaries(fp_t bc[2][2]);
-void apply_initial_conditions(fp_t** conc_old, int nx, int ny, int nm, fp_t bc[2][2]);
-void apply_boundary_conditions(fp_t** conc_old, int nx, int ny, int nm, fp_t bc[2][2]);
+#ifndef _DISCRETIZATION_H_
+#define _DISCRETIZATION_H_
 
-/* Discretized mathematical operations: implemented in discretization.c[u] */
 void set_threads(int n);
 void set_mask(fp_t dx, fp_t dy, int nm, fp_t** mask_lap);
-void compute_convolution(fp_t** conc_old, fp_t** conc_lap, fp_t** mask_lap, int nx, int ny, int nm, int bs);
+void compute_convolution(fp_t** conc_old, fp_t** conc_lap, fp_t** mask_lap, int nx, int ny, int nm);
 void solve_diffusion_equation(fp_t** conc_old, fp_t** conc_new, fp_t** conc_lap,
-                              int nx, int ny, int nm, int bs,
+                              int nx, int ny, int nm,
                               fp_t D, fp_t dt, fp_t *elapsed);
 void analytical_value(fp_t x, fp_t t, fp_t D, fp_t bc[2][2], fp_t* c);
 void check_solution(fp_t** conc_new,
-                    int nx, int ny, fp_t dx, fp_t dy, int nm, int bs,
+                    int nx, int ny, fp_t dx, fp_t dy, int nm,
                     fp_t elapsed, fp_t D, fp_t bc[2][2], fp_t* rss);
 
-/* Output results: implemented in output.c */
-void print_progress(const int step, const int steps);
-void write_csv(fp_t** conc, int nx, int ny, fp_t dx, fp_t dy, int step);
-void write_png(fp_t** conc, int nx, int ny, int step);
+#endif /* _DISCRETIZATION_H_ */
 
-/* Time function calls: implemented in timer.c */
-void StartTimer();
-double GetTimer();
-
-#endif /* _DIFFUSION_H_ */
+/** \} */
+/** \} */

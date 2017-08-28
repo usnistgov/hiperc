@@ -17,30 +17,36 @@
  Questions/comments to Trevor Keller (trevor.keller@nist.gov)
  **********************************************************************************/
 
-/** \defgroup CPU Benchmarks using CPU hardware */
-/** \defgroup analytical Analytical solution */
-/** \defgroup serial Serial implementation */
-/** \defgroup openmp OpenMP implementation */
-/** \defgroup tbb Threading Building Blocks implementation */
-
 /** \addtogroup CPU
  \{
 */
 
-/**
- \file  cpu/type.h
- \brief Definition of scalar data type
+/** \addtogroup analytical
+ \{
 */
 
-#ifndef _TYPE_H_
-#define _TYPE_H_
-
 /**
- Specify the basic data type to achieve the desired accuracy in floating-point
- arithmetic: float for single-precision, double for double-precision.
+ \file  cpu/analytical/discretization.h
+ \brief Declaration of discretize analytical function prototypes
 */
-typedef double fp_t;
 
-#endif /* _TYPE_H_ */
+#include "type.h"
+
+#ifndef _DISCRETIZATION_H_
+#define _DISCRETIZATION_H_
+
+fp_t euclidean_distance(fp_t ax, fp_t ay, fp_t bx, fp_t by);
+
+fp_t distance_point_to_segment(fp_t ax, fp_t ay, fp_t bx, fp_t by, fp_t px, fp_t py);
+
+void solve_diffusion_equation(fp_t** conc_old, fp_t** conc_new, fp_t** conc_lap,
+                              int nx, int ny, fp_t dx, fp_t dy, int nm,
+                              fp_t D, fp_t dt, fp_t elapsed);
+
+void analytical_value(fp_t x, fp_t t, fp_t D, fp_t* c);
+
+#endif /* _DISCRETIZATION_H_ */
+
+/** \} */
 
 /** \} */

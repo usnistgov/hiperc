@@ -83,8 +83,8 @@ void nine_point_Laplacian_stencil(fp_t dx, fp_t dy, fp_t** mask_lap)
  \f$4\times4\f$ mask, 9 values, truncation error \f$\mathcal{O}(\Delta x^4)\f$
  Provided for testing and demonstration of scalability, only:
  as the name indicates, this 9-point stencil is computationally
- more expensive than the \f$3\times3\f$ version. If your code requires \f$\mathcal{O}(\Delta x^4)\f$
- accuracy, please use nine_point_Laplacian_stencil().
+ more expensive than the \f$3\times3\f$ version. If your code requires
+ \f$\mathcal{O}(\Delta x^4)\f$ accuracy, please use nine_point_Laplacian_stencil().
 */
 void slow_nine_point_Laplacian_stencil(fp_t dx, fp_t dy, fp_t** mask_lap)
 {
@@ -117,10 +117,11 @@ void set_mask(fp_t dx, fp_t dy, int nm, fp_t** mask_lap)
  If the convolution mask is the Laplacian stencil, the convolution evaluates
  the discrete Laplacian of the composition field. Other masks are possible, for
  example the Sobel filters for edge detection. This function is general
- purpose: as long as the dimensions \c nx, \c ny, and \c nm are properly specified, the
- convolution will be correctly computed.
+ purpose: as long as the dimensions \c nx, \c ny, and \c nm are properly specified,
+ the convolution will be correctly computed.
 */
-void compute_convolution(fp_t** conc_old, fp_t** conc_lap, fp_t** mask_lap, int nx, int ny, int nm, int bs)
+void compute_convolution(fp_t** conc_old, fp_t** conc_lap, fp_t** mask_lap,
+                         int nx, int ny, int nm, int bs)
 {
 	#pragma acc data copyin(conc_old[0:ny][0:nx], mask_lap[0:nm][0:nm]) copyout(conc_lap[0:ny][0:nx])
 	{
@@ -149,9 +150,8 @@ void compute_convolution(fp_t** conc_old, fp_t** conc_lap, fp_t** mask_lap, int 
 /**
  \brief Update the scalar composition field using old and Laplacian values
 */
-void solve_diffusion_equation(fp_t** conc_old, fp_t** conc_new, fp_t** conc_lap,
-                              int nx, int ny, int nm, int bs,
-                              fp_t D, fp_t dt, fp_t* elapsed)
+void solve_diffusion_equation(fp_t** conc_old, fp_t** conc_new, fp_t** conc_lap, int nx,
+                              int ny, int nm, int bs, fp_t D, fp_t dt, fp_t* elapsed)
 {
 	#pragma acc data copyin(conc_old[0:ny][0:nx], conc_lap[0:ny][0:nx]) copyout(conc_new[0:ny][0:nx])
 	{
@@ -173,6 +173,45 @@ void solve_diffusion_equation(fp_t** conc_old, fp_t** conc_new, fp_t** conc_lap,
 }
 
 /**
+ \brief Compute Euclidean distance between two points, \c a and \c b
+*/
+#pragma acc routine
+fp_t euclidean_distance(fp_t ax, fp_t ay, fp_t bx, fp_t by)
+{
+	return sqrt((ax - bx) * (ax - bx) + (ay - by) * (ay - by));
+}
+
+/**
+ \brief Compute Manhattan distance between two points, \c a and \c b
+*/
+#pragma acc routine
+fp_t manhattan_distance(fp_t ax, fp_t ay, fp_t bx, fp_t by)
+{
+	return fabs(ax - bx) + fabs(ay - by);
+}
+
+/**
+ \brief Compute minimum distance from point \c p to a line segment bounded by points \c a and \c b
+
+ This function computes the projection of \c p onto \c ab, limiting the
+ projected range to [0, 1] to handle projections that fall outside of \c ab.
+ Implemented after Grumdrig on Stackoverflow, https://stackoverflow.com/a/1501725.
+*/
+#pragma acc routine
+fp_t distance_point_to_segment(fp_t ax, fp_t ay, fp_t bx, fp_t by, fp_t px, fp_t py)
+{
+	fp_t L2, t, zx, zy;
+
+	L2 = (ax - bx) * (ax - bx) + (ay - by) * (ay - by);
+	if (L2 == 0.) /* line segment is just a point */
+		return euclidean_distance(ax, ay, px, py);
+	t = fmax(0., fmin(1., ((px - ax) * (bx - ax) + (py - ay) * (by - ay)) / L2));
+	zx = ax + t * (bx - ax);
+	zy = ay + t * (by - ay);
+	return euclidean_distance(px, py, zx, zy);
+}
+
+/**
  \brief Compare numerical and analytical solutions of the diffusion equation
 
  Returns the residual sum of squares (RSS), normalized to the domain size.
@@ -184,8 +223,7 @@ void solve_diffusion_equation(fp_t** conc_old, fp_t** conc_new, fp_t** conc_lap,
  which reduces, when \f$ c_{\infty} = 0 \f$, to
  \f[ c(x,t) = c_0\left[1 - \mathrm{erf}\left(\frac{x}{\sqrt{4Dt}}\right)\right]. \f]
 */
-void check_solution(fp_t** conc_new,
-                    int nx, int ny, fp_t dx, fp_t dy, int nm, int bs,
+void check_solution(fp_t** conc_new, int nx, int ny, fp_t dx, fp_t dy, int nm,
                     fp_t elapsed, fp_t D, fp_t bc[2][2], fp_t* rss)
 {
 	/* OpenCL does not have a GPU-based erf() definition, using Maclaurin series approximation */
@@ -205,17 +243,25 @@ void check_solution(fp_t** conc_new,
 					cn = conc_new[j][i];
 
 					/* shortest distance to left-wall source */
-					r = (j < ny/2) ? dx * (i - nm/2) : sqrt(dx*dx * (i - nm/2) * (i - nm/2) + dy*dy * (j - ny/2) * (j - ny/2));
+					r = distance_point_to_segment(dx * (nm/2), dy * (nm/2),
+					                              dx * (nm/2), dy * (ny/2),
+					                              dx * i, dy * j);
 					z = r / sqrt(4. * D * elapsed);
 					z2 = z * z;
-					poly_erf = (z < 1.5) ? 2. * z * (1. + z2 * (-1./3 + z2 * (1./10 + z2 * (-1./42 + z2 / 216)))) / sqrt(M_PI) : 1.;
+					poly_erf = (z < 1.5)
+					         ? 2. * z * (1. + z2 * (-1./3 + z2 * (1./10 + z2 * (-1./42 + z2 / 216)))) / sqrt(M_PI)
+					         : 1.;
 					cal = bc[1][0] * (1. - poly_erf);
 
 					/* shortest distance to right-wall source */
-					r = (j >= ny/2) ? dx * (nx-1-nm/2 - i) : sqrt(dx*dx * (nx-1-nm/2 - i)*(nx-1-nm/2 - i) + dy*dy * (ny/2 - j)*(ny/2 - j));
+					r = distance_point_to_segment(dx * (nx-1-nm/2), dy * (ny/2),
+					                              dx * (nx-1-nm/2), dy * (ny-1-nm/2),
+					                              dx * i, dy * j);
 					z = r / sqrt(4. * D * elapsed);
 					z2 = z * z;
-					poly_erf = (z < 1.5) ? 2. * z * (1. + z2 * (-1./3 + z2 * (1./10 + z2 * (-1./42 + z2 / 216)))) / sqrt(M_PI) : 1.;
+					poly_erf = (z < 1.5)
+					         ? 2. * z * (1. + z2 * (-1./3 + z2 * (1./10 + z2 * (-1./42 + z2 / 216)))) / sqrt(M_PI)
+					         : 1.;
 					car = bc[1][0] * (1. - poly_erf);
 
 					/* superposition of analytical solutions */
@@ -233,4 +279,5 @@ void check_solution(fp_t** conc_new,
 }
 
 /** \} */
+
 /** \} */

@@ -21,13 +21,13 @@
  \{
 */
 
-/** \addtogroup analytical
+/** \addtogroup analytic
  \{
 */
 
 /**
- \file  cpu/analytical/discretization.h
- \brief Declaration of discretize analytical function prototypes
+ \file  cpu/analytic/discretization.h
+ \brief Declaration of analytical solution prototypes
 */
 
 #include "type.h"
@@ -37,11 +37,12 @@
 
 fp_t euclidean_distance(fp_t ax, fp_t ay, fp_t bx, fp_t by);
 
+fp_t manhattan_distance(fp_t ax, fp_t ay, fp_t bx, fp_t by);
+
 fp_t distance_point_to_segment(fp_t ax, fp_t ay, fp_t bx, fp_t by, fp_t px, fp_t py);
 
-void solve_diffusion_equation(fp_t** conc_old, fp_t** conc_new, fp_t** conc_lap,
-                              int nx, int ny, fp_t dx, fp_t dy, int nm,
-                              fp_t D, fp_t dt, fp_t elapsed);
+void solve_diffusion_equation(fp_t** conc_old, fp_t** conc_new, fp_t** conc_lap, int nx,
+                              int ny, fp_t dx, fp_t dy, int nm, fp_t D, fp_t dt, fp_t elapsed);
 
 void analytical_value(fp_t x, fp_t t, fp_t D, fp_t* c);
 

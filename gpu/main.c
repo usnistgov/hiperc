@@ -204,7 +204,7 @@ int main(int argc, char* argv[])
 
 		if (step % 100 == 0) {
 			start_time = GetTimer();
-			check_solution(conc_new, nx, ny, dx, dy, nm, bs, elapsed, D, bc, &rss);
+			check_solution(conc_new, nx, ny, dx, dy, nm, elapsed, D, bc, &rss);
 			soln_time += GetTimer() - start_time;
 
 			fprintf(output, "%i,%f,%f,%f,%f,%f,%f,%f\n", step, elapsed, rss, conv_time, step_time, file_time, soln_time, GetTimer());

@@ -21,12 +21,12 @@
  \{
 */
 
-/** \addtogroup analytical
+/** \addtogroup analytic
  \{
 */
 
 /**
- \file  cpu/analytical/main.c
+ \file  cpu/analytic/main.c
  \brief Analytical solution to semi-infinite diffusion equation
 */
 

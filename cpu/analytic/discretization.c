@@ -21,13 +21,13 @@
  \{
 */
 
-/** \addtogroup analytical
+/** \addtogroup analytic
  \{
 */
 
 /**
- \file  cpu/analytical/discretization.c
- \brief Implementation of discrete analytical solutions
+ \file  cpu/analytic/discretization.c
+ \brief Implementation of analytical solution functions
 */
 
 #include <math.h>
@@ -42,6 +42,14 @@ fp_t euclidean_distance(fp_t ax, fp_t ay, fp_t bx, fp_t by)
 }
 
 /**
+ \brief Compute Manhattan distance between two points, \c a and \c b
+*/
+fp_t manhattan_distance(fp_t ax, fp_t ay, fp_t bx, fp_t by)
+{
+	return fabs(ax - bx) + fabs(ay - by);
+}
+
+/**
  \brief Compute minimum distance from point \c p to a line segment bounded by points \c a and \c b
 
  This function computes the projection of \c p onto \c ab, limiting the
@@ -50,14 +58,12 @@ fp_t euclidean_distance(fp_t ax, fp_t ay, fp_t bx, fp_t by)
 */
 fp_t distance_point_to_segment(fp_t ax, fp_t ay, fp_t bx, fp_t by, fp_t px, fp_t py)
 {
-	fp_t L2, c, d, t, zx, zy;
+	fp_t L2, t, zx, zy;
 
 	L2 = (ax - bx) * (ax - bx) + (ay - by) * (ay - by);
 	if (L2 == 0.) /* line segment is just a point */
 		return euclidean_distance(ax, ay, px, py);
-	c = ((px - ax) * (bx - ax) + (py - ay) * (by - ay)) / L2;
-	d = (c < 1.) ? c : 1.;
-	t = (d > 0.) ? d : 0.;
+	t = fmax(0., fmin(1., ((px - ax) * (bx - ax) + (py - ay) * (by - ay)) / L2));
 	zx = ax + t * (bx - ax);
 	zy = ay + t * (by - ay);
 	return euclidean_distance(px, py, zx, zy);
@@ -81,7 +87,8 @@ void analytical_value(fp_t x, fp_t t, fp_t D, fp_t* c)
 /**
  \brief Update the scalar composition field using analytical solution
 */
-void solve_diffusion_equation(fp_t** conc_old, fp_t** conc_new, fp_t** conc_lap, int nx, int ny, fp_t dx, fp_t dy, int nm, fp_t D, fp_t dt, fp_t elapsed)
+void solve_diffusion_equation(fp_t** conc_old, fp_t** conc_new, fp_t** conc_lap, int nx,
+                              int ny, fp_t dx, fp_t dy, int nm, fp_t D, fp_t dt, fp_t elapsed)
 {
 	int i, j;
 	fp_t r, cal, car;
@@ -89,11 +96,15 @@ void solve_diffusion_equation(fp_t** conc_old, fp_t** conc_new, fp_t** conc_lap,
 	for (j = nm/2; j < ny-nm/2; j++) {
 		for (i = nm/2; i < nx-nm/2; i++) {
 			/* shortest distance to left-wall source */
-			r = distance_point_to_segment(dx * (nm/2), dy * (nm/2), dx * (nm/2), dy * (ny/2), dx * i, dy * j);
+			r = distance_point_to_segment(dx * (nm/2), dy * (nm/2),
+			                              dx * (nm/2), dy * (ny/2),
+			                              dx * i, dy * j);
 			analytical_value(r, elapsed, D, &cal);
 
 			/* shortest distance to right-wall source */
-			r = distance_point_to_segment(dx * (nx-1-nm/2), dy * (ny/2), dx * (nx-1-nm/2), dy * (ny-1-nm/2), dx * i, dy * j);
+			r = distance_point_to_segment(dx * (nx-1-nm/2), dy * (ny/2),
+			                              dx * (nx-1-nm/2), dy * (ny-1-nm/2),
+			                              dx * i, dy * j);
 			analytical_value(r, elapsed, D, &car);
 
 			/* superposition of analytical solutions */
@@ -103,4 +114,5 @@ void solve_diffusion_equation(fp_t** conc_old, fp_t** conc_new, fp_t** conc_lap,
 }
 
 /** \} */
+
 /** \} */

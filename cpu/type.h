@@ -18,7 +18,7 @@
  **********************************************************************************/
 
 /** \defgroup CPU Benchmarks using CPU hardware */
-/** \defgroup analytical Analytical solution */
+/** \defgroup analytic Analytical solution */
 /** \defgroup serial Serial implementation */
 /** \defgroup openmp OpenMP implementation */
 /** \defgroup tbb Threading Building Blocks implementation */

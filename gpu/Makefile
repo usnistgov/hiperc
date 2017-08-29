@@ -12,10 +12,13 @@ openacc:
 	$(MAKE) -C openacc
 
 run:
-	$(MAKE) -C cuda run; $(MAKE) -C openacc run
+	$(MAKE) -C cuda    run
+	$(MAKE) -C openacc run
 
 clean:
-	$(MAKE) -C cuda clean; $(MAKE) -C openacc clean
+	$(MAKE) -C cuda    clean
+	$(MAKE) -C openacc clean
 
 cleanall:
-	$(MAKE) -C cuda cleanall; $(MAKE) -C openacc cleanall
+	$(MAKE) -C cuda    cleanall
+	$(MAKE) -C openacc cleanall

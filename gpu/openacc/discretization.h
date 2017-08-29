@@ -36,17 +36,28 @@
 #define _DISCRETIZATION_H_
 
 void set_threads(int n);
+
 void set_mask(fp_t dx, fp_t dy, int nm, fp_t** mask_lap);
-void compute_convolution(fp_t** conc_old, fp_t** conc_lap, fp_t** mask_lap, int nx, int ny, int nm, int bs);
-void solve_diffusion_equation(fp_t** conc_old, fp_t** conc_new, fp_t** conc_lap,
-                              int nx, int ny, int nm, int bs,
-                              fp_t D, fp_t dt, fp_t *elapsed);
+
+void compute_convolution(fp_t** conc_old, fp_t** conc_lap, fp_t** mask_lap,
+                         int nx, int ny, int nm, int bs);
+
+void solve_diffusion_equation(fp_t** conc_old, fp_t** conc_new, fp_t** conc_lap, int nx,
+                              int ny, int nm, int bs, fp_t D, fp_t dt, fp_t *elapsed);
+
+fp_t euclidean_distance(fp_t ax, fp_t ay, fp_t bx, fp_t by);
+
+fp_t manhattan_distance(fp_t ax, fp_t ay, fp_t bx, fp_t by);
+
+fp_t distance_point_to_segment(fp_t ax, fp_t ay, fp_t bx, fp_t by, fp_t px, fp_t py);
+
 void analytical_value(fp_t x, fp_t t, fp_t D, fp_t bc[2][2], fp_t* c);
-void check_solution(fp_t** conc_new,
-                    int nx, int ny, fp_t dx, fp_t dy, int nm, int bs,
+
+void check_solution(fp_t** conc_new, int nx, int ny, fp_t dx, fp_t dy, int nm,
                     fp_t elapsed, fp_t D, fp_t bc[2][2], fp_t* rss);
 
 #endif /* _DISCRETIZATION_H_ */
 
 /** \} */
+
 /** \} */

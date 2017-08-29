@@ -28,13 +28,14 @@ A Python package, available through [PyPI][_pypi]. For example,
 This directory contains a makefile with two important invocations:
  1. ```make``` will build the PDF documentation, named
     ```phasefield-accelerator-benchmarks_guide.pdf```, from the source code.
- 2. ~~```make breathe``` will convert the XML output from Doxygen into HTML
-    compatible with [readthedocs][_rtd].~~ Coming soon!
- 3. ```make clean``` will remove the Doxygen build directories.
+ 2. ```make sphinx``` will convert the XML output from Doxygen into HTML
+    compatible with [readthedocs][_rtd].
+ 3. ```make clean``` will remove the [Doxygen][_doxygen] and [Sphinx][_sphinx]
+    build directories.
 
 [_breathe]: https://breathe.readthedocs.io
 [_doxygen]: http://www.stack.nl/~dimitri/doxygen
 [_make]:    https://www.gnu.org/software/make
 [_pypi]:    https://pypi.python.org/pypi
-[_rtd]:    https://readthedocs.org
+[_rtd]:     https://readthedocs.org
 [_sphinx]:  http://www.sphinx-doc.org

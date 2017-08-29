@@ -6,6 +6,7 @@
 *.out
 *.pdf
 *.png
+_build
 .directory
 diffusion
 spinodal

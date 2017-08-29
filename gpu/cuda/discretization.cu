@@ -17,10 +17,6 @@
  Questions/comments to Trevor Keller (trevor.keller@nist.gov)
  **********************************************************************************/
 
-/** \addtogroup GPU
- \{
-*/
-
 /** \addtogroup cuda
  \{
 */
@@ -40,22 +36,23 @@ extern "C" {
 }
 
 /**
- Maximum width of an input tile, including halo cells, for GPU memory allocation
+ \brief Maximum width of an input tile, including halo cells, for GPU memory allocation
 */
 #define MAX_TILE_W 32
 
 /**
- Maximum height of an input tile, including halo cells, for GPU memory allocation
+ \brief Maximum height of an input tile, including halo cells, for GPU memory allocation
 */
 #define MAX_TILE_H 32
 
 /**
- Maximum height and width of the mask array, for GPU memory allocation
+ \brief Maximum height and width of the mask array, for GPU memory allocation
 */
 #define MAX_MASK_W 3
 
 /**
- Allocate constant memory on the GPU for the convolution mask
+ \brief Allocate constant memory on the GPU for the convolution mask
+ \fn fp_t Mc[MAX_MASK_W * MAX_MASK_W]
 */
 __constant__ fp_t Mc[MAX_MASK_W * MAX_MASK_W];
 
@@ -107,8 +104,8 @@ void nine_point_Laplacian_stencil(fp_t dx, fp_t dy, fp_t** mask_lap)
  \f$4\times4\f$ mask, 9 values, truncation error \f$\mathcal{O}(\Delta x^4)\f$
  Provided for testing and demonstration of scalability, only:
  as the name indicates, this 9-point stencil is computationally
- more expensive than the \f$3\times3\f$ version. If your code requires \f$\mathcal{O}(\Delta x^4)\f$
- accuracy, please use nine_point_Laplacian_stencil().
+ more expensive than the \f$3\times3\f$ version. If your code requires
+ \f$\mathcal{O}(\Delta x^4)\f$ accuracy, please use nine_point_Laplacian_stencil().
 */
 void slow_nine_point_Laplacian_stencil(fp_t dx, fp_t dy, fp_t** mask_lap)
 {
@@ -137,6 +134,7 @@ void set_mask(fp_t dx, fp_t dy, int nm, fp_t** mask_lap)
 
 /**
  \brief Tiled convolution algorithm for execution on the GPU
+ \fn void convolution_kernel(fp_t* conc_old, fp_t* conc_lap, int nx, int ny, int nm)
 
  This function accesses 1D data rather than the 2D array representation of the
  scalar composition field, mapping into 2D tiles on the GPU with halo cells
@@ -213,10 +211,11 @@ __global__ void convolution_kernel(fp_t* conc_old, fp_t* conc_lap, int nx, int n
  If the convolution mask is the Laplacian stencil, the convolution evaluates
  the discrete Laplacian of the composition field. Other masks are possible, for
  example the Sobel filters for edge detection. This function is general
- purpose: as long as the dimensions \c nx, \c ny, and \c nm are properly specified, the
- convolution will be correctly computed.
+ purpose: as long as the dimensions \c nx, \c ny, and \c nm are properly specified,
+ the convolution will be correctly computed.
 */
-void compute_convolution(fp_t** conc_old, fp_t** conc_lap, fp_t** mask_lap, int nx, int ny, int nm, int bs)
+void compute_convolution(fp_t** conc_old, fp_t** conc_lap, fp_t** mask_lap,
+                         int nx, int ny, int nm, int bs)
 {
 	fp_t* d_conc_old, *d_conc_lap;
 
@@ -252,6 +251,7 @@ void compute_convolution(fp_t** conc_old, fp_t** conc_lap, fp_t** mask_lap, int 
 
 /**
  \brief Vector addition algorithm for execution on the GPU
+ \fn void diffusion_kernel(fp_t* conc_old, fp_t* conc_new, fp_t* conc_lap, int nx, int ny, int nm, fp_t D, fp_t dt)
 
  This function accesses 1D data rather than the 2D array representation of the
  scalar composition field
@@ -313,6 +313,42 @@ void solve_diffusion_equation(fp_t** conc_old, fp_t** conc_new, fp_t** conc_lap,
 }
 
 /**
+ \brief Compute Euclidean distance between two points, \c a and \c b
+*/
+fp_t euclidean_distance(fp_t ax, fp_t ay, fp_t bx, fp_t by)
+{
+	return sqrt((ax - bx) * (ax - bx) + (ay - by) * (ay - by));
+}
+
+/**
+ \brief Compute Manhattan distance between two points, \c a and \c b
+*/
+fp_t manhattan_distance(fp_t ax, fp_t ay, fp_t bx, fp_t by)
+{
+	return fabs(ax - bx) + fabs(ay - by);
+}
+
+/**
+ \brief Compute minimum distance from point \c p to a line segment bounded by points \c a and \c b
+
+ This function computes the projection of \c p onto \c ab, limiting the
+ projected range to [0, 1] to handle projections that fall outside of \c ab.
+ Implemented after Grumdrig on Stackoverflow, https://stackoverflow.com/a/1501725.
+*/
+fp_t distance_point_to_segment(fp_t ax, fp_t ay, fp_t bx, fp_t by, fp_t px, fp_t py)
+{
+	fp_t L2, t, zx, zy;
+
+	L2 = (ax - bx) * (ax - bx) + (ay - by) * (ay - by);
+	if (L2 == 0.) /* line segment is just a point */
+		return euclidean_distance(ax, ay, px, py);
+	t = fmax(0., fmin(1., ((px - ax) * (bx - ax) + (py - ay) * (by - ay)) / L2));
+	zx = ax + t * (bx - ax);
+	zy = ay + t * (by - ay);
+	return euclidean_distance(px, py, zx, zy);
+}
+
+/**
  \brief Analytical solution of the diffusion equation for a carburizing process
 
  For 1D diffusion through a semi-infinite domain with initial and far-field
@@ -332,8 +368,7 @@ void analytical_value(fp_t x, fp_t t, fp_t D, fp_t bc[2][2], fp_t* c)
 
  Returns the residual sum of squares (RSS), normalized to the domain size.
 */
-void check_solution(fp_t** conc_new,
-                    int nx, int ny, fp_t dx, fp_t dy, int nm, int bs,
+void check_solution(fp_t** conc_new, int nx, int ny, fp_t dx, fp_t dy, int nm,
                     fp_t elapsed, fp_t D, fp_t bc[2][2], fp_t* rss)
 {
 	fp_t sum=0.;
@@ -349,11 +384,15 @@ void check_solution(fp_t** conc_new,
 				cn = conc_new[j][i];
 
 				/* shortest distance to left-wall source */
-				r = (j < ny/2) ? dx * (i - nm/2) : sqrt(dx*dx * (i - nm/2) * (i - nm/2) + dy*dy * (j - ny/2) * (j - ny/2));
+				r = distance_point_to_segment(dx * (nm/2), dy * (nm/2),
+				                              dx * (nm/2), dy * (ny/2),
+				                              dx * i, dy * j);
 				analytical_value(r, elapsed, D, bc, &cal);
 
 				/* shortest distance to right-wall source */
-				r = (j >= ny/2) ? dx * (nx-1-nm/2 - i) : sqrt(dx*dx * (nx-1-nm/2 - i)*(nx-1-nm/2 - i) + dy*dy * (ny/2 - j)*(ny/2 - j));
+				r = distance_point_to_segment(dx * (nx-1-nm/2), dy * (ny/2),
+				                              dx * (nx-1-nm/2), dy * (ny-1-nm/2),
+				                              dx * i, dy * j);
 				analytical_value(r, elapsed, D, bc, &car);
 
 				/* superposition of analytical solutions */
@@ -369,5 +408,4 @@ void check_solution(fp_t** conc_new,
 	*rss = sum;
 }
 
-/** \} */
 /** \} */

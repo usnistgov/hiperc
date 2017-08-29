@@ -17,10 +17,6 @@
  Questions/comments to Trevor Keller (trevor.keller@nist.gov)
  **********************************************************************************/
 
-/** \addtogroup CPU
- \{
-*/
-
 /** \addtogroup tbb
  \{
 */
@@ -88,8 +84,8 @@ void nine_point_Laplacian_stencil(fp_t dx, fp_t dy, fp_t** mask_lap)
  \f$4\times4\f$ mask, 9 values, truncation error \f$\mathcal{O}(\Delta x^4)\f$
  Provided for testing and demonstration of scalability, only:
  as the name indicates, this 9-point stencil is computationally
- more expensive than the \f$3\times3\f$ version. If your code requires \f$\mathcal{O}(\Delta x^4)\f$
- accuracy, please use nine_point_Laplacian_stencil().
+ more expensive than the \f$3\times3\f$ version. If your code requires
+ \f$\mathcal{O}(\Delta x^4)\f$ accuracy, please use nine_point_Laplacian_stencil().
 */
 void slow_nine_point_Laplacian_stencil(fp_t dx, fp_t dy, fp_t** mask_lap)
 {
@@ -122,10 +118,11 @@ void set_mask(fp_t dx, fp_t dy, int nm, fp_t** mask_lap)
  If the convolution mask is the Laplacian stencil, the convolution evaluates
  the discrete Laplacian of the composition field. Other masks are possible, for
  example the Sobel filters for edge detection. This function is general
- purpose: as long as the dimensions \c nx, \c ny, and \c nm are properly specified, the
- convolution will be correctly computed.
+ purpose: as long as the dimensions \c nx, \c ny, and \c nm are properly specified,
+ the convolution will be correctly computed.
 */
-void compute_convolution(fp_t** conc_old, fp_t** conc_lap, fp_t** mask_lap, int nx, int ny, int nm)
+void compute_convolution(fp_t** conc_old, fp_t** conc_lap, fp_t** mask_lap,
+                         int nx, int ny, int nm)
 {
 	tbb::parallel_for(tbb::blocked_range2d<int>(nm/2, nx-nm/2, nm/2, ny-nm/2),
 		[=](const tbb::blocked_range2d<int>& r) {
@@ -147,8 +144,8 @@ void compute_convolution(fp_t** conc_old, fp_t** conc_lap, fp_t** mask_lap, int 
 /**
  \brief Update the scalar composition field using old and Laplacian values
 */
-void solve_diffusion_equation(fp_t** conc_old, fp_t** B, fp_t** conc_lap,
-                              int nx, int ny, int nm, fp_t D, fp_t dt, fp_t* elapsed)
+void solve_diffusion_equation(fp_t** conc_old, fp_t** B, fp_t** conc_lap, int nx,
+                              int ny, int nm, fp_t D, fp_t dt, fp_t* elapsed)
 {
 	tbb::parallel_for(tbb::blocked_range2d<int>(nm/2, nx-nm/2, nm/2, ny-nm/2),
 		[=](const tbb::blocked_range2d<int>& r) {
@@ -161,6 +158,42 @@ void solve_diffusion_equation(fp_t** conc_old, fp_t** B, fp_t** conc_lap,
 	);
 
 	*elapsed += dt;
+}
+
+/**
+ \brief Compute Euclidean distance between two points, \c a and \c b
+*/
+fp_t euclidean_distance(fp_t ax, fp_t ay, fp_t bx, fp_t by)
+{
+	return sqrt((ax - bx) * (ax - bx) + (ay - by) * (ay - by));
+}
+
+/**
+ \brief Compute Manhattan distance between two points, \c a and \c b
+*/
+fp_t manhattan_distance(fp_t ax, fp_t ay, fp_t bx, fp_t by)
+{
+	return fabs(ax - bx) + fabs(ay - by);
+}
+
+/**
+ \brief Compute minimum distance from point \c p to a line segment bounded by points \c a and \c b
+
+ This function computes the projection of \c p onto \c ab, limiting the
+ projected range to [0, 1] to handle projections that fall outside of \c ab.
+ Implemented after Grumdrig on Stackoverflow, https://stackoverflow.com/a/1501725.
+*/
+fp_t distance_point_to_segment(fp_t ax, fp_t ay, fp_t bx, fp_t by, fp_t px, fp_t py)
+{
+	fp_t L2, t, zx, zy;
+
+	L2 = (ax - bx) * (ax - bx) + (ay - by) * (ay - by);
+	if (L2 == 0.) /* line segment is just a point */
+		return euclidean_distance(ax, ay, px, py);
+	t = fmax(0., fmin(1., ((px - ax) * (bx - ax) + (py - ay) * (by - ay)) / L2));
+	zx = ax + t * (bx - ax);
+	zy = ay + t * (by - ay);
+	return euclidean_distance(px, py, zx, zy);
 }
 
 /**
@@ -196,10 +229,16 @@ class ResidualSumOfSquares2D {
 		fp_t my_rss;
 
 		/* constructors */
-		ResidualSumOfSquares2D(fp_t** conc_new, int nx, int ny, fp_t dx, fp_t dy, int nm, fp_t elapsed, fp_t D, fp_t c)
-		                      : my_conc_new(conc_new), my_nx(nx), my_ny(ny), my_dx(dx), my_dy(dy), my_nm(nm), my_elapsed(elapsed), my_D(D), my_c(c), my_rss(0.0) {}
+		ResidualSumOfSquares2D(fp_t** conc_new, int nx, int ny, fp_t dx, fp_t dy, int nm,
+		                       fp_t elapsed, fp_t D, fp_t c)
+		                      : my_conc_new(conc_new), my_nx(nx), my_ny(ny),
+		                        my_dx(dx), my_dy(dy), my_nm(nm),
+		                        my_elapsed(elapsed), my_D(D), my_c(c), my_rss(0.0) {}
 		ResidualSumOfSquares2D(ResidualSumOfSquares2D& a, tbb::split)
-		                      : my_conc_new(a.my_conc_new), my_nx(a.my_nx), my_ny(a.my_ny), my_dx(a.my_dx), my_dy(a.my_dy), my_nm(a.my_nm), my_elapsed(a.my_elapsed), my_D(a.my_D), my_c(a.my_c), my_rss(0.0) {}
+		                      : my_conc_new(a.my_conc_new), my_nx(a.my_nx), my_ny(a.my_ny),
+		                        my_dx(a.my_dx), my_dy(a.my_dy), my_nm(a.my_nm),
+		                        my_elapsed(a.my_elapsed), my_D(a.my_D), my_c(a.my_c),
+		                        my_rss(0.0) {}
 
 		/* modifier */
 		void operator()(const tbb::blocked_range2d<int>& r)
@@ -217,22 +256,22 @@ class ResidualSumOfSquares2D {
 
 			for (int j = r.cols().begin(); j != r.cols().end(); j++) {
 				for (int i = r.rows().begin(); i != r.rows().end(); i++) {
-					fp_t x, cal, car, ca, cn;
+					fp_t r, cal, car, ca, cn;
 
 					/* numerical solution */
 					cn = conc_new[j][i];
 
 					/* shortest distance to left-wall source */
-					x = (j < ny/2) ?
-					    dx * (i - nm/2) :
-					    sqrt(dx*dx * (i - nm/2) * (i - nm/2) + dy*dy * (j - ny/2) * (j - ny/2));
-					analytical_value(x, elapsed, D, c, &cal);
+					r = distance_point_to_segment(dx * (nm/2), dy * (nm/2),
+					                              dx * (nm/2), dy * (ny/2),
+					                              dx * i, dy * j);
+					analytical_value(r, elapsed, D, c, &cal);
 
 					/* shortest distance to right-wall source */
-					x = (j >= ny/2) ?
-					    dx * (nx-1-nm/2 - i) :
-					    sqrt(dx*dx * (nx-1-nm/2 - i)*(nx-1-nm/2 - i) + dy*dy * (ny/2 - j)*(ny/2 - j));
-					analytical_value(x, elapsed, D, c, &car);
+					r = distance_point_to_segment(dx * (nx-1-nm/2), dy * (ny/2),
+					                              dx * (nx-1-nm/2), dy * (ny-1-nm/2),
+					                              dx * i, dy * j);
+					analytical_value(r, elapsed, D, c, &car);
 
 					/* superposition of analytical solutions */
 					ca = cal + car;
@@ -256,7 +295,8 @@ class ResidualSumOfSquares2D {
 
  Returns the residual sum of squares (RSS), normalized to the domain size.
 */
-void check_solution(fp_t** conc_new, int nx, int ny, fp_t dx, fp_t dy, int nm, fp_t elapsed, fp_t D, fp_t bc[2][2], fp_t* rss)
+void check_solution(fp_t** conc_new, int nx, int ny, fp_t dx, fp_t dy, int nm,
+                    fp_t elapsed, fp_t D, fp_t bc[2][2], fp_t* rss)
 {
 	ResidualSumOfSquares2D R(conc_new, nx, ny, dx, dy, nm, elapsed, D, bc[1][0]);
 
@@ -265,5 +305,4 @@ void check_solution(fp_t** conc_new, int nx, int ny, fp_t dx, fp_t dy, int nm, f
 	*rss = R.my_rss;
 }
 
-/** \} */
 /** \} */

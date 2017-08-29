@@ -17,23 +17,23 @@
  Questions/comments to Trevor Keller (trevor.keller@nist.gov)
  **********************************************************************************/
 
-/** \addtogroup GPU
+/** \addtogroup analytic
  \{
 */
 
 /**
- \file  gpu/main.c
- \brief Implementation of semi-infinite diffusion equation
+ \file  cpu/analytic/main.c
+ \brief Analytical solution to semi-infinite diffusion equation
 */
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
 #include "type.h"
 #include "mesh.h"
 #include "output.h"
 #include "timer.h"
-#include "boundaries.h"
 #include "discretization.h"
 
 /**
@@ -50,15 +50,15 @@
 int main(int argc, char* argv[])
 {
 	FILE * input, * output;
+
 	char buffer[256];
 	char* pch;
-	int ith=0, inx=0, iny=0, idx=0, idy=0, ins=0, inc=0, idc=0, ico=0, ibs=0;
+	int ith=0, inx=0, iny=0, idx=0, idy=0, ins=0, inc=0, idc=0, ico=0;
 
 	/* declare mesh size and resolution */
 	fp_t **conc_old, **conc_new, **conc_lap, **mask_lap;
-	int nx=512, ny=512, nm=3, nth=4, bs=32;
+	int nx=512, ny=512, nm=3, nth=4;
 	fp_t dx=0.5, dy=0.5, h=0.5;
-	fp_t bc[2][2];
 
 	/* declare materials and numerical parameters */
 	fp_t D=0.00625, linStab=0.1, dt=1., elapsed=0., rss=0.;
@@ -104,10 +104,6 @@ int main(int argc, char* argv[])
 					pch = strtok(NULL, " ");
 					dy = atof(pch);
 					idy = 1;
-				} else if (strcmp(pch, "bs") == 0) {
-					pch = strtok(NULL, " ");
-					bs = atoi(pch);
-					ibs = 1;
 				} else if (strcmp(pch, "ns") == 0) {
 					pch = strtok(NULL, " ");
 					steps = atoi(pch);
@@ -141,8 +137,6 @@ int main(int argc, char* argv[])
 			printf("Warning: parameter %s undefined. Using default value, %f.\n", "dx", dx);
 		} else if (! idy) {
 			printf("Warning: parameter %s undefined. Using default value, %f.\n", "dy", dy);
-		} else if (! ibs) {
-			printf("Warning: parameter %s undefined. Using default value, %i.\n", "bs", bs);
 		} else if (! ins) {
 			printf("Warning: parameter %s undefined. Using default value, %i.\n", "ns", steps);
 		} else if (! inc) {
@@ -154,17 +148,14 @@ int main(int argc, char* argv[])
 		}
 	}
 
-	set_threads(nth);
 	h = (dx > dy) ? dy : dx;
 	dt = (linStab * h * h) / (4.0 * D);
 
 	/* initialize memory */
 	make_arrays(&conc_old, &conc_new, &conc_lap, &mask_lap, nx, ny, nm);
-	set_mask(dx, dy, nm, mask_lap);
-	set_boundaries(bc);
 
 	start_time = GetTimer();
-	apply_initial_conditions(conc_old, nx, ny, nm, bc);
+	solve_diffusion_equation(conc_old, conc_old, conc_lap, nx, ny, dx, dy, nm, D, dt, dt);
 	step_time = GetTimer() - start_time;
 
 	/* write initial condition data */
@@ -186,29 +177,17 @@ int main(int argc, char* argv[])
 	for (step = 1; step < steps+1; step++) {
 		print_progress(step-1, steps);
 
-		apply_boundary_conditions(conc_old, nx, ny, nm, bc);
-
-		start_time = GetTimer();
-		compute_convolution(conc_old, conc_lap, mask_lap, nx, ny, nm, bs);
-		conv_time += GetTimer() - start_time;
-
-		start_time = GetTimer();
-		solve_diffusion_equation(conc_old, conc_new, conc_lap, nx, ny, nm, bs, D, dt, &elapsed);
-		step_time += GetTimer() - start_time;
-
 		if (step % checks == 0) {
+			start_time = GetTimer();
+			solve_diffusion_equation(conc_old, conc_new, conc_lap, nx, ny, dx, dy, nm, D, dt, elapsed);
+			step_time += GetTimer() - start_time;
+
 			start_time = GetTimer();
 			write_png(conc_new, nx, ny, step);
 			file_time += GetTimer() - start_time;
 		}
 
-		if (step % 100 == 0) {
-			start_time = GetTimer();
-			check_solution(conc_new, nx, ny, dx, dy, nm, elapsed, D, bc, &rss);
-			soln_time += GetTimer() - start_time;
-
-			fprintf(output, "%i,%f,%f,%f,%f,%f,%f,%f\n", step, elapsed, rss, conv_time, step_time, file_time, soln_time, GetTimer());
-		}
+		elapsed += dt;
 
 		swap_pointers(&conc_old, &conc_new);
 	}

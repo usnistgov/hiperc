@@ -17,10 +17,6 @@
  Questions/comments to Trevor Keller (trevor.keller@nist.gov)
  **********************************************************************************/
 
-/** \addtogroup CPU
- \{
-*/
-
 /** \addtogroup serial
  \{
 */
@@ -242,7 +238,5 @@ void check_solution(fp_t** conc_new, int nx, int ny, fp_t dx, fp_t dy, int nm,
 		}
 	}
 }
-
-/** \} */
 
 /** \} */

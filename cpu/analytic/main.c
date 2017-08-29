@@ -17,10 +17,6 @@
  Questions/comments to Trevor Keller (trevor.keller@nist.gov)
  **********************************************************************************/
 
-/** \addtogroup CPU
- \{
-*/
-
 /** \addtogroup analytic
  \{
 */
@@ -204,7 +200,5 @@ int main(int argc, char* argv[])
 
 	return 0;
 }
-
-/** \} */
 
 /** \} */

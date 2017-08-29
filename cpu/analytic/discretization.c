@@ -17,10 +17,6 @@
  Questions/comments to Trevor Keller (trevor.keller@nist.gov)
  **********************************************************************************/
 
-/** \addtogroup CPU
- \{
-*/
-
 /** \addtogroup analytic
  \{
 */
@@ -112,7 +108,5 @@ void solve_diffusion_equation(fp_t** conc_old, fp_t** conc_new, fp_t** conc_lap,
 		}
 	}
 }
-
-/** \} */
 
 /** \} */

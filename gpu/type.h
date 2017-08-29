@@ -27,7 +27,7 @@
 
 /**
  \file  gpu/type.h
- \brief Definition of scalar data type
+ \brief Definition of scalar data type and GPU-related Doxygen groups
 */
 
 #ifndef _TYPE_H_

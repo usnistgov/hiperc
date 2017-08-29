@@ -17,10 +17,6 @@
  Questions/comments to Trevor Keller (trevor.keller@nist.gov)
  **********************************************************************************/
 
-/** \addtogroup GPU
- \{
-*/
-
 /** \addtogroup cuda
  \{
 */
@@ -40,22 +36,23 @@ extern "C" {
 }
 
 /**
- Maximum width of an input tile, including halo cells, for GPU memory allocation
+ \brief Maximum width of an input tile, including halo cells, for GPU memory allocation
 */
 #define MAX_TILE_W 32
 
 /**
- Maximum height of an input tile, including halo cells, for GPU memory allocation
+ \brief Maximum height of an input tile, including halo cells, for GPU memory allocation
 */
 #define MAX_TILE_H 32
 
 /**
- Maximum height and width of the mask array, for GPU memory allocation
+ \brief Maximum height and width of the mask array, for GPU memory allocation
 */
 #define MAX_MASK_W 3
 
 /**
- Allocate constant memory on the GPU for the convolution mask
+ \brief Allocate constant memory on the GPU for the convolution mask
+ \fn fp_t Mc[MAX_MASK_W * MAX_MASK_W]
 */
 __constant__ fp_t Mc[MAX_MASK_W * MAX_MASK_W];
 
@@ -137,6 +134,7 @@ void set_mask(fp_t dx, fp_t dy, int nm, fp_t** mask_lap)
 
 /**
  \brief Tiled convolution algorithm for execution on the GPU
+ \fn void convolution_kernel(fp_t* conc_old, fp_t* conc_lap, int nx, int ny, int nm)
 
  This function accesses 1D data rather than the 2D array representation of the
  scalar composition field, mapping into 2D tiles on the GPU with halo cells
@@ -253,6 +251,7 @@ void compute_convolution(fp_t** conc_old, fp_t** conc_lap, fp_t** mask_lap,
 
 /**
  \brief Vector addition algorithm for execution on the GPU
+ \fn void diffusion_kernel(fp_t* conc_old, fp_t* conc_new, fp_t* conc_lap, int nx, int ny, int nm, fp_t D, fp_t dt)
 
  This function accesses 1D data rather than the 2D array representation of the
  scalar composition field
@@ -408,7 +407,5 @@ void check_solution(fp_t** conc_new, int nx, int ny, fp_t dx, fp_t dy, int nm,
 
 	*rss = sum;
 }
-
-/** \} */
 
 /** \} */

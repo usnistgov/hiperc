@@ -17,10 +17,6 @@
  Questions/comments to Trevor Keller (trevor.keller@nist.gov)
  **********************************************************************************/
 
-/** \addtogroup CPU
- \{
-*/
-
 /** \addtogroup tbb
  \{
 */
@@ -41,5 +37,4 @@ void apply_boundary_conditions(fp_t** conc_old, int nx, int ny, int nm, fp_t bc[
 
 #endif /* _BOUNDARIES_H_ */
 
-/** \} */
 /** \} */

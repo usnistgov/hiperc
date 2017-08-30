@@ -33,8 +33,6 @@
 
 void set_threads(int n);
 
-void set_mask(fp_t dx, fp_t dy, int nm, fp_t** mask_lap);
-
 void compute_convolution(fp_t** conc_old, fp_t** conc_lap, fp_t** mask_lap,
                          int nx, int ny, int nm);
 

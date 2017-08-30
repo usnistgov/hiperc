@@ -47,15 +47,10 @@ extern "C" {
 #define MAX_TILE_H 32
 
 /**
- \brief Maximum height and width of the mask array, for GPU memory allocation
-*/
-#define MAX_MASK_W 3
-
-/**
  \brief Allocate constant memory on the GPU for the convolution mask
- \fn fp_t Mc[MAX_MASK_W * MAX_MASK_W]
+ \fn fp_t Mc[MAX_MASK_W * MAX_MASK_H]
 */
-__constant__ fp_t Mc[MAX_MASK_W * MAX_MASK_W];
+__constant__ fp_t Mc[MAX_MASK_W * MAX_MASK_H];
 
 /**
  \brief Set number of OpenMP threads to use in CPU code sections
@@ -63,14 +58,6 @@ __constant__ fp_t Mc[MAX_MASK_W * MAX_MASK_W];
 void set_threads(int n)
 {
 	omp_set_num_threads(n);
-}
-
-/**
- \brief Specify which stencil to use for the Laplacian
-*/
-void set_mask(fp_t dx, fp_t dy, int nm, fp_t** mask_lap)
-{
-	five_point_Laplacian_stencil(dx, dy, mask_lap);
 }
 
 /**
@@ -115,7 +102,7 @@ __global__ void convolution_kernel(fp_t* conc_old, fp_t* conc_lap, int nx, int n
 	src_col = dst_col - nm/2;
 
 	/* copy tile from conc_old: __shared__ gives access to all threads working on this tile */
-	__shared__ fp_t N_ds[MAX_TILE_H + MAX_MASK_W - 1][MAX_TILE_W + MAX_MASK_W - 1];
+	__shared__ fp_t N_ds[MAX_TILE_H + MAX_MASK_H - 1][MAX_TILE_W + MAX_MASK_W - 1];
 
 	if ((src_row >= 0) && (src_row < ny) &&
 	    (src_col >= 0) && (src_col < nx)) {

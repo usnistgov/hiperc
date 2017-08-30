@@ -156,8 +156,8 @@ int main(int argc, char* argv[])
 	dt = (linStab * h * h) / (4.0 * D);
 
 	/* initialize memory */
+	set_mask(dx, dy, mask_lap, &nm);
 	make_arrays(&conc_old, &conc_new, &conc_lap, &mask_lap, nx, ny, nm);
-	set_mask(dx, dy, nm, mask_lap);
 	set_boundaries(bc);
 
 	start_time = GetTimer();

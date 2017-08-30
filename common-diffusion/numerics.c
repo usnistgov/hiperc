@@ -30,12 +30,22 @@
 #include "numerics.h"
 
 /**
+ \brief Specify which stencil to use for the Laplacian
+*/
+void set_mask(fp_t dx, fp_t dy, fp_t** mask_lap, int* nm)
+{
+    nine_point_Laplacian_stencil(dx, dy, mask_lap, nm);
+}
+
+/**
  \brief Write 5-point Laplacian stencil into convolution mask
 
  \f$3\times3\f$ mask, 5 values, truncation error \f$\mathcal{O}(\Delta x^2)\f$
 */
-void five_point_Laplacian_stencil(fp_t dx, fp_t dy, fp_t** mask_lap)
+void five_point_Laplacian_stencil(fp_t dx, fp_t dy, fp_t** mask_lap, int* nm)
 {
+	*nm = 3;
+
 	mask_lap[0][1] =  1. / (dy * dy); /* up */
 	mask_lap[1][0] =  1. / (dx * dx); /* left */
 	mask_lap[1][1] = -2. * (dx*dx + dy*dy) / (dx*dx * dy*dy); /* middle */
@@ -48,8 +58,10 @@ void five_point_Laplacian_stencil(fp_t dx, fp_t dy, fp_t** mask_lap)
 
  \f$3\times3\f$ mask, 9 values, truncation error \f$\mathcal{O}(\Delta x^4)\f$
 */
-void nine_point_Laplacian_stencil(fp_t dx, fp_t dy, fp_t** mask_lap)
+void nine_point_Laplacian_stencil(fp_t dx, fp_t dy, fp_t** mask_lap, int* nm)
 {
+	*nm = 3;
+
 	mask_lap[0][0] =   1. / (6. * dx * dy);
 	mask_lap[0][1] =   4. / (6. * dy * dy);
 	mask_lap[0][2] =   1. / (6. * dx * dy);
@@ -66,15 +78,17 @@ void nine_point_Laplacian_stencil(fp_t dx, fp_t dy, fp_t** mask_lap)
 /**
  \brief Write 9-point Laplacian stencil into convolution mask
 
- \f$4\times4\f$ mask, 9 values, truncation error \f$\mathcal{O}(\Delta x^4)\f$
+ \f$5\times5\f$ mask, 9 values, truncation error \f$\mathcal{O}(\Delta x^4)\f$
 
  Provided for testing and demonstration of scalability, only:
  as the name indicates, this 9-point stencil is computationally
  more expensive than the \f$3\times3\f$ version. If your code requires
  \f$\mathcal{O}(\Delta x^4)\f$ accuracy, please use nine_point_Laplacian_stencil().
 */
-void slow_nine_point_Laplacian_stencil(fp_t dx, fp_t dy, fp_t** mask_lap)
+void slow_nine_point_Laplacian_stencil(fp_t dx, fp_t dy, fp_t** mask_lap, int* nm)
 {
+	*nm = 5;
+
 	mask_lap[0][2] = -1. / (12. * dy * dy);
 
 	mask_lap[1][2] =  4. / (3. * dy * dy);

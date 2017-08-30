@@ -40,14 +40,6 @@ void set_threads(int n)
 }
 
 /**
- \brief Specify which stencil to use for the Laplacian
-*/
-void set_mask(fp_t dx, fp_t dy, int nm, fp_t** mask_lap)
-{
-	five_point_Laplacian_stencil(dx, dy, mask_lap);
-}
-
-/**
  \brief Perform the convolution of the mask matrix with the composition matrix
 
  If the convolution mask is the Laplacian stencil, the convolution evaluates

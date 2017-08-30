@@ -7,11 +7,11 @@ FULL_PATH_NAMES       = NO
 HIDE_UNDOC_MEMBERS    = YES
 HIDE_UNDOC_CLASSES    = NO
 SOURCE_BROWSER        = YES
-INPUT                 = ../cpu ../gpu
+INPUT                 = ../
 RECURSIVE             = YES
-FILE_PATTERNS         = *.c *.cpp *.cu *.h
-EXCLUDE_PATTERNS      = *.git
-EXTENSION_MAPPING     = cu=C++
+FILE_PATTERNS         = *.c *.cl *.cpp *.cu *.h
+EXCLUDE_PATTERNS      = *.git doc
+EXTENSION_MAPPING     = cl=C++ cu=C++
 ALPHABETICAL_INDEX    = YES
 COLS_IN_ALPHA_INDEX   = 3
 ENABLE_PREPROCESSING  = YES

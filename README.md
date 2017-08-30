@@ -4,6 +4,8 @@ Ever wonder if a GPU or Xeon Phi accelerator card would make your code faster?
 Fast enough to justify the expense to your manager, adviser, or funding agency?
 This project can help answer your questions!
 
+[![Documentation Status](https://readthedocs.org/projects/phasefield-accelerator-benchmarks/badge/?version=latest)](http://phasefield-accelerator-benchmarks.readthedocs.io/en/latest/?badge=latest)
+
 The example codes in this repository implement the same basic algorithm using
 whichever of the mainstream accelerator programming methods apply. Running the
 code on different parallel hardware configurations &mdash; CPU threading, GPU

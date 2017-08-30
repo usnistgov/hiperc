@@ -19,20 +19,39 @@ simulations, not to enhance or promote any particular software package.
 
 ## Work in Progress
 
- - [ ] diffusion
-   - [x] cpu
-     - [x] serial
-     - [x] OpenMP
-     - [x] Threading Building Blocks
-   - [x] gpu
-     - [x] OpenACC
-     - [x] CUDA
-   - [ ] phi
-     - [ ] Knights Landing
- - [ ] spinodal
-   - [ ] &middot;&middot;&middot;
- - [ ] ripening
-   - [ ] &middot;&middot;&middot;
+ - [ ] cpu
+   - [ ] analytical
+     - [x] diffusion
+   - [ ] serial
+     - [x] diffusion
+     - [ ] spinodal
+     - [ ] ripening
+   - [ ] OpenMP
+     - [x] diffusion
+     - [ ] spinodal
+     - [ ] ripening
+   - [ ] Threading Building Blocks
+     - [x] diffusion
+     - [ ] spinodal
+     - [ ] ripening
+ - [ ] gpu
+   - [ ] CUDA
+     - [x] diffusion
+     - [ ] spinodal
+     - [ ] ripening
+   - [ ] OpenACC
+     - [x] diffusion
+     - [ ] spinodal
+     - [ ] ripening
+   - [ ] OpenCL
+     - [ ] diffusion
+     - [ ] spinodal
+     - [ ] ripening
+ - [ ] phi
+   - [ ] OpenMP
+     - [ ] diffusion
+     - [ ] spinodal
+     - [ ] ripening
 
 ## Accelerator Languages
 
@@ -204,16 +223,16 @@ browse the source code to your heart's content.
 
 ## Running the Demonstration Programs
 
-This repository is hierarchical, with the real codes of interest residing in
-the lowest-ranked folders: ```cpu/serial```, ```cpu/openmp``` and
-```gpu/cuda``` are expected to be the most useful. To compile, you may ```cd```
-into each of these and run ```make```. If you wish to compile all the examples
-for a particular hardware type, (```cpu```, ```gpu```, ```phi```), simply run
-```make``` in that mid-level folder: ```make``` will be called recursively in
-each of the child directories corresponding to different programming models
-available for the hardware. If the executables build, *i.e.* ```make``` returns
-without errors in either the middle or lowest levels, you can ```make run```
-to execute the programs and gather data.
+This repository has a flat structure. Code common to each problem type are
+lumped together, *e.g.* in ```common-diffusion```. The remaining implementation
+folders have three-part names: ```architecture-threading-model```. To compile
+code for your setup of interest, ```cd``` into its directory and run ```make```
+(note that this will not work in the ```common``` folders). If the executable
+builds, *i.e.* ```make``` returns without errors, you can ```make run```
+to execute the program and gather timing data. If you wish to attempt building
+or running all the example codes, execute ```make``` or ```make run``` from
+this top-level directory: it will recursively call the corresponding ```make```
+command in every sub-directory.
 
 ### What to Expect
 
@@ -251,9 +270,9 @@ At timestep 10,000 the expected ```wrss=0.002895``` using the 5-point stencil;
 the rendered initial and final images should look like these (grayscale,
 ```0``` is black and ```1``` is white):
 
-| *t* = 0&middot;&Delta;*t*            | *t*=10000&middot;&Delta;*t*          |
-| :----------------------------------: | :----------------------------------: |
-| ![initial conc](diffusion.00000.png) | ![final conc](diffusion.10000.png)   |
+| *t* = 0&middot;&Delta;*t*           | *t*=10000&middot;&Delta;*t*     |
+| :---------------------------------: | :-----------------------------: |
+| ![initial conc][_initial_diffusion] | ![final conc](_final_diffusion] |
 
 The boundary conditions are fixed values of ```1``` along the lower-left half
 and upper-right half walls, no flux everywhere else, with an initial value of
@@ -266,6 +285,17 @@ like this, or if your final ```wrss``` deviates from the expected value,
 something may be wrong with the installation, hardware, or implementation.
 Please [file an issue][_issues] and share what happened.
 You probably found a bug!
+
+## Reusing the Demonstration Code
+
+The flat file structure is intended to make it easy for you to extract code
+for modification and reuse in your research code. To do so, copy the three-part
+folder corresponding to your setup of interest, *e.g.* ```gpu-cuda-diffusion```,
+to another location (outside this repository). Then copy the contents of the
+common folder it depends upon, *e.g.* ```common-diffusion```, into the new
+folder location. Finally, edit the ```Makefile``` within the new folder to
+remove references to the old common folder. This should centralize everything
+you need to remix and get started in the new folder.
 
 ## Contributions and Contact
 
@@ -285,6 +315,8 @@ the best available for the purpose.
 
 [_NIST]:     http://www.nist.gov
 [_doc]:      doc/phasefield-accelerator-benchmarks_guide.pdf
+[_initial_diffusion]: common-diffusion/diffusion.00000.png
+[_final_diffusion]:   common-diffusion/diffusion.10000.png
 [_issues]:   https://github.com/usnistgov/phasefield-accelerator-benchmarks/issues
 [_acc]:      https://www.openacc.org/
 [_amdtop]:   https://github.com/clbr/radeontop

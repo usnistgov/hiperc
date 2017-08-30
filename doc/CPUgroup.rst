@@ -4,10 +4,6 @@
 CPU Reference
 *************
 
-.. doxygengroup:: CPU
-   :project: phasefield-accelerator-benchmarks
-   :members:
-
 .. doxygengroup:: analytic
    :project: phasefield-accelerator-benchmarks
    :members:

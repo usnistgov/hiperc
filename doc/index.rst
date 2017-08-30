@@ -10,6 +10,7 @@ Welcome to phasefield-accelerator-benchmarks's documentation!
    :maxdepth: 2
    :caption: Contents:
 
+   DiffusionGroup
    CPUgroup  
    GPUgroup
 

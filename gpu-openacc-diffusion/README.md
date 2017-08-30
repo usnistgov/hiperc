@@ -1,7 +1,7 @@
-# CUDA GPU code
+# OpenAcc GPU code
 
 implementation of the diffusion equation with
-OpenMP threading and CUDA acceleration
+OpenMP threading and OpenAcc acceleration
 
 This directory contains implementations of the diffusion equation for GPUs, with help from the following text:
 > Kirk and Wu. *Programming Massively Parallel Processors: A Hands-On Approach,* 3 Ed. Morgan Kaufmann. New York: 2017.
@@ -24,25 +24,25 @@ This directory contains a makefile with three important invocations:
 To build this code, you must have installed
  * [GNU make][_make]
  * [PNG library][_png]
- * [CUDA toolkit][_cuda]
+ * [PGI compiler][_pgi]
+ * OpenCL runtime for [AMD][_amdcl], [NVIDIA][_nvcl], or [Intel][_icl]
 
 ```make``` and ```libpng``` can be installed through your operating
 system's package manager, *e.g.* ```apt-get install make libpng12-dev```.
-The [CUDA][_cuda] software should be installed using up-to-date distributions
-from their websites since the packaged versions are often several versions
-behind, and GPU hardware support evolves quickly. Note that CUDA is not
-compatible with all GPU architectures. CUDA hardware can be emulated on the CPU
-using the [MCUDA framework][_mcuda]. Proof-of-concept trials on GPU hardware
-can be run on [Amazon's EC2][_aws] and equivalent HPC cloud computing platforms.
+The other software should be installed using up-to-date distributions from
+their websites since the packaged versions are often several versions behind,
+and GPU hardware support evolves quickly. Proof-of-concept trials on GPU
+hardware can be run on [Amazon's EC2][_aws] and equivalent HPC cloud computing
+platforms.
 
-If you read the ```Makefile```s, you will see that this code also invokes
-OpenMP (via compiler flag ```-fopenmp```). This is because some
-operations &mdash; namely array allocation and application of boundary
-conditions &mdash; cannot be performed efficiently on the GPU, due to the high
-expense of transferring data in and out compared to the small amount of work
-to be done. This program therefore implement an "OpenMP + CUDA" programming
-model, where CPU threading is used to modify a few values and GPU processing
-is used to perform the real work.
+If you read the ```Makefile```s, you will see that this GPU code also invokes
+OpenMP (via compiler flag ```-mp```). This is because some operations &mdash;
+namely array allocation and application of boundary conditions &mdash; cannot
+be performed efficiently on the GPU, due to the high expense of transferring
+data in and out compared to the small amount of work to be done. This program
+therefore implements an "OpenMP + OpenAcc" programming model, where CPU
+threading is used to modify a few values and GPU processing is used to perform
+the real work.
 
 ## Customization
 

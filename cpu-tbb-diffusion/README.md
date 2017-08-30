@@ -1,7 +1,7 @@
-# Serial CPU diffusion code
+# TBB CPU diffusion code
 
 implementation of the diffusion equation for the
-CPU with neither threading nor acceleration
+CPU with Threading Building Blocks
 
 ## Usage
 
@@ -22,10 +22,11 @@ To build this code, you must have installed
  * [GNU make][_make]
  * [GNU compiler collection][_gcc]
  * [PNG library][_png]
+ * [Threading Building Blocks (TBB) library][_tbb]
 
 These are usually available through the package manager. For example,
-```apt-get install make libpng12-dev``` or
-```yum install make libpng-devel```.
+```apt-get install make libpng12-dev libtbb-dev``` or
+```yum install make libpng-devel tbb-devel```.
 
 ## Customization
 
@@ -40,4 +41,4 @@ no difference, so long as it contains plain text.
 [_make]: https://www.gnu.org/software/make/
 [_gcc]:  https://gcc.gnu.org
 [_png]:  http://www.libpng.org/pub/png/libpng.html
-
+[_tbb]:  https://www.threadingbuildingblocks.org

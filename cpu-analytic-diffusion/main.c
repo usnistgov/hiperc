@@ -40,13 +40,10 @@
 /**
  \brief Run simulation using input parameters specified on the command line
 
- Program will write a series of PNG image files to visualize scalar composition
- field, plus a final CSV raw data file and CSV runtime log tabulating the
- iteration counter (iter), elapsed simulation time (sim_time), system free
- energy (energy), error relative to analytical solution (wrss), time spent
- performing convolution (conv_time), time spent updating fields (step_time),
- time spent writing to disk (IO_time), time spent generating analytical values
- (soln_time), and total elapsed (run_time).
+ Program will write a series of PNG image files to visualize the  scalar
+ composition field, plus \c delta.png showing the difference between the
+ analytical result and the image stored in
+ \c ../common-diffusion/diffusion.10000.png.
 */
 int main(int argc, char* argv[])
 {
@@ -192,8 +189,6 @@ int main(int argc, char* argv[])
 
 		swap_pointers(&conc_old, &conc_new);
 	}
-
-	write_csv(conc_old, nx, ny, dx, dy, steps);
 
 	/* clean up */
 	fclose(output);

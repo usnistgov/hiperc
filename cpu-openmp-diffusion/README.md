@@ -1,7 +1,6 @@
-# Serial CPU diffusion code
+# OpenMP CPU diffusion code
 
-implementation of the diffusion equation for the
-CPU with neither threading nor acceleration
+implementation of the diffusion equation for the CPU with OpenMP threading
 
 ## Usage
 
@@ -40,4 +39,3 @@ no difference, so long as it contains plain text.
 [_make]: https://www.gnu.org/software/make/
 [_gcc]:  https://gcc.gnu.org
 [_png]:  http://www.libpng.org/pub/png/libpng.html
-

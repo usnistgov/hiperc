@@ -17,42 +17,6 @@ possible to enhance readability for study and reusability in other codes.
 The goal here is to learn how to use accelerators for materials science
 simulations, not to enhance or promote any particular software package.
 
-## Work in Progress
-
- - [ ] cpu
-   - [ ] analytical
-     - [x] diffusion
-   - [ ] serial
-     - [x] diffusion
-     - [ ] spinodal
-     - [ ] ripening
-   - [ ] OpenMP
-     - [x] diffusion
-     - [ ] spinodal
-     - [ ] ripening
-   - [ ] Threading Building Blocks
-     - [x] diffusion
-     - [ ] spinodal
-     - [ ] ripening
- - [ ] gpu
-   - [ ] CUDA
-     - [x] diffusion
-     - [ ] spinodal
-     - [ ] ripening
-   - [ ] OpenACC
-     - [x] diffusion
-     - [ ] spinodal
-     - [ ] ripening
-   - [ ] OpenCL
-     - [ ] diffusion
-     - [ ] spinodal
-     - [ ] ripening
- - [ ] phi
-   - [ ] OpenMP
-     - [ ] diffusion
-     - [ ] spinodal
-     - [ ] ripening
-
 ## Accelerator Languages
 
 There are six mainstream approaches to shared-memory parallel programming,
@@ -272,7 +236,7 @@ the rendered initial and final images should look like these (grayscale,
 
 | *t* = 0&middot;&Delta;*t*           | *t*=10000&middot;&Delta;*t*     |
 | :---------------------------------: | :-----------------------------: |
-| ![initial conc][_initial_diffusion] | ![final conc](_final_diffusion] |
+| ![initial conc][_initial_diffusion] | ![final conc][_final_diffusion] |
 
 The boundary conditions are fixed values of ```1``` along the lower-left half
 and upper-right half walls, no flux everywhere else, with an initial value of
@@ -296,6 +260,42 @@ common folder it depends upon, *e.g.* ```common-diffusion```, into the new
 folder location. Finally, edit the ```Makefile``` within the new folder to
 remove references to the old common folder. This should centralize everything
 you need to remix and get started in the new folder.
+
+## Work in Progress
+
+ - [ ] cpu
+   - [x] analytical
+     - [x] diffusion
+   - [ ] serial
+     - [x] diffusion
+     - [ ] spinodal
+     - [ ] ripening
+   - [ ] OpenMP
+     - [x] diffusion
+     - [ ] spinodal
+     - [ ] ripening
+   - [ ] Threading Building Blocks
+     - [x] diffusion
+     - [ ] spinodal
+     - [ ] ripening
+ - [ ] gpu
+   - [ ] CUDA
+     - [x] diffusion
+     - [ ] spinodal
+     - [ ] ripening
+   - [ ] OpenACC
+     - [x] diffusion
+     - [ ] spinodal
+     - [ ] ripening
+   - [ ] OpenCL
+     - [ ] diffusion
+     - [ ] spinodal
+     - [ ] ripening
+ - [ ] phi
+   - [ ] OpenMP
+     - [ ] diffusion
+     - [ ] spinodal
+     - [ ] ripening
 
 ## Contributions and Contact
 

@@ -55,11 +55,11 @@ int main(int argc, char* argv[])
 
 	char buffer[256];
 	char* pch;
-	int ith=0, inx=0, iny=0, idx=0, idy=0, ins=0, inc=0, idc=0, ico=0;
+	int ith=0, inx=0, iny=0, idx=0, idy=0, ins=0, inc=0, idc=0, ico=0, isc=0;
 
 	/* declare mesh size and resolution */
 	fp_t **conc_old, **conc_new, **conc_lap, **mask_lap;
-	int nx=512, ny=512, nm=3, nth=4;
+	int nx=512, ny=512, nm=3, nth=4, code=53;
 	fp_t dx=0.5, dy=0.5, h=0.5;
 	fp_t bc[2][2];
 
@@ -123,6 +123,12 @@ int main(int argc, char* argv[])
 					pch = strtok(NULL, " ");
 					linStab = atof(pch);
 					ico = 1;
+				} else if (strcmp(pch, "sc") == 0) {
+					pch = strtok(NULL, " ");
+					nm = atoi(pch);
+					pch = strtok(NULL, " ");
+					code = atoi(pch);
+					isc = 1;
 				} else {
 					printf("Warning: unknown key %s. Ignoring value.\n", pch);
 				}
@@ -148,6 +154,8 @@ int main(int argc, char* argv[])
 			printf("Warning: parameter %s undefined. Using default value, %f.\n", "dc", D);
 		} else if (! ico) {
 			printf("Warning: parameter %s undefined. Using default value, %f.\n", "co", linStab);
+		} else if (! isc) {
+			printf("Warning: parameter %s undefined. Using default value, %i.\n", "sc", code);
 		}
 	}
 
@@ -156,8 +164,8 @@ int main(int argc, char* argv[])
 	dt = (linStab * h * h) / (4.0 * D);
 
 	/* initialize memory */
-	set_mask(dx, dy, mask_lap, &nm);
 	make_arrays(&conc_old, &conc_new, &conc_lap, &mask_lap, nx, ny, nm);
+	set_mask(dx, dy, code, mask_lap, nm);
 	set_boundaries(bc);
 
 	start_time = GetTimer();

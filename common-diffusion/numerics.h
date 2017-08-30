@@ -41,13 +41,13 @@
 */
 #define MAX_MASK_H 5
 
-void set_mask(fp_t dx, fp_t dy, fp_t** mask_lap, int* nm);
+void set_mask(fp_t dx, fp_t dy, int code, fp_t** mask_lap, int nm);
 
-void five_point_Laplacian_stencil(fp_t dx, fp_t dy, fp_t** mask_lap, int* nm);
+void five_point_Laplacian_stencil(fp_t dx, fp_t dy, fp_t** mask_lap, int nm);
 
-void nine_point_Laplacian_stencil(fp_t dx, fp_t dy, fp_t** mask_lap, int* nm);
+void nine_point_Laplacian_stencil(fp_t dx, fp_t dy, fp_t** mask_lap, int nm);
 
-void slow_nine_point_Laplacian_stencil(fp_t dx, fp_t dy, fp_t** mask_lap, int* nm);
+void slow_nine_point_Laplacian_stencil(fp_t dx, fp_t dy, fp_t** mask_lap, int nm);
 
 #ifdef _OPENACC
 #pragma acc routine worker nohost

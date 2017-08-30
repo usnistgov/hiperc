@@ -26,15 +26,45 @@
  \brief Implementation of boundary condition functions with OpenMP threading
 */
 
+#include <assert.h>
 #include <math.h>
+#include <stdio.h>
+#include <stdlib.h>
 #include "numerics.h"
 
 /**
- \brief Specify which stencil to use for the Laplacian
+ \brief Specify which stencil (mask) to use for the Laplacian (convolution)
+
+ The mask corresponding to the numerical code will be applied. The suggested
+ encoding is mask width as the ones digit and value count as the tens digit,
+ \a e.g. five-point Laplacian is 53, nine-point is 93.
+
+ To add your own mask (stencil), define its prototype in \c numerics.h,
+ implement it in \c numerics.c, add a case to this function with your chosen
+ numerical encoding, then specify that code in \c params.txt. Note that, for
+ a Laplacian stencil, the sum of the coefficients must equal zero.
+
+ If your stencil is larger than \f$ 5\times 5\f$, you must increase the values
+ defined by \c MAX_MASK_W and \c MAX_MASK_H in \c numerics.h.
 */
-void set_mask(fp_t dx, fp_t dy, fp_t** mask_lap, int* nm)
+void set_mask(fp_t dx, fp_t dy, int code, fp_t** mask_lap, int nm)
 {
-    nine_point_Laplacian_stencil(dx, dy, mask_lap, nm);
+    switch(code) {
+	    case 53:
+	    	five_point_Laplacian_stencil(dx, dy, mask_lap, nm);
+	    	break;
+	    case 93:
+	    	nine_point_Laplacian_stencil(dx, dy, mask_lap, nm);
+	    	break;
+	    case 95:
+	    	slow_nine_point_Laplacian_stencil(dx, dy, mask_lap, nm);
+	    	break;
+	    default :
+	    	five_point_Laplacian_stencil(dx, dy, mask_lap, nm);
+    }
+
+	assert(nm <= MAX_MASK_W);
+	assert(nm <= MAX_MASK_H);
 }
 
 /**
@@ -42,15 +72,15 @@ void set_mask(fp_t dx, fp_t dy, fp_t** mask_lap, int* nm)
 
  \f$3\times3\f$ mask, 5 values, truncation error \f$\mathcal{O}(\Delta x^2)\f$
 */
-void five_point_Laplacian_stencil(fp_t dx, fp_t dy, fp_t** mask_lap, int* nm)
+void five_point_Laplacian_stencil(fp_t dx, fp_t dy, fp_t** mask_lap, int nm)
 {
-	*nm = 3;
+	assert(nm == 3);
 
-	mask_lap[0][1] =  1. / (dy * dy); /* up */
+	mask_lap[0][1] =  1. / (dy * dy); /* upper */
 	mask_lap[1][0] =  1. / (dx * dx); /* left */
 	mask_lap[1][1] = -2. * (dx*dx + dy*dy) / (dx*dx * dy*dy); /* middle */
 	mask_lap[1][2] =  1. / (dx * dx); /* right */
-	mask_lap[2][1] =  1. / (dy * dy); /* down */
+	mask_lap[2][1] =  1. / (dy * dy); /* lower */
 }
 
 /**
@@ -58,21 +88,21 @@ void five_point_Laplacian_stencil(fp_t dx, fp_t dy, fp_t** mask_lap, int* nm)
 
  \f$3\times3\f$ mask, 9 values, truncation error \f$\mathcal{O}(\Delta x^4)\f$
 */
-void nine_point_Laplacian_stencil(fp_t dx, fp_t dy, fp_t** mask_lap, int* nm)
+void nine_point_Laplacian_stencil(fp_t dx, fp_t dy, fp_t** mask_lap, int nm)
 {
-	*nm = 3;
+	assert(nm == 3);
 
-	mask_lap[0][0] =   1. / (6. * dx * dy);
-	mask_lap[0][1] =   4. / (6. * dy * dy);
-	mask_lap[0][2] =   1. / (6. * dx * dy);
+	mask_lap[0][0] =   1. / (6. * dx * dy); /* upper-left */
+	mask_lap[0][1] =   4. / (6. * dy * dy); /* upper-middle */
+	mask_lap[0][2] =   1. / (6. * dx * dy); /* upper-right */
 
-	mask_lap[1][0] =   4. / (6. * dx * dx);
-	mask_lap[1][1] = -10. * (dx*dx + dy*dy) / (6. * dx*dx * dy*dy);
-	mask_lap[1][2] =   4. / (6. * dx * dx);
+	mask_lap[1][0] =   4. / (6. * dx * dx); /* middle-left */
+	mask_lap[1][1] = -10. * (dx*dx + dy*dy) / (6. * dx*dx * dy*dy); /* middle */
+	mask_lap[1][2] =   4. / (6. * dx * dx); /* middle-right */
 
-	mask_lap[2][0] =   1. / (6. * dx * dy);
-	mask_lap[2][1] =   4. / (6. * dy * dy);
-	mask_lap[2][2] =   1. / (6. * dx * dy);
+	mask_lap[2][0] =   1. / (6. * dx * dy); /* lower-left */
+	mask_lap[2][1] =   4. / (6. * dy * dy); /* lower-middle */
+	mask_lap[2][2] =   1. / (6. * dx * dy); /* lower-right */
 }
 
 /**
@@ -85,27 +115,27 @@ void nine_point_Laplacian_stencil(fp_t dx, fp_t dy, fp_t** mask_lap, int* nm)
  more expensive than the \f$3\times3\f$ version. If your code requires
  \f$\mathcal{O}(\Delta x^4)\f$ accuracy, please use nine_point_Laplacian_stencil().
 */
-void slow_nine_point_Laplacian_stencil(fp_t dx, fp_t dy, fp_t** mask_lap, int* nm)
+void slow_nine_point_Laplacian_stencil(fp_t dx, fp_t dy, fp_t** mask_lap, int nm)
 {
-	*nm = 5;
+	assert(nm == 5);
 
-	mask_lap[0][2] = -1. / (12. * dy * dy);
+	mask_lap[0][2] = -1. / (12. * dy * dy); /* upper-upper-middle */
 
-	mask_lap[1][2] =  4. / (3. * dy * dy);
+	mask_lap[1][2] =  4. / (3. * dy * dy); /* upper-middle */
 
-	mask_lap[2][0] = -1. / (12. * dx * dx);
-	mask_lap[2][1] =  4. / (3. * dx * dx);
-	mask_lap[2][2] = -5. * (dx*dx + dy*dy) / (2. * dx*dx * dy*dy);
-	mask_lap[2][3] =  4. / (3. * dx * dx);
-	mask_lap[2][4] = -1. / (12. * dx * dx);
+	mask_lap[2][0] = -1. / (12. * dx * dx); /* middle-left-left */
+	mask_lap[2][1] =  4. / (3. * dx * dx); /* middle-left */
+	mask_lap[2][2] = -5. * (dx*dx + dy*dy) / (2. * dx*dx * dy*dy); /* middle */
+	mask_lap[2][3] =  4. / (3. * dx * dx); /* middle-right */
+	mask_lap[2][4] = -1. / (12. * dx * dx); /* middle-right-right */
 
-	mask_lap[3][2] =  4. / (3. * dy * dy);
+	mask_lap[3][2] =  4. / (3. * dy * dy); /* lower-middle */
 
-	mask_lap[4][2] = -1. / (12. * dy * dy);
+	mask_lap[4][2] = -1. / (12. * dy * dy); /* lower-lower-middle */
 }
 
 /**
- \brief Compute Euclidean distance between two points, \c a and \c b
+ \brief Compute Euclidean distance between two points, \a a and \a b
 */
 fp_t euclidean_distance(fp_t ax, fp_t ay, fp_t bx, fp_t by)
 {
@@ -113,7 +143,7 @@ fp_t euclidean_distance(fp_t ax, fp_t ay, fp_t bx, fp_t by)
 }
 
 /**
- \brief Compute Manhattan distance between two points, \c a and \c b
+ \brief Compute Manhattan distance between two points, \a a and \a b
 */
 fp_t manhattan_distance(fp_t ax, fp_t ay, fp_t bx, fp_t by)
 {
@@ -121,10 +151,10 @@ fp_t manhattan_distance(fp_t ax, fp_t ay, fp_t bx, fp_t by)
 }
 
 /**
- \brief Compute minimum distance from point \c p to a line segment bounded by points \c a and \c b
+ \brief Compute minimum distance from point \a p to a line segment bounded by points \a a and \a b
 
- This function computes the projection of \c p onto \c ab, limiting the
- projected range to [0, 1] to handle projections that fall outside of \c ab.
+ This function computes the projection of \a p onto \a ab, limiting the
+ projected range to [0, 1] to handle projections that fall outside of \a ab.
  Implemented after Grumdrig on Stackoverflow, https://stackoverflow.com/a/1501725.
 */
 fp_t distance_point_to_segment(fp_t ax, fp_t ay, fp_t bx, fp_t by, fp_t px, fp_t py)

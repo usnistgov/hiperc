@@ -7,3 +7,4 @@ ns 100000  # number of timesteps to march
 nc 10000   # number of timesteps between checkpoint outputs
 dc 0.00625 # diffusion coefficient
 co 0.1     # linear stability constant (Courant/CFL condition)
+sc 3 93    # mask size and code (3 53 for five-point, 3 93 for nine-point Laplacian)

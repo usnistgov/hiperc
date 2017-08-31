@@ -35,9 +35,19 @@
  Specify the basic data type to achieve the desired accuracy in floating-point
  arithmetic: float for single-precision, double for double-precision. This
  choice propagates throughout the code, and may significantly affect runtime
- on GPU hardware. 
+ on GPU hardware.
 */
 typedef double fp_t;
+
+/**
+ Container for timing data
+*/
+struct Stopwatch {
+	double conv;
+	double step;
+	double file;
+	double soln;
+};
 
 #endif /* _TYPE_H_ */
 

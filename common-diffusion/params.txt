@@ -1,4 +1,3 @@
-nt 4       # number of threads
 nx 512     # mesh points along x-axis
 ny 512     # mesh points along y-axis
 dx 0.5     # mesh resolution along x-axis

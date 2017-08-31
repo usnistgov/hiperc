@@ -39,6 +39,11 @@
 #include "discretization.h"
 
 /**
+ \brief Read input parameters from file specified on the command line
+*/
+void param_parser(int argc, char* argv[], int* nx, int* ny, int* nm, int* code, fp_t* dx, fp_t* dy, fp_t* D, fp_t* linStab, int* steps, int* checks);
+
+/**
  \brief Run simulation using input parameters specified on the command line
 
  Program will write a series of PNG image files to visualize scalar composition
@@ -51,24 +56,97 @@
 */
 int main(int argc, char* argv[])
 {
-	FILE * input, * output;
-
-	char buffer[256];
-	char* pch;
-	int ith=0, inx=0, iny=0, idx=0, idy=0, ins=0, inc=0, idc=0, ico=0, isc=0;
+	FILE * output;
 
 	/* declare mesh size and resolution */
 	fp_t **conc_old, **conc_new, **conc_lap, **mask_lap;
-	int nx=512, ny=512, nm=3, nth=4, code=53;
+	int nx=512, ny=512, nm=3, code=53;
 	fp_t dx=0.5, dy=0.5, h=0.5;
 	fp_t bc[2][2];
 
 	/* declare materials and numerical parameters */
 	fp_t D=0.00625, linStab=0.1, dt=1., elapsed=0., rss=0.;
 	int step=0, steps=100000, checks=10000;
-	double start_time=0., conv_time=0., step_time=0., file_time=0., soln_time=0.;
+	double start_time=0.;
+	struct Stopwatch sw = {0., 0., 0., 0.};
 
 	StartTimer();
+
+	param_parser(argc, argv, &nx, &ny, &nm, &code, &dx, &dy, &D, &linStab, &steps, &checks);
+
+	h = (dx > dy) ? dy : dx;
+	dt = (linStab * h * h) / (4.0 * D);
+
+	/* initialize memory */
+	make_arrays(&conc_old, &conc_new, &conc_lap, &mask_lap, nx, ny, nm);
+	set_mask(dx, dy, code, mask_lap, nm);
+	set_boundaries(bc);
+
+	start_time = GetTimer();
+	apply_initial_conditions(conc_old, nx, ny, nm, bc);
+	sw.step = GetTimer() - start_time;
+
+	/* write initial condition data */
+	start_time = GetTimer();
+	write_png(conc_old, nx, ny, 0);
+
+	/* prepare to log comparison to analytical solution */
+	output = fopen("runlog.csv", "w");
+	if (output == NULL) {
+		printf("Error: unable to %s for output. Check permissions.\n", "runlog.csv");
+		exit(-1);
+	}
+	sw.file = GetTimer() - start_time;
+
+	fprintf(output, "iter,sim_time,wrss,conv_time,step_time,IO_time,soln_time,run_time\n");
+	fprintf(output, "%i,%f,%f,%f,%f,%f,%f,%f\n", step, elapsed, rss, sw.conv, sw.step, sw.file, sw.soln, GetTimer());
+
+	/* do the work */
+	for (step = 1; step < steps+1; step++) {
+		print_progress(step-1, steps);
+
+		apply_boundary_conditions(conc_old, nx, ny, nm, bc);
+
+		start_time = GetTimer();
+		compute_convolution(conc_old, conc_lap, mask_lap, nx, ny, nm);
+		sw.conv += GetTimer() - start_time;
+
+		start_time = GetTimer();
+		solve_diffusion_equation(conc_old, conc_new, conc_lap, nx, ny, nm, D, dt, &elapsed);
+		sw.step += GetTimer() - start_time;
+
+		if (step % checks == 0) {
+			start_time = GetTimer();
+			write_png(conc_new, nx, ny, step);
+			sw.file += GetTimer() - start_time;
+		}
+
+		if (step % 100 == 0) {
+			start_time = GetTimer();
+			check_solution(conc_new, nx, ny, dx, dy, nm, elapsed, D, bc, &rss);
+			sw.soln += GetTimer() - start_time;
+
+			fprintf(output, "%i,%f,%f,%f,%f,%f,%f,%f\n", step, elapsed, rss, sw.conv, sw.step, sw.file, sw.soln, GetTimer());
+		}
+
+		swap_pointers(&conc_old, &conc_new);
+	}
+
+	write_csv(conc_old, nx, ny, dx, dy, steps);
+
+	/* clean up */
+	fclose(output);
+	free_arrays(conc_old, conc_new, conc_lap, mask_lap);
+
+	return 0;
+}
+
+void param_parser(int argc, char* argv[], int* nx, int* ny, int* nm, int* code, fp_t* dx, fp_t* dy, fp_t* D, fp_t* linStab, int* steps, int* checks)
+{
+	FILE * input;
+	char buffer[256];
+	char* pch;
+	int inx=0, iny=0, idx=0, idy=0, ins=0, inc=0, idc=0, ico=0, isc=0;
 
 	if (argc != 2) {
 		printf("Error: improper arguments supplied.\nUsage: ./%s filename\n", argv[0]);
@@ -87,47 +165,43 @@ int main(int argc, char* argv[])
 			{
 				pch = strtok(buffer, " ");
 
-				if (strcmp(pch, "nt") == 0) {
+				if (strcmp(pch, "nx") == 0) {
 					pch = strtok(NULL, " ");
-					nth = atof(pch);
-					ith = 1;
-				} else if (strcmp(pch, "nx") == 0) {
-					pch = strtok(NULL, " ");
-					nx = atoi(pch);
+					*nx = atoi(pch);
 					inx = 1;
 				} else if (strcmp(pch, "ny") == 0) {
 					pch = strtok(NULL, " ");
-					ny = atoi(pch);
+					*ny = atoi(pch);
 					iny = 1;
 				} else if (strcmp(pch, "dx") == 0) {
 					pch = strtok(NULL, " ");
-					dx = atof(pch);
+					*dx = atof(pch);
 					idx = 1;
 				} else if (strcmp(pch, "dy") == 0) {
 					pch = strtok(NULL, " ");
-					dy = atof(pch);
+					*dy = atof(pch);
 					idy = 1;
 				} else if (strcmp(pch, "ns") == 0) {
 					pch = strtok(NULL, " ");
-					steps = atoi(pch);
+					*steps = atoi(pch);
 					ins = 1;
 				} else if (strcmp(pch, "nc") == 0) {
 					pch = strtok(NULL, " ");
-					checks = atoi(pch);
+					*checks = atoi(pch);
 					inc = 1;
 				} else if (strcmp(pch, "dc") == 0) {
 					pch = strtok(NULL, " ");
-					D = atof(pch);
+					*D = atof(pch);
 					idc = 1;
 				} else if (strcmp(pch, "co") == 0) {
 					pch = strtok(NULL, " ");
-					linStab = atof(pch);
+					*linStab = atof(pch);
 					ico = 1;
 				} else if (strcmp(pch, "sc") == 0) {
 					pch = strtok(NULL, " ");
-					nm = atoi(pch);
+					*nm = atoi(pch);
 					pch = strtok(NULL, " ");
-					code = atoi(pch);
+					*code = atoi(pch);
 					isc = 1;
 				} else {
 					printf("Warning: unknown key %s. Ignoring value.\n", pch);
@@ -136,95 +210,27 @@ int main(int argc, char* argv[])
 		}
 
 		/* make sure we got everyone */
-		if (! ith) {
-			printf("Warning: parameter %s undefined. Using default value, %i.\n", "nt", nth);
-		} else if (! inx) {
-			printf("Warning: parameter %s undefined. Using default value, %i.\n", "nx", nx);
+		if (! inx) {
+			printf("Warning: parameter %s undefined. Using default value, %i.\n", "nx", *nx);
 		} else if (! iny) {
-			printf("Warning: parameter %s undefined. Using default value, %i.\n", "ny", ny);
+			printf("Warning: parameter %s undefined. Using default value, %i.\n", "ny", *ny);
 		} else if (! idx) {
-			printf("Warning: parameter %s undefined. Using default value, %f.\n", "dx", dx);
+			printf("Warning: parameter %s undefined. Using default value, %f.\n", "dx", *dx);
 		} else if (! idy) {
-			printf("Warning: parameter %s undefined. Using default value, %f.\n", "dy", dy);
+			printf("Warning: parameter %s undefined. Using default value, %f.\n", "dy", *dy);
 		} else if (! ins) {
-			printf("Warning: parameter %s undefined. Using default value, %i.\n", "ns", steps);
+			printf("Warning: parameter %s undefined. Using default value, %i.\n", "ns", *steps);
 		} else if (! inc) {
-			printf("Warning: parameter %s undefined. Using default value, %i.\n", "nc", checks);
+			printf("Warning: parameter %s undefined. Using default value, %i.\n", "nc", *checks);
 		} else if (! idc) {
-			printf("Warning: parameter %s undefined. Using default value, %f.\n", "dc", D);
+			printf("Warning: parameter %s undefined. Using default value, %f.\n", "dc", *D);
 		} else if (! ico) {
-			printf("Warning: parameter %s undefined. Using default value, %f.\n", "co", linStab);
+			printf("Warning: parameter %s undefined. Using default value, %f.\n", "co", *linStab);
 		} else if (! isc) {
-			printf("Warning: parameter %s undefined. Using default value, %i.\n", "sc", code);
+			printf("Warning: parameter %s undefined. Using default values, %i and %i.\n", "sc", *nm, *code);
 		}
 	}
-
-	set_threads(nth);
-	h = (dx > dy) ? dy : dx;
-	dt = (linStab * h * h) / (4.0 * D);
-
-	/* initialize memory */
-	make_arrays(&conc_old, &conc_new, &conc_lap, &mask_lap, nx, ny, nm);
-	set_mask(dx, dy, code, mask_lap, nm);
-	set_boundaries(bc);
-
-	start_time = GetTimer();
-	apply_initial_conditions(conc_old, nx, ny, nm, bc);
-	step_time = GetTimer() - start_time;
-
-	/* write initial condition data */
-	start_time = GetTimer();
-	write_png(conc_old, nx, ny, 0);
-	file_time = GetTimer() - start_time;
-
-	/* prepare to log comparison to analytical solution */
-	output = fopen("runlog.csv", "w");
-	if (output == NULL) {
-		printf("Error: unable to %s for output. Check permissions.\n", "runlog.csv");
-		exit(-1);
-	}
-
-	fprintf(output, "iter,sim_time,wrss,conv_time,step_time,IO_time,soln_time,run_time\n");
-	fprintf(output, "%i,%f,%f,%f,%f,%f,%f,%f\n", step, elapsed, rss, conv_time, step_time, file_time, soln_time, GetTimer());
-
-	/* do the work */
-	for (step = 1; step < steps+1; step++) {
-		print_progress(step-1, steps);
-
-		apply_boundary_conditions(conc_old, nx, ny, nm, bc);
-
-		start_time = GetTimer();
-		compute_convolution(conc_old, conc_lap, mask_lap, nx, ny, nm);
-		conv_time += GetTimer() - start_time;
-
-		start_time = GetTimer();
-		solve_diffusion_equation(conc_old, conc_new, conc_lap, nx, ny, nm, D, dt, &elapsed);
-		step_time += GetTimer() - start_time;
-
-		if (step % checks == 0) {
-			start_time = GetTimer();
-			write_png(conc_new, nx, ny, step);
-			file_time += GetTimer() - start_time;
-		}
-
-		if (step % 100 == 0) {
-			start_time = GetTimer();
-			check_solution(conc_new, nx, ny, dx, dy, nm, elapsed, D, bc, &rss);
-			soln_time += GetTimer() - start_time;
-
-			fprintf(output, "%i,%f,%f,%f,%f,%f,%f,%f\n", step, elapsed, rss, conv_time, step_time, file_time, soln_time, GetTimer());
-		}
-
-		swap_pointers(&conc_old, &conc_new);
-	}
-
-	write_csv(conc_old, nx, ny, dx, dy, steps);
-
-	/* clean up */
-	fclose(output);
-	free_arrays(conc_old, conc_new, conc_lap, mask_lap);
-
-	return 0;
 }
+
 
 /** \} */

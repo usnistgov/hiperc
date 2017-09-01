@@ -17,10 +17,6 @@
  Questions/comments to Trevor Keller (trevor.keller@nist.gov)
  **********************************************************************************/
 
-/** \addtogroup DIFFUSION
- \{
-*/
-
 /**
  \file  common-diffusion/numerics.c
  \brief Implementation of boundary condition functions with OpenMP threading
@@ -184,5 +180,3 @@ void analytical_value(fp_t x, fp_t t, fp_t D, fp_t bc[2][2], fp_t* c)
 {
 	*c = bc[1][0] * (1.0 - erf(x / sqrt(4.0 * D * t)));
 }
-
-/** \} */

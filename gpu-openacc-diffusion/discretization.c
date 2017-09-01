@@ -17,10 +17,6 @@
  Questions/comments to Trevor Keller (trevor.keller@nist.gov)
  **********************************************************************************/
 
-/** \addtogroup openacc
- \{
-*/
-
 /**
  \file  gpu-openacc-diffusion/discretization.c
  \brief Implementation of boundary condition functions with OpenACC threading
@@ -170,5 +166,3 @@ void check_solution(fp_t** conc_new, int nx, int ny, fp_t dx, fp_t dy, int nm,
 
 	*rss = sum;
 }
-
-/** \} */

@@ -17,12 +17,6 @@
  Questions/comments to Trevor Keller (trevor.keller@nist.gov)
  **********************************************************************************/
 
-/** \defgroup DIFFUSION Diffusion equation benchmark */
-
-/** \addtogroup DIFFUSION
- \{
-*/
-
 /**
  \file  common-diffusion/type.h
  \brief Definition of scalar data type and Doxygen diffusion group
@@ -50,5 +44,3 @@ struct Stopwatch {
 };
 
 #endif /* _TYPE_H_ */
-
-/** \} */

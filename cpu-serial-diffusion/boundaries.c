@@ -17,10 +17,6 @@
  Questions/comments to Trevor Keller (trevor.keller@nist.gov)
  **********************************************************************************/
 
-/** \addtogroup serial
- \{
-*/
-
 /**
  \file  cpu-serial-diffusion/boundaries.c
  \brief Implementation of boundary condition functions without threading
@@ -98,5 +94,3 @@ void apply_boundary_conditions(fp_t** conc, int nx, int ny, int nm, fp_t bc[2][2
 			conc[j+1][i] = conc[j][i]; /* top condition */
 	}
 }
-
-/** \} */

@@ -17,10 +17,6 @@
  Questions/comments to Trevor Keller (trevor.keller@nist.gov)
  **********************************************************************************/
 
-/** \addtogroup DIFFUSION
- \{
-*/
-
 /**
  \file  common-diffusion/timer.h
  \brief Declaration of timer function prototypes for diffusion benchmarks
@@ -35,5 +31,3 @@ void StartTimer();
 double GetTimer();
 
 #endif /* _TIMER_H_ */
-
-/** \} */

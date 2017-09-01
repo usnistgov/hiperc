@@ -14,10 +14,6 @@
  *  limitations under the License.
  */
 
-/** \addtogroup DIFFUSION
- \{
-*/
-
 /**
  \file   common-diffusion/timer.c
  \brief  High-resolution cross-platform machine time reader
@@ -84,5 +80,3 @@ double GetTimer()
     return timerElapsed.tv_sec+timerElapsed.tv_usec/1000000.0;
 #endif
 }
-
-/** \} */

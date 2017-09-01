@@ -17,10 +17,6 @@
  Questions/comments to Trevor Keller (trevor.keller@nist.gov)
  **********************************************************************************/
 
-/** \addtogroup DIFFUSION
- \{
-*/
-
 /**
  \file  common-diffusion/discretization.h
  \brief Declaration of discretized mathematical function prototypes
@@ -43,5 +39,3 @@ void check_solution(fp_t** conc_new, int nx, int ny, fp_t dx, fp_t dy, int nm,
                     fp_t elapsed, fp_t D, fp_t bc[2][2], fp_t* rss);
 
 #endif /* _DISCRETIZATION_H_ */
-
-/** \} */

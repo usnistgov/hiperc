@@ -17,10 +17,6 @@
  Questions/comments to Trevor Keller (trevor.keller@nist.gov)
  **********************************************************************************/
 
-/** \addtogroup DIFFUSION
- \{
-*/
-
 /**
  \file  common-diffusion/output.h
  \brief Declaration of output function prototypes for diffusion benchmarks
@@ -32,9 +28,9 @@
 #define _OUTPUT_H_
 
 void print_progress(const int step, const int steps);
+
 void write_csv(fp_t** conc, int nx, int ny, fp_t dx, fp_t dy, int step);
+
 void write_png(fp_t** conc, int nx, int ny, int step);
 
 #endif /* _OUTPUT_H_ */
-
-/** \} */

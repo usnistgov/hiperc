@@ -17,10 +17,6 @@
  Questions/comments to Trevor Keller (trevor.keller@nist.gov)
  **********************************************************************************/
 
-/** \addtogroup DIFFUSION
- \{
-*/
-
 /**
  \file  common-diffusion/boundaries.h
  \brief Declaration of boundary condition function prototypes
@@ -38,5 +34,3 @@ void apply_initial_conditions(fp_t** conc_old, int nx, int ny, int nm, fp_t bc[2
 void apply_boundary_conditions(fp_t** conc_old, int nx, int ny, int nm, fp_t bc[2][2]);
 
 #endif /* _BOUNDARIES_H_ */
-
-/** \} */

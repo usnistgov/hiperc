@@ -17,10 +17,6 @@
  Questions/comments to Trevor Keller (trevor.keller@nist.gov)
  **********************************************************************************/
 
-/** \addtogroup tbb
- \{
-*/
-
 /**
  \file  cpu-tbb-diffusion/discretization.cpp
  \brief Implementation of boundary condition functions with TBB threading
@@ -191,5 +187,3 @@ void check_solution(fp_t** conc_new, int nx, int ny, fp_t dx, fp_t dy, int nm,
 
 	*rss = R.my_rss;
 }
-
-/** \} */

@@ -17,10 +17,6 @@
  Questions/comments to Trevor Keller (trevor.keller@nist.gov)
  **********************************************************************************/
 
-/** \addtogroup DIFFUSION
- \{
-*/
-
 /**
  \file  common-diffusion/main.c
  \brief Implementation of semi-infinite diffusion equation
@@ -224,6 +220,3 @@ void param_parser(int argc, char* argv[], int* nx, int* ny, int* nm, int* code, 
 		}
 	}
 }
-
-
-/** \} */

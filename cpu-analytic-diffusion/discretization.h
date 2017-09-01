@@ -17,10 +17,6 @@
  Questions/comments to Trevor Keller (trevor.keller@nist.gov)
  **********************************************************************************/
 
-/** \addtogroup analytic
- \{
-*/
-
 /**
  \file  cpu-analytic-diffusion/discretization.h
  \brief Declaration of analytical solution prototypes
@@ -35,5 +31,3 @@ void solve_diffusion_equation(fp_t** conc_old, fp_t** conc_new, fp_t** conc_lap,
                               int ny, fp_t dx, fp_t dy, int nm, fp_t D, fp_t dt, fp_t elapsed);
 
 #endif /* _DISCRETIZATION_H_ */
-
-/** \} */

@@ -17,10 +17,6 @@
  Questions/comments to Trevor Keller (trevor.keller@nist.gov)
  **********************************************************************************/
 
-/** \addtogroup DIFFUSION
- \{
-*/
-
 /**
  \file  common-diffusion/numerics.h
  \brief Declaration of Laplacian operator and analytical solution functions
@@ -67,5 +63,3 @@ fp_t distance_point_to_segment(fp_t ax, fp_t ay, fp_t bx, fp_t by, fp_t px, fp_t
 void analytical_value(fp_t x, fp_t t, fp_t D, fp_t bc[2][2], fp_t* c);
 
 #endif /* _NUMERICS_H_ */
-
-/** \} */

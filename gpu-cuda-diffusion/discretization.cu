@@ -17,10 +17,6 @@
  Questions/comments to Trevor Keller (trevor.keller@nist.gov)
  **********************************************************************************/
 
-/** \addtogroup cuda
- \{
-*/
-
 /**
  \file  gpu-cuda-diffusion/discretization.cu
  \brief Implementation of boundary condition functions with CUDA acceleration
@@ -263,5 +259,3 @@ void check_solution(fp_t** conc_new, int nx, int ny, fp_t dx, fp_t dy, int nm,
 
 	*rss = sum;
 }
-
-/** \} */

@@ -17,10 +17,6 @@
  Questions/comments to Trevor Keller (trevor.keller@nist.gov)
  **********************************************************************************/
 
-/** \addtogroup DIFFUSION
- \{
-*/
-
 /**
  \file  common-diffusion/mesh.h
  \brief Declaration of mesh function prototypes for diffusion benchmarks
@@ -33,9 +29,9 @@
 
 void make_arrays(fp_t*** conc_old, fp_t*** conc_new, fp_t*** conc_lap, fp_t*** mask_lap,
                  int nx, int ny, int nm);
+
 void free_arrays(fp_t** conc_old, fp_t** conc_new, fp_t** conc_lap, fp_t** mask_lap);
+
 void swap_pointers(fp_t*** conc_old, fp_t*** conc_new);
 
 #endif /* _MESH_H_ */
-
-/** \} */

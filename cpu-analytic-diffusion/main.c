@@ -17,10 +17,6 @@
  Questions/comments to Trevor Keller (trevor.keller@nist.gov)
  **********************************************************************************/
 
-/** \addtogroup analytic
- \{
-*/
-
 /**
  \file  cpu-analytic-diffusion/main.c
  \brief Analytical solution to semi-infinite diffusion equation
@@ -196,5 +192,3 @@ int main(int argc, char* argv[])
 
 	return 0;
 }
-
-/** \} */

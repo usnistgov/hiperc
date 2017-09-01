@@ -17,10 +17,6 @@
  Questions/comments to Trevor Keller (trevor.keller@nist.gov)
  **********************************************************************************/
 
-/** \addtogroup DIFFUSION
- \{
-*/
-
 /**
  \file  common-diffusion/output.c
  \brief Implementation of file output functions for diffusion benchmarks
@@ -219,5 +215,3 @@ void write_png(fp_t** conc, int nx, int ny, int step)
 	free(row_pointers);
 	free(buffer);
 }
-
-/** \} */

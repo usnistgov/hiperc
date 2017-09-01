@@ -18,7 +18,7 @@
  **********************************************************************************/
 
 /**
- \file  common-diffusion/boundaries.h
+ \file  boundaries.h
  \brief Declaration of boundary condition function prototypes
 */
 

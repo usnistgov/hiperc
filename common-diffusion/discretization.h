@@ -18,7 +18,7 @@
  **********************************************************************************/
 
 /**
- \file  common-diffusion/discretization.h
+ \file  discretization.h
  \brief Declaration of discretized mathematical function prototypes
 */
 

@@ -18,7 +18,7 @@
  **********************************************************************************/
 
 /**
- \file  common-diffusion/mesh.c
+ \file  mesh.c
  \brief Implemenatation of mesh handling functions for diffusion benchmarks
 */
 

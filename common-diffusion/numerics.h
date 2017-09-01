@@ -18,7 +18,7 @@
  **********************************************************************************/
 
 /**
- \file  common-diffusion/numerics.h
+ \file  numerics.h
  \brief Declaration of Laplacian operator and analytical solution functions
 */
 

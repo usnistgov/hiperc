@@ -18,7 +18,7 @@
  **********************************************************************************/
 
 /**
- \file  gpu-openacc-diffusion/discretization.c
+ \file  openacc_discretization.c
  \brief Implementation of boundary condition functions with OpenACC threading
 */
 

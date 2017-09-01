@@ -18,7 +18,7 @@
  **********************************************************************************/
 
 /**
- \file  cpu-analytic-diffusion/main.c
+ \file  analytic_main.c
  \brief Analytical solution to semi-infinite diffusion equation
 */
 
@@ -31,7 +31,35 @@
 #include "numerics.h"
 #include "output.h"
 #include "timer.h"
-#include "discretization.h"
+
+/**
+ \brief Update the scalar composition field using analytical solution
+*/
+void solve_diffusion_equation(fp_t** conc, int nx, int ny, int nm, fp_t dx, fp_t dy, fp_t D, fp_t dt, fp_t elapsed)
+{
+	int i, j;
+	fp_t r, cal, car;
+	fp_t bc[2][2] = {{1., 1.}, {1., 1.}};
+
+	for (j = nm/2; j < ny-nm/2; j++) {
+			for (i = nm/2; i < nx-nm/2; i++) {
+					/* shortest distance to left-wall source */
+					r = distance_point_to_segment(dx * (nm/2), dy * (nm/2),
+					                              dx * (nm/2), dy * (ny/2),
+					                              dx * i, dy * j);
+					analytical_value(r, elapsed, D, bc, &cal);
+
+					/* shortest distance to right-wall source */
+					r = distance_point_to_segment(dx * (nx-1-nm/2), dy * (ny/2),
+					                              dx * (nx-1-nm/2), dy * (ny-1-nm/2),
+					                              dx * i, dy * j);
+					analytical_value(r, elapsed, D, bc, &car);
+
+					/* superposition of analytical solutions */
+					conc[j][i] = cal + car;
+			}
+	}
+}
 
 /**
  \brief Run simulation using input parameters specified on the command line
@@ -51,6 +79,7 @@ int main(int argc, char* argv[])
 
 	/* declare mesh size and resolution */
 	fp_t **conc_old, **conc_new, **conc_lap, **mask_lap;
+
 	int nx=512, ny=512, nm=3, nth=4;
 	fp_t dx=0.5, dy=0.5, h=0.5;
 
@@ -149,7 +178,7 @@ int main(int argc, char* argv[])
 	make_arrays(&conc_old, &conc_new, &conc_lap, &mask_lap, nx, ny, nm);
 
 	start_time = GetTimer();
-	solve_diffusion_equation(conc_old, conc_old, conc_lap, nx, ny, dx, dy, nm, D, dt, dt);
+	solve_diffusion_equation(conc_old, nx, ny, nm, dx, dy, D, dt, dt);
 	step_time = GetTimer() - start_time;
 
 	/* write initial condition data */
@@ -173,7 +202,7 @@ int main(int argc, char* argv[])
 
 		if (step % checks == 0) {
 			start_time = GetTimer();
-			solve_diffusion_equation(conc_old, conc_new, conc_lap, nx, ny, dx, dy, nm, D, dt, elapsed);
+			solve_diffusion_equation(conc_new, nx, ny, nm, dx, dy, D, dt, elapsed);
 			step_time += GetTimer() - start_time;
 
 			start_time = GetTimer();
@@ -182,8 +211,6 @@ int main(int argc, char* argv[])
 		}
 
 		elapsed += dt;
-
-		swap_pointers(&conc_old, &conc_new);
 	}
 
 	/* clean up */

@@ -18,8 +18,8 @@
  **********************************************************************************/
 
 /**
- \file  common-diffusion/numerics.c
- \brief Implementation of boundary condition functions with OpenMP threading
+ \file  numerics.c
+ \brief Implementation of Laplacian operator and analytical solution functions
 */
 
 #include <assert.h>

@@ -18,7 +18,7 @@
  **********************************************************************************/
 
 /**
- \file  cpu-tbb-diffusion/discretization.cpp
+ \file  tbb_discretization.cpp
  \brief Implementation of boundary condition functions with TBB threading
 */
 

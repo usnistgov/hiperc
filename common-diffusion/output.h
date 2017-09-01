@@ -18,7 +18,7 @@
  **********************************************************************************/
 
 /**
- \file  common-diffusion/output.h
+ \file  output.h
  \brief Declaration of output function prototypes for diffusion benchmarks
 */
 

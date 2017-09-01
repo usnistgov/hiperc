@@ -18,7 +18,7 @@
  **********************************************************************************/
 
 /**
- \file  common-diffusion/main.c
+ \file  main.c
  \brief Implementation of semi-infinite diffusion equation
 */
 

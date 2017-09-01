@@ -15,7 +15,7 @@
  */
 
 /**
- \file   common-diffusion/timer.c
+ \file   timer.c
  \brief  High-resolution cross-platform machine time reader
  \author NVIDIA
 */

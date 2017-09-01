@@ -18,7 +18,7 @@
  **********************************************************************************/
 
 /**
- \file  common-diffusion/type.h
+ \file  type.h
  \brief Definition of scalar data type and Doxygen diffusion group
 */
 

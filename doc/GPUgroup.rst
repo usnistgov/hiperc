@@ -4,10 +4,32 @@
 GPU Reference
 *************
 
-.. doxygengroup:: cuda
-   :project: phasefield-accelerator-benchmarks
-   :members:
+gpu-cuda-diffusion
+==================
 
-.. doxygengroup:: openacc
+cuda_boundaries.c
+-----------------
+
+.. doxygenfile:: cuda_boundaries.c
    :project: phasefield-accelerator-benchmarks
-   :members:
+
+cuda_discretization.cu
+----------------------
+
+.. doxygenfile:: cuda_discretization.cu
+   :project: phasefield-accelerator-benchmarks
+
+gpu-openacc-diffusion
+=====================
+
+openacc_boundaries.c
+--------------------
+
+.. doxygenfile:: openacc_boundaries.c
+   :project: phasefield-accelerator-benchmarks
+
+openacc_discretization.c
+------------------------
+
+.. doxygenfile:: openacc_discretization.c
+   :project: phasefield-accelerator-benchmarks

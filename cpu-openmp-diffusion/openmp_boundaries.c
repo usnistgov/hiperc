@@ -17,8 +17,9 @@
  Questions/comments to Trevor Keller (trevor.keller@nist.gov)
  **********************************************************************************/
 
+
 /**
- \file  gpu-cuda-diffusion/boundaries.c
+ \file  openmp_boundaries.c
  \brief Implementation of boundary condition functions with OpenMP threading
 */
 

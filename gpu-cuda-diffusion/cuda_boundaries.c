@@ -18,7 +18,7 @@
  **********************************************************************************/
 
 /**
- \file  gpu-openacc-diffusion/boundaries.c
+ \file  cuda_boundaries.c
  \brief Implementation of boundary condition functions with OpenMP threading
 */
 

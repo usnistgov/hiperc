@@ -18,11 +18,12 @@
  **********************************************************************************/
 
 /**
- \file  cpu-serial-diffusion/discretization.c
- \brief Implementation of boundary condition functions without threading
+ \file  openmp_discretization.c
+ \brief Implementation of boundary condition functions with OpenMP threading
 */
 
 #include <math.h>
+#include <omp.h>
 #include "boundaries.h"
 #include "discretization.h"
 #include "numerics.h"
@@ -40,18 +41,22 @@
 void compute_convolution(fp_t** conc_old, fp_t** conc_lap, fp_t** mask_lap,
                          int nx, int ny, int nm)
 {
-	int i, j, mi, mj;
-	fp_t value;
+	#pragma omp parallel
+	{
+		int i, j, mi, mj;
+		fp_t value;
 
-	for (j = nm/2; j < ny-nm/2; j++) {
-		for (i = nm/2; i < nx-nm/2; i++) {
-			value = 0.0;
-			for (mj = -nm/2; mj < nm/2+1; mj++) {
-				for (mi = -nm/2; mi < nm/2+1; mi++) {
-					value += mask_lap[mj+nm/2][mi+nm/2] * conc_old[j+mj][i+mi];
+		#pragma omp for collapse(2)
+		for (j = nm/2; j < ny-nm/2; j++) {
+			for (i = nm/2; i < nx-nm/2; i++) {
+				value = 0.0;
+				for (mj = -nm/2; mj < nm/2+1; mj++) {
+					for (mi = -nm/2; mi < nm/2+1; mi++) {
+						value += mask_lap[mj+nm/2][mi+nm/2] * conc_old[j+mj][i+mi];
+					}
 				}
+				conc_lap[j][i] = value;
 			}
-			conc_lap[j][i] = value;
 		}
 	}
 }
@@ -65,6 +70,7 @@ void solve_diffusion_equation(fp_t** conc_old, fp_t** conc_new, fp_t** conc_lap,
                               struct Stopwatch* sw)
 {
 	int i, j;
+
 	double start_time=0.;
 
 	apply_boundary_conditions(conc_old, nx, ny, nm, bc);
@@ -74,6 +80,7 @@ void solve_diffusion_equation(fp_t** conc_old, fp_t** conc_new, fp_t** conc_lap,
 	sw->conv += GetTimer() - start_time;
 
 	start_time = GetTimer();
+	#pragma omp parallel for private(i,j) collapse(2)
 	for (j = nm/2; j < ny-nm/2; j++)
 		for (i = nm/2; i < nx-nm/2; i++)
 			conc_new[j][i] = conc_old[j][i] + dt * D * conc_lap[j][i];
@@ -84,37 +91,45 @@ void solve_diffusion_equation(fp_t** conc_old, fp_t** conc_new, fp_t** conc_lap,
 
 /**
  \brief Compare numerical and analytical solutions of the diffusion equation
- \return Residual sum of squares (RSS), normalized to the domain size.
+
+ Returns the residual sum of squares (RSS), normalized to the domain size.
 */
 void check_solution(fp_t** conc_new, int nx, int ny, fp_t dx, fp_t dy, int nm,
                     fp_t elapsed, fp_t D, fp_t bc[2][2], fp_t* rss)
 {
-	int i, j;
-	fp_t r, cal, car, ca, cn;
-	*rss = 0.0;
+	fp_t sum=0.;
+	#pragma omp parallel reduction(+:sum)
+	{
+		int i, j;
+		fp_t r, cal, car, ca, cn, trss;
 
-	for (j = nm/2; j < ny-nm/2; j++) {
-		for (i = nm/2; i < nx-nm/2; i++) {
-			/* numerical solution */
-			cn = conc_new[j][i];
+		#pragma omp for collapse(2)
+		for (j = nm/2; j < ny-nm/2; j++) {
+			for (i = nm/2; i < nx-nm/2; i++) {
+				/* numerical solution */
+				cn = conc_new[j][i];
 
-			/* shortest distance to left-wall source */
-			r = distance_point_to_segment(dx * (nm/2), dy * (nm/2),
-			                              dx * (nm/2), dy * (ny/2),
-			                              dx * i, dy * j);
-			analytical_value(r, elapsed, D, bc, &cal);
+				/* shortest distance to left-wall source */
+				r = distance_point_to_segment(dx * (nm/2), dy * (nm/2),
+				                              dx * (nm/2), dy * (ny/2),
+				                              dx * i, dy * j);
+				analytical_value(r, elapsed, D, bc, &cal);
 
-			/* shortest distance to right-wall source */
-			r = distance_point_to_segment(dx * (nx-1-nm/2), dy * (ny/2),
-			                              dx * (nx-1-nm/2), dy * (ny-1-nm/2),
-			                              dx * i, dy * j);
-			analytical_value(r, elapsed, D, bc, &car);
+				/* shortest distance to right-wall source */
+				r = distance_point_to_segment(dx * (nx-1-nm/2), dy * (ny/2),
+				                              dx * (nx-1-nm/2), dy * (ny-1-nm/2),
+				                              dx * i, dy * j);
+				analytical_value(r, elapsed, D, bc, &car);
 
-			/* superposition of analytical solutions */
-			ca = cal + car;
+				/* superposition of analytical solutions */
+				ca = cal + car;
 
-			/* residual sum of squares (RSS) */
-			*rss += (ca - cn) * (ca - cn) / (fp_t)((nx-1-nm/2) * (ny-1-nm/2));
+				/* residual sum of squares (RSS) */
+				trss = (ca - cn) * (ca - cn) / (fp_t)((nx-1-nm/2) * (ny-1-nm/2));
+				sum += trss;
+			}
 		}
 	}
+
+	*rss = sum;
 }

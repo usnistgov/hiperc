@@ -18,7 +18,7 @@
  **********************************************************************************/
 
 /**
- \file  common-diffusion/output.c
+ \file  output.c
  \brief Implementation of file output functions for diffusion benchmarks
 */
 

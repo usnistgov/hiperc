@@ -18,7 +18,7 @@
  **********************************************************************************/
 
 /**
- \file  common-diffusion/timer.h
+ \file  timer.h
  \brief Declaration of timer function prototypes for diffusion benchmarks
 */
 

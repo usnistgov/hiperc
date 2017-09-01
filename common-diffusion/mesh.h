@@ -18,7 +18,7 @@
  **********************************************************************************/
 
 /**
- \file  common-diffusion/mesh.h
+ \file  mesh.h
  \brief Declaration of mesh function prototypes for diffusion benchmarks
 */
 

@@ -18,7 +18,7 @@
  **********************************************************************************/
 
 /**
- \file  gpu-cuda-diffusion/discretization.cu
+ \file  cuda_discretization.cu
  \brief Implementation of boundary condition functions with CUDA acceleration
 */
 

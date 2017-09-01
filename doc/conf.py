@@ -177,7 +177,7 @@ man_pages = [
 #  dir menu entry, description, category)
 texinfo_documents = [
     (master_doc, 'phasefield-accelerator-benchmarks', u'phasefield-accelerator-benchmarks Documentation',
-     author, 'phasefield-accelerator-benchmarks', 'One line description of project.',
+     author, 'phasefield-accelerator-benchmarks', 'Computer hardware benchmarks for materials scientists.',
      'Miscellaneous'),
 ]
 
@@ -187,3 +187,16 @@ texinfo_documents = [
 breathe_projects = {"phasefield-accelerator-benchmarks": "xml"}
 
 breathe_default_project = "phasefield-accelerator-benchmarks"
+
+#breathe_domain_by_extension = {
+#    "h" : "c",
+#    "c" : "c",
+#    "cu" : "cpp",
+#    "cpp" : "cpp",
+#}
+
+#breathe_domain_by_file_pattern = {
+#    "*/common-diffusion/*" : "c",
+#    "*/cpu-tbb-diffusion/*" : "cpp",
+#    "*/gpu-cuda-diffusion/*" : "cpp",
+#}

@@ -71,105 +71,21 @@ void solve_diffusion_equation(fp_t** conc, int nx, int ny, int nm, fp_t dx, fp_t
 */
 int main(int argc, char* argv[])
 {
-	FILE * input, * output;
-
-	char buffer[256];
-	char* pch;
-	int ith=0, inx=0, iny=0, idx=0, idy=0, ins=0, inc=0, idc=0, ico=0;
+	FILE * output;
 
 	/* declare mesh size and resolution */
 	fp_t **conc_old, **conc_new, **conc_lap, **mask_lap;
-
-	int nx=512, ny=512, nm=3, nth=4;
+	int nx=512, ny=512, nm=3, code=53;
 	fp_t dx=0.5, dy=0.5, h=0.5;
 
 	/* declare materials and numerical parameters */
 	fp_t D=0.00625, linStab=0.1, dt=1., elapsed=0., rss=0.;
 	int step=0, steps=100000, checks=10000;
-	double start_time=0., conv_time=0., step_time=0., file_time=0., soln_time=0.;
+	double conv_time=0., file_time=0., soln_time=0., start_time=0., step_time=0.;
 
 	StartTimer();
 
-	if (argc != 2) {
-		printf("Error: improper arguments supplied.\nUsage: ./%s filename\n", argv[0]);
-		exit(-1);
-	}
-
-	input = fopen(argv[1], "r");
-	if (input == NULL) {
-		printf("Warning: unable to open parameter file %s. Marching with default values.\n", argv[1]);
-	} else {
-		/* read parameters */
-		while ( !feof(input))
-		{
-			/* process key-value pairs line-by-line */
-			if (fgets(buffer, 256, input) != NULL)
-			{
-				pch = strtok(buffer, " ");
-
-				if (strcmp(pch, "nt") == 0) {
-					pch = strtok(NULL, " ");
-					nth = atof(pch);
-					ith = 1;
-				} else if (strcmp(pch, "nx") == 0) {
-					pch = strtok(NULL, " ");
-					nx = atoi(pch);
-					inx = 1;
-				} else if (strcmp(pch, "ny") == 0) {
-					pch = strtok(NULL, " ");
-					ny = atoi(pch);
-					iny = 1;
-				} else if (strcmp(pch, "dx") == 0) {
-					pch = strtok(NULL, " ");
-					dx = atof(pch);
-					idx = 1;
-				} else if (strcmp(pch, "dy") == 0) {
-					pch = strtok(NULL, " ");
-					dy = atof(pch);
-					idy = 1;
-				} else if (strcmp(pch, "ns") == 0) {
-					pch = strtok(NULL, " ");
-					steps = atoi(pch);
-					ins = 1;
-				} else if (strcmp(pch, "nc") == 0) {
-					pch = strtok(NULL, " ");
-					checks = atoi(pch);
-					inc = 1;
-				} else if (strcmp(pch, "dc") == 0) {
-					pch = strtok(NULL, " ");
-					D = atof(pch);
-					idc = 1;
-				} else if (strcmp(pch, "co") == 0) {
-					pch = strtok(NULL, " ");
-					linStab = atof(pch);
-					ico = 1;
-				} else {
-					printf("Warning: unknown key %s. Ignoring value.\n", pch);
-				}
-			}
-		}
-
-		/* make sure we got everyone */
-		if (! ith) {
-			printf("Warning: parameter %s undefined. Using default value, %i.\n", "nt", nth);
-		} else if (! inx) {
-			printf("Warning: parameter %s undefined. Using default value, %i.\n", "nx", nx);
-		} else if (! iny) {
-			printf("Warning: parameter %s undefined. Using default value, %i.\n", "ny", ny);
-		} else if (! idx) {
-			printf("Warning: parameter %s undefined. Using default value, %f.\n", "dx", dx);
-		} else if (! idy) {
-			printf("Warning: parameter %s undefined. Using default value, %f.\n", "dy", dy);
-		} else if (! ins) {
-			printf("Warning: parameter %s undefined. Using default value, %i.\n", "ns", steps);
-		} else if (! inc) {
-			printf("Warning: parameter %s undefined. Using default value, %i.\n", "nc", checks);
-		} else if (! idc) {
-			printf("Warning: parameter %s undefined. Using default value, %f.\n", "dc", D);
-		} else if (! ico) {
-			printf("Warning: parameter %s undefined. Using default value, %f.\n", "co", linStab);
-		}
-	}
+	param_parser(argc, argv, &nx, &ny, &nm, &code, &dx, &dy, &D, &linStab, &steps, &checks);
 
 	h = (dx > dy) ? dy : dx;
 	dt = (linStab * h * h) / (4.0 * D);

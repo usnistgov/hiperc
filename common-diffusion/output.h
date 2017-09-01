@@ -27,6 +27,8 @@
 #ifndef _OUTPUT_H_
 #define _OUTPUT_H_
 
+void param_parser(int argc, char* argv[], int* nx, int* ny, int* nm, int* code, fp_t* dx, fp_t* dy, fp_t* D, fp_t* linStab, int* steps, int* checks);
+
 void print_progress(const int step, const int steps);
 
 void write_csv(fp_t** conc, int nx, int ny, fp_t dx, fp_t dy, int step);

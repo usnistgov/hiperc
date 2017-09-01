@@ -17,13 +17,13 @@
  Questions/comments to Trevor Keller (trevor.keller@nist.gov)
  **********************************************************************************/
 
-/** \addtogroup openmp
+/** \addtogroup DIFFUSION
  \{
 */
 
 /**
- \file  cpu-openmp-diffusion/boundaries.h
- \brief Declaration of boundary condition function prototypes for OpenMP benchmarks
+ \file  common-diffusion/boundaries.h
+ \brief Declaration of boundary condition function prototypes
 */
 
 #include "type.h"
@@ -32,7 +32,9 @@
 #define _BOUNDARIES_H_
 
 void set_boundaries(fp_t bc[2][2]);
+
 void apply_initial_conditions(fp_t** conc_old, int nx, int ny, int nm, fp_t bc[2][2]);
+
 void apply_boundary_conditions(fp_t** conc_old, int nx, int ny, int nm, fp_t bc[2][2]);
 
 #endif /* _BOUNDARIES_H_ */

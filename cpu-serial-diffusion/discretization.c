@@ -27,18 +27,10 @@
 */
 
 #include <math.h>
+#include "boundaries.h"
 #include "discretization.h"
 #include "numerics.h"
-
-/**
- \brief Set number of OpenMP threads to use in parallel code sections
-
- \warning Serial code contains no parallel sections: this setting has no effect.
-*/
-void set_threads(int n)
-{
-	/* nothing to do here */
-}
+#include "timer.h"
 
 /**
  \brief Perform the convolution of the mask matrix with the composition matrix
@@ -72,15 +64,26 @@ void compute_convolution(fp_t** conc_old, fp_t** conc_lap, fp_t** mask_lap,
  \brief Update the scalar composition field using old and Laplacian values
 */
 void solve_diffusion_equation(fp_t** conc_old, fp_t** conc_new, fp_t** conc_lap,
-                              int nx, int ny, int nm, fp_t D, fp_t dt, fp_t* elapsed)
+                              fp_t** mask_lap, int nx, int ny, int nm,
+                              fp_t bc[2][2], fp_t D, fp_t dt, fp_t* elapsed,
+                              struct Stopwatch* sw)
 {
 	int i, j;
+	double start_time=0.;
 
+	apply_boundary_conditions(conc_old, nx, ny, nm, bc);
+
+	start_time = GetTimer();
+	compute_convolution(conc_old, conc_lap, mask_lap, nx, ny, nm);
+	sw->conv += GetTimer() - start_time;
+
+	start_time = GetTimer();
 	for (j = nm/2; j < ny-nm/2; j++)
 		for (i = nm/2; i < nx-nm/2; i++)
 			conc_new[j][i] = conc_old[j][i] + dt * D * conc_lap[j][i];
 
 	*elapsed += dt;
+	sw->step += GetTimer() - start_time;
 }
 
 /**

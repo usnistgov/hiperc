@@ -17,24 +17,31 @@
  Questions/comments to Trevor Keller (trevor.keller@nist.gov)
  **********************************************************************************/
 
-/** \addtogroup tbb
+/** \addtogroup DIFFUSION
  \{
 */
 
 /**
- \file  cpu-tbb-diffusion/boundaries.h
- \brief Declaration of boundary condition function prototypes for TBB benchmarks
+ \file  common-diffusion/discretization.h
+ \brief Declaration of discretized mathematical function prototypes
 */
 
 #include "type.h"
 
-#ifndef _BOUNDARIES_H_
-#define _BOUNDARIES_H_
+#ifndef _DISCRETIZATION_H_
+#define _DISCRETIZATION_H_
 
-void set_boundaries(fp_t bc[2][2]);
-void apply_initial_conditions(fp_t** conc_old, int nx, int ny, int nm, fp_t bc[2][2]);
-void apply_boundary_conditions(fp_t** conc_old, int nx, int ny, int nm, fp_t bc[2][2]);
+void compute_convolution(fp_t** conc_old, fp_t** conc_lap, fp_t** mask_lap,
+                         int nx, int ny, int nm);
 
-#endif /* _BOUNDARIES_H_ */
+void solve_diffusion_equation(fp_t** conc_old, fp_t** conc_new, fp_t** conc_lap,
+                              fp_t** mask_lap, int nx, int ny, int nm,
+                              fp_t bc[2][2], fp_t D, fp_t dt, fp_t *elapsed,
+                              struct Stopwatch* sw);
+
+void check_solution(fp_t** conc_new, int nx, int ny, fp_t dx, fp_t dy, int nm,
+                    fp_t elapsed, fp_t D, fp_t bc[2][2], fp_t* rss);
+
+#endif /* _DISCRETIZATION_H_ */
 
 /** \} */

@@ -33,14 +33,6 @@
 #include "numerics.h"
 
 /**
- \brief Set number of OpenMP threads to use in CPU code sections
-*/
-void set_threads(int n)
-{
-	omp_set_num_threads(n);
-}
-
-/**
  \brief Perform the convolution of the mask matrix with the composition matrix
 
  If the convolution mask is the Laplacian stencil, the convolution evaluates
@@ -79,15 +71,25 @@ void compute_convolution(fp_t** conc_old, fp_t** conc_lap, fp_t** mask_lap,
 /**
  \brief Update the scalar composition field using old and Laplacian values
 */
-void solve_diffusion_equation(fp_t** conc_old, fp_t** conc_new, fp_t** conc_lap, int nx,
-                              int ny, int nm, fp_t D, fp_t dt, fp_t* elapsed)
+void solve_diffusion_equation(fp_t** conc_old, fp_t** conc_new, fp_t** conc_lap,
+                              fp_t** mask_lap, int nx, int ny, int nm,
+                              fp_t bc[2][2], fp_t D, fp_t dt, fp_t* elapsed,
+                              struct Stopwatch* sw)
 {
+	int i, j;
+	double start_time=0.;
+
+	apply_boundary_conditions(conc_old, nx, ny, nm, bc);
+
+	start_time = GetTimer();
+	compute_convolution(conc_old, conc_lap, mask_lap, nx, ny, nm);
+	sw->conv += GetTimer() - start_time;
+
+	start_time = GetTimer();
 	#pragma acc data copyin(conc_old[0:ny][0:nx], conc_lap[0:ny][0:nx]) copyout(conc_new[0:ny][0:nx])
 	{
 		#pragma acc parallel
 		{
-			int i, j;
-
 			#pragma acc loop
 			for (j = nm/2; j < ny-nm/2; j++) {
 				#pragma acc loop
@@ -99,6 +101,7 @@ void solve_diffusion_equation(fp_t** conc_old, fp_t** conc_new, fp_t** conc_lap,
 	}
 
 	*elapsed += dt;
+	sw->step += GetTimer() - start_time;
 }
 
 /**

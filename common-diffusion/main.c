@@ -105,15 +105,8 @@ int main(int argc, char* argv[])
 	for (step = 1; step < steps+1; step++) {
 		print_progress(step-1, steps);
 
-		apply_boundary_conditions(conc_old, nx, ny, nm, bc);
-
-		start_time = GetTimer();
-		compute_convolution(conc_old, conc_lap, mask_lap, nx, ny, nm);
-		sw.conv += GetTimer() - start_time;
-
-		start_time = GetTimer();
-		solve_diffusion_equation(conc_old, conc_new, conc_lap, nx, ny, nm, D, dt, &elapsed);
-		sw.step += GetTimer() - start_time;
+		solve_diffusion_equation(conc_old, conc_new, conc_lap, mask_lap,
+		                         nx, ny, nm, bc, D, dt, &elapsed, &sw);
 
 		if (step % checks == 0) {
 			start_time = GetTimer();

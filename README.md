@@ -4,7 +4,7 @@ Ever wonder if a GPU or Xeon Phi accelerator card would make your code faster?
 Fast enough to justify the expense to your manager, adviser, or funding agency?
 This project can help answer your questions!
 
-[![Documentation Status](https://readthedocs.org/projects/phasefield-accelerator-benchmarks/badge/?version=latest)](http://phasefield-accelerator-benchmarks.readthedocs.io/en/latest/?badge=latest)
+[![Documentation on readthedocs][doc_img]][doc_lnk] [![Conversation on Gitter][chat_img]][chat_lnk]
 
 The example codes in this repository implement the same basic algorithm using
 whichever of the mainstream accelerator programming methods apply. Running the
@@ -319,6 +319,10 @@ the best available for the purpose.
 [_doc]:      doc/phasefield-accelerator-benchmarks_guide.pdf
 [_initial_diffusion]: common-diffusion/diffusion.00000.png
 [_final_diffusion]:   common-diffusion/diffusion.10000.png
+[doc_img]:   https://readthedocs.org/projects/phasefield-accelerator-benchmarks/badge/?version=latest
+[doc_lnk]:   http://phasefield-accelerator-benchmarks.readthedocs.io/en/latest/?badge=latest
+[chat_img]:  https://badges.gitter.im/phasefield-accelerator-benchmarks/Lobby.svg
+[chat_lnk]:  https://gitter.im/phasefield-accelerator-benchmarks/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge
 [_issues]:   https://github.com/usnistgov/phasefield-accelerator-benchmarks/issues
 [_acc]:      https://www.openacc.org/
 [_amdtop]:   https://github.com/clbr/radeontop

@@ -1,5 +1,7 @@
 # phasefield-accelerator-benchmarks
 
+[![Join the chat at https://gitter.im/phasefield-accelerator-benchmarks/Lobby](https://badges.gitter.im/phasefield-accelerator-benchmarks/Lobby.svg)](https://gitter.im/phasefield-accelerator-benchmarks/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
 Ever wonder if a GPU or Xeon Phi accelerator card would make your code faster?
 Fast enough to justify the expense to your manager, adviser, or funding agency?
 This project can help answer your questions!

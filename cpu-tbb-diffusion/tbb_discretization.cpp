@@ -65,7 +65,7 @@ void compute_convolution(fp_t** conc_old, fp_t** conc_lap, fp_t** mask_lap,
 /**
  \brief Update the scalar composition field using old and Laplacian values
 */
-void solve_diffusion_equation(fp_t** conc_old, fp_t** B, fp_t** conc_lap,
+void solve_diffusion_equation(fp_t** conc_old, fp_t** conc_new, fp_t** conc_lap,
                               fp_t** mask_lap, int nx, int ny, int nm,
                               fp_t bc[2][2], fp_t D, fp_t dt, fp_t* elapsed,
                               struct Stopwatch* sw)
@@ -83,7 +83,7 @@ void solve_diffusion_equation(fp_t** conc_old, fp_t** B, fp_t** conc_lap,
 		[=](const tbb::blocked_range2d<int>& r) {
 			for (int j = r.cols().begin(); j != r.cols().end(); j++) {
 				for (int i = r.rows().begin(); i != r.rows().end(); i++) {
-					B[j][i] = conc_old[j][i] + dt * D * conc_lap[j][i];
+					conc_new[j][i] = conc_old[j][i] + dt * D * conc_lap[j][i];
 				}
 			}
 		}

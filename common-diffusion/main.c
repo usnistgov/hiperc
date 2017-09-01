@@ -107,7 +107,7 @@ int main(int argc, char* argv[])
 
 		if (step % 100 == 0) {
 			start_time = GetTimer();
-			check_solution(conc_new, nx, ny, dx, dy, nm, elapsed, D, bc, &rss);
+			check_solution(conc_new, conc_lap, nx, ny, dx, dy, nm, elapsed, D, bc, &rss);
 			sw.soln += GetTimer() - start_time;
 
 			fprintf(output, "%i,%f,%f,%f,%f,%f,%f,%f\n", step, elapsed, rss, sw.conv, sw.step, sw.file, sw.soln, GetTimer());

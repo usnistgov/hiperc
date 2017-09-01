@@ -42,22 +42,22 @@ void solve_diffusion_equation(fp_t** conc, int nx, int ny, int nm, fp_t dx, fp_t
 	fp_t bc[2][2] = {{1., 1.}, {1., 1.}};
 
 	for (j = nm/2; j < ny-nm/2; j++) {
-			for (i = nm/2; i < nx-nm/2; i++) {
-					/* shortest distance to left-wall source */
-					r = distance_point_to_segment(dx * (nm/2), dy * (nm/2),
-					                              dx * (nm/2), dy * (ny/2),
-					                              dx * i, dy * j);
-					analytical_value(r, elapsed, D, bc, &cal);
+		for (i = nm/2; i < nx-nm/2; i++) {
+			/* shortest distance to left-wall source */
+			r = distance_point_to_segment(dx * (nm/2), dy * (nm/2),
+			                              dx * (nm/2), dy * (ny/2),
+			                              dx * i, dy * j);
+			analytical_value(r, elapsed, D, bc, &cal);
 
-					/* shortest distance to right-wall source */
-					r = distance_point_to_segment(dx * (nx-1-nm/2), dy * (ny/2),
-					                              dx * (nx-1-nm/2), dy * (ny-1-nm/2),
-					                              dx * i, dy * j);
-					analytical_value(r, elapsed, D, bc, &car);
+			/* shortest distance to right-wall source */
+			r = distance_point_to_segment(dx * (nx-1-nm/2), dy * (ny/2),
+			                              dx * (nx-1-nm/2), dy * (ny-1-nm/2),
+			                              dx * i, dy * j);
+			analytical_value(r, elapsed, D, bc, &car);
 
-					/* superposition of analytical solutions */
-					conc[j][i] = cal + car;
-			}
+			/* superposition of analytical solutions */
+			conc[j][i] = cal + car;
+		}
 	}
 }
 

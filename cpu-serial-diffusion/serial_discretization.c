@@ -85,13 +85,16 @@ void solve_diffusion_equation(fp_t** conc_old, fp_t** conc_new, fp_t** conc_lap,
 /**
  \brief Compare numerical and analytical solutions of the diffusion equation
  \return Residual sum of squares (RSS), normalized to the domain size.
+
+ Overwrites \c conc_lap, into which the point-wise RSS is written.
+ Normalized RSS is then computed as the sum of the point-wise values.
 */
-void check_solution(fp_t** conc_new, int nx, int ny, fp_t dx, fp_t dy, int nm,
-                    fp_t elapsed, fp_t D, fp_t bc[2][2], fp_t* rss)
+void check_solution(fp_t** conc_new, fp_t** conc_lap, int nx, int ny,
+                    fp_t dx, fp_t dy, int nm, fp_t elapsed, fp_t D,
+                    fp_t bc[2][2], fp_t* rss)
 {
 	int i, j;
-	fp_t r, cal, car, ca, cn;
-	*rss = 0.0;
+	fp_t r, cal, car, ca, cn, sum=0.;
 
 	for (j = nm/2; j < ny-nm/2; j++) {
 		for (i = nm/2; i < nx-nm/2; i++) {
@@ -114,7 +117,15 @@ void check_solution(fp_t** conc_new, int nx, int ny, fp_t dx, fp_t dy, int nm,
 			ca = cal + car;
 
 			/* residual sum of squares (RSS) */
-			*rss += (ca - cn) * (ca - cn) / (fp_t)((nx-1-nm/2) * (ny-1-nm/2));
+			conc_lap[j][i] = (ca - cn) * (ca - cn) / (fp_t)((nx-1-nm/2) * (ny-1-nm/2));
 		}
 	}
+
+	for (j = nm/2; j < ny-nm/2; j++) {
+		for (i = nm/2; i < nx-nm/2; i++) {
+			sum += conc_lap[j][i];
+		}
+	}
+
+	*rss = sum;
 }

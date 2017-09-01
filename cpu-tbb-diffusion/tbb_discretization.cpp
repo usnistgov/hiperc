@@ -94,49 +94,54 @@ void solve_diffusion_equation(fp_t** conc_old, fp_t** conc_new, fp_t** conc_lap,
 }
 
 /**
- \brief Comparison algorithm for execution on the block of threads
+ \brief Parallel reduction for execution on the block of threads
 */
-class ResidualSumOfSquares2D {
-	fp_t** my_conc_new;
-	int my_nx;
-	int my_ny;
-	fp_t my_dx;
-	fp_t my_dy;
-	int my_nm;
-	fp_t my_elapsed;
-	fp_t my_D;
-	fp_t my_c;
+class Reduction2D {
+	fp_t** my_conc;
 
 	public:
-		fp_t my_rss;
+		fp_t my_sum;
 
 		/* constructors */
-		ResidualSumOfSquares2D(fp_t** conc_new, int nx, int ny, fp_t dx, fp_t dy, int nm,
-		                       fp_t elapsed, fp_t D, fp_t c)
-		                      : my_conc_new(conc_new), my_nx(nx), my_ny(ny),
-		                        my_dx(dx), my_dy(dy), my_nm(nm),
-		                        my_elapsed(elapsed), my_D(D), my_c(c), my_rss(0.0) {}
-		ResidualSumOfSquares2D(ResidualSumOfSquares2D& a, tbb::split)
-		                      : my_conc_new(a.my_conc_new), my_nx(a.my_nx), my_ny(a.my_ny),
-		                        my_dx(a.my_dx), my_dy(a.my_dy), my_nm(a.my_nm),
-		                        my_elapsed(a.my_elapsed), my_D(a.my_D), my_c(a.my_c),
-		                        my_rss(0.0) {}
+		Reduction2D(fp_t** conc) : my_conc(conc), my_sum(0.0) {}
+		Reduction2D(Reduction2D& a, tbb::split)
+		                      : my_conc(a.my_conc), my_sum(0.0) {}
 
 		/* modifier */
 		void operator()(const tbb::blocked_range2d<int>& r)
 		{
-			fp_t** conc_new = my_conc_new;
-			int nx = my_nx;
-			int ny = my_ny;
-			fp_t dx = my_dx;
-			fp_t dy = my_dy;
-			int nm = my_nm;
-			fp_t elapsed = my_elapsed;
-			fp_t D = my_D;
-			fp_t c = my_c;
-			fp_t sum = my_rss;
-			fp_t bc[2][2] = {{c, c}, {c, c}};
+			fp_t** conc = my_conc;
+			fp_t sum = my_sum;
 
+			for (int j = r.cols().begin(); j != r.cols().end(); j++) {
+				for (int i = r.rows().begin(); i != r.rows().end(); i++) {
+					sum += conc[j][i];
+				}
+			}
+			my_sum = sum;
+		}
+
+		/* reduction */
+		void join(const Reduction2D& a)
+		{
+			my_sum += a.my_sum;
+		}
+};
+
+/**
+ \brief Compare numerical and analytical solutions of the diffusion equation
+ \return Residual sum of squares (RSS), normalized to the domain size.
+
+ Overwrites \c conc_lap, into which the point-wise RSS is written.
+ Normalized RSS is then computed as the sum of the point-wise values
+ using parallel reduction.
+*/
+void check_solution(fp_t** conc_new, fp_t** conc_lap, int nx, int ny,
+                    fp_t dx, fp_t dy, int nm, fp_t elapsed, fp_t D,
+                    fp_t bc[2][2], fp_t* rss)
+{
+	tbb::parallel_for(tbb::blocked_range2d<int>(nm/2, nx-nm/2, nm/2, ny-nm/2),
+		[=](const tbb::blocked_range2d<int>& r) {
 			for (int j = r.cols().begin(); j != r.cols().end(); j++) {
 				for (int i = r.rows().begin(); i != r.rows().end(); i++) {
 					fp_t r, cal, car, ca, cn;
@@ -160,30 +165,14 @@ class ResidualSumOfSquares2D {
 					ca = cal + car;
 
 					/* residual sum of squares (RSS) */
-					sum += (ca - cn) * (ca - cn) / (fp_t)((nx-1-nm/2) * (ny-1-nm/2));
+					conc_lap[j][i] = (ca - cn) * (ca - cn) / (fp_t)((nx-1-nm/2) * (ny-1-nm/2));
 				}
 			}
-			my_rss = sum;
 		}
+	);
 
-		/* reduction */
-		void join(const ResidualSumOfSquares2D& a)
-		{
-			my_rss += a.my_rss;
-		}
-};
-
-/**
- \brief Compare numerical and analytical solutions of the diffusion equation
-
- Returns the residual sum of squares (RSS), normalized to the domain size.
-*/
-void check_solution(fp_t** conc_new, int nx, int ny, fp_t dx, fp_t dy, int nm,
-                    fp_t elapsed, fp_t D, fp_t bc[2][2], fp_t* rss)
-{
-	ResidualSumOfSquares2D R(conc_new, nx, ny, dx, dy, nm, elapsed, D, bc[1][0]);
-
+	Reduction2D R(conc_lap);
 	tbb::parallel_reduce(tbb::blocked_range2d<int>(nm/2, nx-nm/2, nm/2, ny-nm/2), R);
 
-	*rss = R.my_rss;
+	*rss = R.my_sum;
 }

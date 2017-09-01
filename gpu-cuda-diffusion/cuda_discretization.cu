@@ -217,43 +217,50 @@ void solve_diffusion_equation(fp_t** conc_old, fp_t** conc_new, fp_t** conc_lap,
 
 /**
  \brief Compare numerical and analytical solutions of the diffusion equation
+ \return Residual sum of squares (RSS), normalized to the domain size.
 
- Returns the residual sum of squares (RSS), normalized to the domain size.
+ Overwrites \c conc_lap, into which the point-wise RSS is written.
+ Normalized RSS is then computed as the sum of the point-wise values
+ using parallel reduction.
 */
-void check_solution(fp_t** conc_new, int nx, int ny, fp_t dx, fp_t dy, int nm,
-                    fp_t elapsed, fp_t D, fp_t bc[2][2], fp_t* rss)
+void check_solution(fp_t** conc_new, fp_t** conc_lap, int nx, int ny,
+                    fp_t dx, fp_t dy, int nm, fp_t elapsed, fp_t D,
+                    fp_t bc[2][2], fp_t* rss)
 {
 	fp_t sum=0.;
-	#pragma omp parallel reduction(+:sum)
-	{
-		int i, j;
-		fp_t r, cal, car, ca, cn, trss;
+	int i, j;
+	fp_t r, cal, car, ca, cn;
 
-		#pragma omp for collapse(2)
-		for (j = nm/2; j < ny-nm/2; j++) {
-			for (i = nm/2; i < nx-nm/2; i++) {
-				/* numerical solution */
-				cn = conc_new[j][i];
+	#pragma omp parallel for collapse(2) private(i,j)
+	for (j = nm/2; j < ny-nm/2; j++) {
+		for (i = nm/2; i < nx-nm/2; i++) {
+			/* numerical solution */
+			cn = conc_new[j][i];
 
-				/* shortest distance to left-wall source */
-				r = distance_point_to_segment(dx * (nm/2), dy * (nm/2),
-				                              dx * (nm/2), dy * (ny/2),
-				                              dx * i, dy * j);
-				analytical_value(r, elapsed, D, bc, &cal);
+			/* shortest distance to left-wall source */
+			r = distance_point_to_segment(dx * (nm/2), dy * (nm/2),
+			                              dx * (nm/2), dy * (ny/2),
+			                              dx * i, dy * j);
+			analytical_value(r, elapsed, D, bc, &cal);
 
-				/* shortest distance to right-wall source */
-				r = distance_point_to_segment(dx * (nx-1-nm/2), dy * (ny/2),
-				                              dx * (nx-1-nm/2), dy * (ny-1-nm/2),
-				                              dx * i, dy * j);
-				analytical_value(r, elapsed, D, bc, &car);
+			/* shortest distance to right-wall source */
+			r = distance_point_to_segment(dx * (nx-1-nm/2), dy * (ny/2),
+			                              dx * (nx-1-nm/2), dy * (ny-1-nm/2),
+			                              dx * i, dy * j);
+			analytical_value(r, elapsed, D, bc, &car);
 
-				/* superposition of analytical solutions */
-				ca = cal + car;
+			/* superposition of analytical solutions */
+			ca = cal + car;
 
-				/* residual sum of squares (RSS) */
-				trss = (ca - cn) * (ca - cn) / (fp_t)((nx-1-nm/2) * (ny-1-nm/2));
-				sum += trss;
-			}
+			/* residual sum of squares (RSS) */
+			conc_lap[j][i] = (ca - cn) * (ca - cn) / (fp_t)((nx-1-nm/2) * (ny-1-nm/2));
+		}
+	}
+
+	#pragma omp parallel for collapse(2) private(i,j) reduction(+:sum)
+	for (j = nm/2; j < ny-nm/2; j++) {
+		for (i = nm/2; i < nx-nm/2; i++) {
+			sum += conc_lap[j][i];
 		}
 	}
 

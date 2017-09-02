@@ -14,8 +14,8 @@ Welcome to phasefield-accelerator-benchmarks's documentation!
    CPUgroup  
    GPUgroup
 
-Indices and tables
-==================
+Looking for something specific?
+===============================
 
 * :ref:`genindex`
 * :ref:`search`

@@ -17,20 +17,39 @@
  Questions/comments to Trevor Keller (trevor.keller@nist.gov)
  **********************************************************************************/
 
+#ifndef _BOUNDARIES_H_
+#define _BOUNDARIES_H_
+
+#include "type.h"
+
 /**
  \file  boundaries.h
  \brief Declaration of boundary condition function prototypes
 */
 
-#include "type.h"
+/**
+ \brief Set values to be used along the simulation domain boundaries
 
-#ifndef _BOUNDARIES_H_
-#define _BOUNDARIES_H_
-
+ Indexing is row-major, i.e. \f$ A[y][x] \f$, so
+ \f$ bc = [[y_{lo},y_{hi}], [x_{lo},x_{hi}]] \f$.
+*/
 void set_boundaries(fp_t bc[2][2]);
 
+/**
+ \brief Initialize flat composition field with fixed boundary conditions
+
+ The boundary conditions are fixed values of \f$ c_{hi} \f$ along the lower-left
+ half and upper-right half walls, no flux everywhere else, with an initial
+ values of \f$ c_{lo} \f$ everywhere. These conditions represent a carburizing
+ process, with partial exposure (rather than the entire left and right walls)
+ to produce an inhomogeneous workload and highlight numerical errors at the
+ boundaries.
+*/
 void apply_initial_conditions(fp_t** conc_old, int nx, int ny, int nm, fp_t bc[2][2]);
 
+/**
+ \brief Set fixed value \f$ (c_{hi}) \f$ along left and bottom, zero-flux elsewhere
+*/
 void apply_boundary_conditions(fp_t** conc_old, int nx, int ny, int nm, fp_t bc[2][2]);
 
 #endif /* _BOUNDARIES_H_ */

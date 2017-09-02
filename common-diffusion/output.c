@@ -29,9 +29,6 @@
 #include <png.h>
 #include "output.h"
 
-/**
- \brief Read parameters from file specified on the command line
-*/
 void param_parser(int argc, char* argv[], int* nx, int* ny, int* nm, int* code, fp_t* dx, fp_t* dy, fp_t* D, fp_t* linStab, int* steps, int* checks)
 {
 	FILE * input;
@@ -123,18 +120,6 @@ void param_parser(int argc, char* argv[], int* nx, int* ny, int* nm, int* code, 
 	}
 }
 
-/**
- \brief Prints timestamps and a 20-point progress bar to stdout
-
- Call inside the timestepping loop, near the top, e.g.
- \code
- for (int step=0; step<steps; step++) {
- 	print_progress(step, steps);
- 	take_a_step();
- 	elapsed += dt;
- }
- \endcode
-*/
 void print_progress(const int step, const int steps)
 {
 	char* timestring;
@@ -160,9 +145,6 @@ void print_progress(const int step, const int steps)
 	}
 }
 
-/**
- \brief Writes scalar composition field to diffusion.???????.csv
-*/
 void write_csv(fp_t** conc, int nx, int ny, fp_t dx, fp_t dy, int step)
 {
 	int i, j;
@@ -197,13 +179,10 @@ void write_csv(fp_t** conc, int nx, int ny, fp_t dx, fp_t dy, int step)
 	fclose(output);
 }
 
-/**
- \brief Writes scalar composition field to diffusion.???????.png
-*/
 void write_png(fp_t** conc, int nx, int ny, int step)
 {
 	/* After "A simple libpng example program," http://zarb.org/~gc/html/libpng.html
-	   and the libong manual, http://www.libpng.org/pub/png */
+	   and the libpng manual, http://www.libpng.org/pub/png */
 
 	fp_t min, max, *c;
 	int i, j, w, h, n;

@@ -17,17 +17,22 @@
  Questions/comments to Trevor Keller (trevor.keller@nist.gov)
  **********************************************************************************/
 
+#ifndef _TIMER_H_
+#define _TIMER_H_
+
 /**
  \file  timer.h
  \brief Declaration of timer function prototypes for diffusion benchmarks
 */
 
-#include "type.h"
-
-#ifndef _TIMER_H_
-#define _TIMER_H_
-
+/**
+ \brief Set CPU frequency and begin timing
+*/
 void StartTimer();
+
+/**
+ \brief Return elapsed time in seconds
+*/
 double GetTimer();
 
 #endif /* _TIMER_H_ */

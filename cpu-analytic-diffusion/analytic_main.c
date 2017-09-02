@@ -62,12 +62,10 @@ void solve_diffusion_equation(fp_t** conc, int nx, int ny, int nm, fp_t dx, fp_t
 }
 
 /**
- \brief Run simulation using input parameters specified on the command line
+ \brief Find analytical solution at intervals specified in the parameters file
 
- Program will write a series of PNG image files to visualize the  scalar
- composition field, plus \c delta.png showing the difference between the
- analytical result and the image stored in
- \c ../common-diffusion/diffusion.10000.png.
+ Program will write a series of PNG image files to visualize the scalar
+ composition field, useful for qualitative verification of numerical results.
 */
 int main(int argc, char* argv[])
 {

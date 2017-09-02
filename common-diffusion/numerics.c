@@ -28,21 +28,6 @@
 #include <stdlib.h>
 #include "numerics.h"
 
-/**
- \brief Specify which stencil (mask) to use for the Laplacian (convolution)
-
- The mask corresponding to the numerical code will be applied. The suggested
- encoding is mask width as the ones digit and value count as the tens digit,
- \a e.g. five-point Laplacian is 53, nine-point is 93.
-
- To add your own mask (stencil), define its prototype in \c numerics.h,
- implement it in \c numerics.c, add a case to this function with your chosen
- numerical encoding, then specify that code in \c params.txt. Note that, for
- a Laplacian stencil, the sum of the coefficients must equal zero.
-
- If your stencil is larger than \f$ 5\times 5\f$, you must increase the values
- defined by \c MAX_MASK_W and \c MAX_MASK_H in \c numerics.h.
-*/
 void set_mask(fp_t dx, fp_t dy, int code, fp_t** mask_lap, int nm)
 {
     switch(code) {
@@ -63,11 +48,6 @@ void set_mask(fp_t dx, fp_t dy, int code, fp_t** mask_lap, int nm)
 	assert(nm <= MAX_MASK_H);
 }
 
-/**
- \brief Write 5-point Laplacian stencil into convolution mask
-
- \f$3\times3\f$ mask, 5 values, truncation error \f$\mathcal{O}(\Delta x^2)\f$
-*/
 void five_point_Laplacian_stencil(fp_t dx, fp_t dy, fp_t** mask_lap, int nm)
 {
 	assert(nm == 3);
@@ -79,11 +59,6 @@ void five_point_Laplacian_stencil(fp_t dx, fp_t dy, fp_t** mask_lap, int nm)
 	mask_lap[2][1] =  1. / (dy * dy); /* lower */
 }
 
-/**
- \brief Write 9-point Laplacian stencil into convolution mask
-
- \f$3\times3\f$ mask, 9 values, truncation error \f$\mathcal{O}(\Delta x^4)\f$
-*/
 void nine_point_Laplacian_stencil(fp_t dx, fp_t dy, fp_t** mask_lap, int nm)
 {
 	assert(nm == 3);
@@ -101,16 +76,6 @@ void nine_point_Laplacian_stencil(fp_t dx, fp_t dy, fp_t** mask_lap, int nm)
 	mask_lap[2][2] =   1. / (6. * dx * dy); /* lower-right */
 }
 
-/**
- \brief Write 9-point Laplacian stencil into convolution mask
-
- \f$5\times5\f$ mask, 9 values, truncation error \f$\mathcal{O}(\Delta x^4)\f$
-
- Provided for testing and demonstration of scalability, only:
- as the name indicates, this 9-point stencil is computationally
- more expensive than the \f$3\times3\f$ version. If your code requires
- \f$\mathcal{O}(\Delta x^4)\f$ accuracy, please use nine_point_Laplacian_stencil().
-*/
 void slow_nine_point_Laplacian_stencil(fp_t dx, fp_t dy, fp_t** mask_lap, int nm)
 {
 	assert(nm == 5);
@@ -130,29 +95,16 @@ void slow_nine_point_Laplacian_stencil(fp_t dx, fp_t dy, fp_t** mask_lap, int nm
 	mask_lap[4][2] = -1. / (12. * dy * dy); /* lower-lower-middle */
 }
 
-/**
- \brief Compute Euclidean distance between two points, \a a and \a b
-*/
 fp_t euclidean_distance(fp_t ax, fp_t ay, fp_t bx, fp_t by)
 {
 	return sqrt((ax - bx) * (ax - bx) + (ay - by) * (ay - by));
 }
 
-/**
- \brief Compute Manhattan distance between two points, \a a and \a b
-*/
 fp_t manhattan_distance(fp_t ax, fp_t ay, fp_t bx, fp_t by)
 {
 	return fabs(ax - bx) + fabs(ay - by);
 }
 
-/**
- \brief Compute minimum distance from point \a p to a line segment bounded by points \a a and \a b
-
- This function computes the projection of \a p onto \a ab, limiting the
- projected range to [0, 1] to handle projections that fall outside of \a ab.
- Implemented after Grumdrig on Stackoverflow, https://stackoverflow.com/a/1501725.
-*/
 fp_t distance_point_to_segment(fp_t ax, fp_t ay, fp_t bx, fp_t by, fp_t px, fp_t py)
 {
 	fp_t L2, t, zx, zy;
@@ -166,16 +118,6 @@ fp_t distance_point_to_segment(fp_t ax, fp_t ay, fp_t bx, fp_t by, fp_t px, fp_t
 	return euclidean_distance(px, py, zx, zy);
 }
 
-/**
- \brief Analytical solution of the diffusion equation for a carburizing process
-
- For 1D diffusion through a semi-infinite domain with initial and far-field
- composition \f$ c_{\infty} \f$ and boundary value \f$ c(x=0, t) = c_0 \f$
- with constant diffusivity \e D, the solution to Fick's second law is
- \f[ c(x,t) = c_0 - (c_0 - c_{\infty})\mathrm{erf}\left(\frac{x}{\sqrt{4Dt}}\right) \f]
- which reduces, when \f$ c_{\infty} = 0 \f$, to
- \f[ c(x,t) = c_0\left[1 - \mathrm{erf}\left(\frac{x}{\sqrt{4Dt}}\right)\right]. \f]
-*/
 void analytical_value(fp_t x, fp_t t, fp_t D, fp_t bc[2][2], fp_t* c)
 {
 	*c = bc[1][0] * (1.0 - erf(x / sqrt(4.0 * D * t)));

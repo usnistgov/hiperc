@@ -17,21 +17,38 @@
  Questions/comments to Trevor Keller (trevor.keller@nist.gov)
  **********************************************************************************/
 
+#ifndef _MESH_H_
+#define _MESH_H_
+
+#include "type.h"
+
 /**
  \file  mesh.h
  \brief Declaration of mesh function prototypes for diffusion benchmarks
 */
 
-#include "type.h"
+/**
+ \brief Allocate 2D arrays to store scalar composition values
 
-#ifndef _MESH_H_
-#define _MESH_H_
-
+ Arrays are allocated as 1D arrays, then 2D pointer arrays are mapped over the
+ top. This facilitates use of either 1D or 2D data access, depending on whether
+ the task is spatially dependent or not.
+*/
 void make_arrays(fp_t*** conc_old, fp_t*** conc_new, fp_t*** conc_lap, fp_t*** mask_lap,
                  int nx, int ny, int nm);
 
+/**
+ \brief Free dynamically allocated memory
+*/
 void free_arrays(fp_t** conc_old, fp_t** conc_new, fp_t** conc_lap, fp_t** mask_lap);
 
+/**
+ \brief Swap pointers to data underlying two arrays
+
+ Rather than copy data from \a conc_old into \a conc_new, an expensive
+ operation, simply trade the top-most pointers. New becomes old with no data
+ lost and in almost no time.
+*/
 void swap_pointers(fp_t*** conc_old, fp_t*** conc_new);
 
 #endif /* _MESH_H_ */

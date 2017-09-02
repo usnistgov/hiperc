@@ -33,3 +33,10 @@ openacc_discretization.c
 
 .. doxygenfile:: openacc_discretization.c
    :project: phasefield-accelerator-benchmarks
+
+Looking for something specific?
+===============================
+
+* :ref:`genindex`
+* :ref:`search`
+

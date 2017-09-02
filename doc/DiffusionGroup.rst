@@ -25,29 +25,34 @@ discretization.h
 .. doxygenfile:: discretization.h
    :project: phasefield-accelerator-benchmarks
 
-
 main.c
 ------
 
 .. doxygenfile:: main.c
    :project: phasefield-accelerator-benchmarks
 
-mesh.c
+mesh.h
 ------
 
-.. doxygenfile:: mesh.c
+.. doxygenfile:: mesh.h
    :project: phasefield-accelerator-benchmarks
 
-numerics.c
+numerics.h
 ----------
 
-.. doxygenfile:: numerics.c
+.. doxygenfile:: numerics.h
    :project: phasefield-accelerator-benchmarks
 
-output.c
+output.h
 --------
 
-.. doxygenfile:: output.c
+.. doxygenfile:: output.h
+   :project: phasefield-accelerator-benchmarks
+
+timer.h
+-------
+
+.. doxygenfile:: timer.h
    :project: phasefield-accelerator-benchmarks
 
 timer.c
@@ -55,3 +60,10 @@ timer.c
 
 .. doxygenfile:: timer.c
    :project: phasefield-accelerator-benchmarks
+
+Looking for something specific?
+===============================
+
+* :ref:`genindex`
+* :ref:`search`
+

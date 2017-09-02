@@ -57,3 +57,10 @@ tbb_discretization.cpp
 
 .. doxygenfile:: tbb_discretization.cpp
    :project: phasefield-accelerator-benchmarks
+
+Looking for something specific?
+===============================
+
+* :ref:`genindex`
+* :ref:`search`
+

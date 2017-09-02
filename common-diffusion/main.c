@@ -39,11 +39,11 @@
 
  Program will write a series of PNG image files to visualize scalar composition
  field, plus a final CSV raw data file and CSV runtime log tabulating the
- iteration counter (iter), elapsed simulation time (sim_time), system free
- energy (energy), error relative to analytical solution (wrss), time spent
- performing convolution (conv_time), time spent updating fields (step_time),
- time spent writing to disk (IO_time), time spent generating analytical values
- (soln_time), and total elapsed (run_time).
+ iteration counter (\a iter), elapsed simulation time (\a sim_time), system free
+ energy (\a energy), error relative to analytical solution (\a wrss), time spent
+ performing convolution (\a conv_time), time spent updating fields (\a step_time),
+ time spent writing to disk (\a IO_time), time spent generating analytical values
+ (\a soln_time), and total elapsed (\a run_time).
 */
 int main(int argc, char* argv[])
 {

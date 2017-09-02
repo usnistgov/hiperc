@@ -45,7 +45,7 @@ extern "C" {
 #define MAX_TILE_H 32
 
 /**
- \brief Allocate constant memory on the GPU for the convolution mask
+ \brief Convolution mask array on the GPU, allocated in protected memory
  \fn fp_t Mc[MAX_MASK_W * MAX_MASK_H]
 */
 __constant__ fp_t Mc[MAX_MASK_W * MAX_MASK_H];
@@ -56,18 +56,15 @@ __constant__ fp_t Mc[MAX_MASK_W * MAX_MASK_H];
 
  This function accesses 1D data rather than the 2D array representation of the
  scalar composition field, mapping into 2D tiles on the GPU with halo cells
- before computing the convolution
+ before computing the convolution. Note:
+ - The source matrix (\a conc_old) and destination matrix (\a conc_lap) must be identical in size
+ - One CUDA core operates on one array index: there is no nested loop over matrix elements
+ - The halo (\a nm/2 perimeter cells) in \a conc_lap are unallocated garbage
+ - The same cells in \a conc_old are boundary values, and contribute to the convolution
+ - \a conc_tile is the shared tile of input data, accessible by all threads in this block
 */
 __global__ void convolution_kernel(fp_t* conc_old, fp_t* conc_lap, int nx, int ny, int nm)
 {
-	/* Notes:
-		* The source matrix (conc_old) and destination matrix (conc_lap) must be identical in size
-		* One CUDA core operates on one array index: there is no nested loop over matrix elements
-		* The halo (nm/2 perimeter cells) in conc_lap are unallocated garbage
-		* The same cells in conc_old are boundary values, and contribute to the convolution
-		* N_ds is the shared tile data array... dunno where the name comes from yet
-	*/
-
 	int i, j, tx, ty,
 	    dst_row, dst_col, dst_tile_w, dst_tile_h,
 	    src_row, src_col, src_tile_w, src_tile_h;
@@ -91,16 +88,16 @@ __global__ void convolution_kernel(fp_t* conc_old, fp_t* conc_lap, int nx, int n
 	src_row = dst_row - nm/2;
 	src_col = dst_col - nm/2;
 
-	/* copy tile from conc_old: __shared__ gives access to all threads working on this tile */
-	__shared__ fp_t N_ds[MAX_TILE_H + MAX_MASK_H - 1][MAX_TILE_W + MAX_MASK_W - 1];
+	/* copy tile from conc_old: __shared__ gives access to all threads working on this tile	*/
+	__shared__ fp_t conc_tile[MAX_TILE_H + MAX_MASK_H - 1][MAX_TILE_W + MAX_MASK_W - 1];
 
 	if ((src_row >= 0) && (src_row < ny) &&
 	    (src_col >= 0) && (src_col < nx)) {
 		/* if src_row==0, then dst_row==nm/2: this is a halo row, still contributing to the output */
-		N_ds[ty][tx] = conc_old[src_row * nx + src_col];
+		conc_tile[ty][tx] = conc_old[src_row * nx + src_col];
 	} else {
 		/* points outside the halo should be switched off */
-		N_ds[ty][tx] = 0.;
+		conc_tile[ty][tx] = 0.;
 	}
 
 	/* tile data is shared: wait for all threads to finish copying */
@@ -110,7 +107,7 @@ __global__ void convolution_kernel(fp_t* conc_old, fp_t* conc_lap, int nx, int n
 	if (tx < dst_tile_w && ty < dst_tile_h) {
 		for (j = 0; j < nm; j++) {
 			for (i = 0; i < nm; i++) {
-				value += Mc[j * nm + i] * N_ds[j+ty][i+tx];
+				value += Mc[j * nm + i] * conc_tile[j+ty][i+tx];
 			}
 		}
 		/* record value */
@@ -123,15 +120,6 @@ __global__ void convolution_kernel(fp_t* conc_old, fp_t* conc_lap, int nx, int n
 	__syncthreads();
 }
 
-/**
- \brief Perform the convolution of the mask matrix with the composition matrix
-
- If the convolution mask is the Laplacian stencil, the convolution evaluates
- the discrete Laplacian of the composition field. Other masks are possible, for
- example the Sobel filters for edge detection. This function is general
- purpose: as long as the dimensions \c nx, \c ny, and \c nm are properly specified,
- the convolution will be correctly computed.
-*/
 void compute_convolution(fp_t** conc_old, fp_t** conc_lap, fp_t** mask_lap,
                          int nx, int ny, int nm)
 {
@@ -165,9 +153,6 @@ __global__ void diffusion_kernel(fp_t* conc_old, fp_t* conc_new, fp_t* conc_lap,
 	__syncthreads();
 }
 
-/**
- \brief Update the scalar composition field using old and Laplacian values
-*/
 void solve_diffusion_equation(fp_t** conc_old, fp_t** conc_new, fp_t** conc_lap,
                               fp_t** mask_lap, int nx, int ny, int nm,
                               fp_t bc[2][2], fp_t D, fp_t dt, fp_t* elapsed,
@@ -215,14 +200,6 @@ void solve_diffusion_equation(fp_t** conc_old, fp_t** conc_new, fp_t** conc_lap,
 	*elapsed += dt;
 }
 
-/**
- \brief Compare numerical and analytical solutions of the diffusion equation
- \return Residual sum of squares (RSS), normalized to the domain size.
-
- Overwrites \c conc_lap, into which the point-wise RSS is written.
- Normalized RSS is then computed as the sum of the point-wise values
- using parallel reduction.
-*/
 void check_solution(fp_t** conc_new, fp_t** conc_lap, int nx, int ny,
                     fp_t dx, fp_t dy, int nm, fp_t elapsed, fp_t D,
                     fp_t bc[2][2], fp_t* rss)

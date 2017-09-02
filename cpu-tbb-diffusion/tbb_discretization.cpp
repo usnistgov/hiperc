@@ -33,18 +33,10 @@
 #include "numerics.h"
 #include "timer.h"
 
-/**
- \brief Perform the convolution of the mask matrix with the composition matrix
-
- If the convolution mask is the Laplacian stencil, the convolution evaluates
- the discrete Laplacian of the composition field. Other masks are possible, for
- example the Sobel filters for edge detection. This function is general
- purpose: as long as the dimensions \c nx, \c ny, and \c nm are properly specified,
- the convolution will be correctly computed.
-*/
 void compute_convolution(fp_t** conc_old, fp_t** conc_lap, fp_t** mask_lap,
                          int nx, int ny, int nm)
 {
+	/* Lambda function executed on each thread, solving convolution	*/
 	tbb::parallel_for(tbb::blocked_range2d<int>(nm/2, nx-nm/2, nm/2, ny-nm/2),
 		[=](const tbb::blocked_range2d<int>& r) {
 			for (int j = r.cols().begin(); j != r.cols().end(); j++) {
@@ -62,9 +54,6 @@ void compute_convolution(fp_t** conc_old, fp_t** conc_lap, fp_t** mask_lap,
 	);
 }
 
-/**
- \brief Update the scalar composition field using old and Laplacian values
-*/
 void solve_diffusion_equation(fp_t** conc_old, fp_t** conc_new, fp_t** conc_lap,
                               fp_t** mask_lap, int nx, int ny, int nm,
                               fp_t bc[2][2], fp_t D, fp_t dt, fp_t* elapsed,
@@ -79,6 +68,7 @@ void solve_diffusion_equation(fp_t** conc_old, fp_t** conc_new, fp_t** conc_lap,
 	sw->conv += GetTimer() - start_time;
 
 	start_time = GetTimer();
+	/* Lambda function executed on each thread, updating diffusion equation */
 	tbb::parallel_for(tbb::blocked_range2d<int>(nm/2, nx-nm/2, nm/2, ny-nm/2),
 		[=](const tbb::blocked_range2d<int>& r) {
 			for (int j = r.cols().begin(); j != r.cols().end(); j++) {
@@ -93,21 +83,30 @@ void solve_diffusion_equation(fp_t** conc_old, fp_t** conc_new, fp_t** conc_lap,
 	sw->step += GetTimer() - start_time;
 }
 
-/**
- \brief Parallel reduction for execution on the block of threads
-*/
 class Reduction2D {
+	/* Local pointer to \a conc_new	*/
 	fp_t** my_conc;
 
 	public:
+		/**
+		 Local copy of variable to be reduced (summed) over my_conc
+		*/
 		fp_t my_sum;
 
-		/* constructors */
+		/**
+		 Initializing constructor using \a conc_new
+		*/
 		Reduction2D(fp_t** conc) : my_conc(conc), my_sum(0.0) {}
+
+		/**
+		 Copy constructor for dividing workload
+		*/
 		Reduction2D(Reduction2D& a, tbb::split)
 		                      : my_conc(a.my_conc), my_sum(0.0) {}
 
-		/* modifier */
+		/**
+		 Lambda function executed on each thread, summing local values
+		*/
 		void operator()(const tbb::blocked_range2d<int>& r)
 		{
 			fp_t** conc = my_conc;
@@ -121,25 +120,20 @@ class Reduction2D {
 			my_sum = sum;
 		}
 
-		/* reduction */
+		/**
+		 Parallel reduction, combining values from threads as they finish
+		*/
 		void join(const Reduction2D& a)
 		{
 			my_sum += a.my_sum;
 		}
 };
 
-/**
- \brief Compare numerical and analytical solutions of the diffusion equation
- \return Residual sum of squares (RSS), normalized to the domain size.
-
- Overwrites \c conc_lap, into which the point-wise RSS is written.
- Normalized RSS is then computed as the sum of the point-wise values
- using parallel reduction.
-*/
 void check_solution(fp_t** conc_new, fp_t** conc_lap, int nx, int ny,
                     fp_t dx, fp_t dy, int nm, fp_t elapsed, fp_t D,
                     fp_t bc[2][2], fp_t* rss)
 {
+	/* Lambda function executed on each thread, checking local values */
 	tbb::parallel_for(tbb::blocked_range2d<int>(nm/2, nx-nm/2, nm/2, ny-nm/2),
 		[=](const tbb::blocked_range2d<int>& r) {
 			for (int j = r.cols().begin(); j != r.cols().end(); j++) {

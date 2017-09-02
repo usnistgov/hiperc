@@ -17,33 +17,44 @@
  Questions/comments to Trevor Keller (trevor.keller@nist.gov)
  **********************************************************************************/
 
-/** \addtogroup openacc
- \{
-*/
-
-/**
- \file  gpu-openacc-diffusion/discretization.h
- \brief Declaration of discretized mathematical function prototypes for OpenAcc benchmarks
-*/
-
-#include "type.h"
-
 #ifndef _DISCRETIZATION_H_
 #define _DISCRETIZATION_H_
 
-void set_threads(int n);
+#include "type.h"
 
-void set_mask(fp_t dx, fp_t dy, int nm, fp_t** mask_lap);
+/**
+ \file  discretization.h
+ \brief Declaration of discretized mathematical function prototypes
+*/
 
+/**
+ \brief Perform the convolution of the mask matrix with the composition matrix
+
+ If the convolution mask is the Laplacian stencil, the convolution evaluates
+ the discrete Laplacian of the composition field. Other masks are possible, for
+ example the Sobel filters for edge detection. This function is general
+ purpose: as long as the dimensions \a nx, \a ny, and \a nm are properly specified,
+ the convolution will be correctly computed.
+*/
 void compute_convolution(fp_t** conc_old, fp_t** conc_lap, fp_t** mask_lap,
                          int nx, int ny, int nm);
 
-void solve_diffusion_equation(fp_t** conc_old, fp_t** conc_new, fp_t** conc_lap, int nx,
-                              int ny, int nm, fp_t D, fp_t dt, fp_t *elapsed);
+/**
+ \brief Update the scalar composition field using old and Laplacian values
+*/
+void solve_diffusion_equation(fp_t** conc_old, fp_t** conc_new, fp_t** conc_lap,
+                              fp_t** mask_lap, int nx, int ny, int nm,
+                              fp_t bc[2][2], fp_t D, fp_t dt, fp_t *elapsed,
+                              struct Stopwatch* sw);
 
-void check_solution(fp_t** conc_new, int nx, int ny, fp_t dx, fp_t dy, int nm,
-                    fp_t elapsed, fp_t D, fp_t bc[2][2], fp_t* rss);
+/**
+ \brief Compare numerical and analytical solutions of the diffusion equation
+ \return Residual sum of squares (RSS), normalized to the domain size.
+
+ Overwrites \a conc_lap, into which the point-wise RSS is written.
+ Normalized RSS is then computed as the sum of the point-wise values.
+*/
+void check_solution(fp_t** conc_new, fp_t** conc_lap, int nx, int ny, fp_t dx, fp_t dy,
+                    int nm, fp_t elapsed, fp_t D, fp_t bc[2][2], fp_t* rss);
 
 #endif /* _DISCRETIZATION_H_ */
-
-/** \} */

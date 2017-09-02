@@ -17,12 +17,8 @@
  Questions/comments to Trevor Keller (trevor.keller@nist.gov)
  **********************************************************************************/
 
-/** \addtogroup tbb
- \{
-*/
-
 /**
- \file  cpu-tbb-diffusion/discretization.cpp
+ \file  tbb_discretization.cpp
  \brief Implementation of boundary condition functions with TBB threading
 */
 
@@ -32,39 +28,15 @@
 #include <tbb/parallel_for.h>
 #include <tbb/parallel_reduce.h>
 #include <tbb/blocked_range2d.h>
+#include "boundaries.h"
 #include "discretization.h"
 #include "numerics.h"
+#include "timer.h"
 
-/**
- \brief Requested number of TBB threads to use in parallel code sections
-
- \warning This setting does not appear to have any effect.
-*/
-void set_threads(int n)
-{
-	tbb::task_scheduler_init init(n);
-}
-
-/**
- \brief Specify which stencil to use for the Laplacian
-*/
-void set_mask(fp_t dx, fp_t dy, int nm, fp_t** mask_lap)
-{
-	five_point_Laplacian_stencil(dx, dy, mask_lap);
-}
-
-/**
- \brief Perform the convolution of the mask matrix with the composition matrix
-
- If the convolution mask is the Laplacian stencil, the convolution evaluates
- the discrete Laplacian of the composition field. Other masks are possible, for
- example the Sobel filters for edge detection. This function is general
- purpose: as long as the dimensions \c nx, \c ny, and \c nm are properly specified,
- the convolution will be correctly computed.
-*/
 void compute_convolution(fp_t** conc_old, fp_t** conc_lap, fp_t** mask_lap,
                          int nx, int ny, int nm)
 {
+	/* Lambda function executed on each thread, solving convolution	*/
 	tbb::parallel_for(tbb::blocked_range2d<int>(nm/2, nx-nm/2, nm/2, ny-nm/2),
 		[=](const tbb::blocked_range2d<int>& r) {
 			for (int j = r.cols().begin(); j != r.cols().end(); j++) {
@@ -82,69 +54,88 @@ void compute_convolution(fp_t** conc_old, fp_t** conc_lap, fp_t** mask_lap,
 	);
 }
 
-/**
- \brief Update the scalar composition field using old and Laplacian values
-*/
-void solve_diffusion_equation(fp_t** conc_old, fp_t** B, fp_t** conc_lap, int nx,
-                              int ny, int nm, fp_t D, fp_t dt, fp_t* elapsed)
+void solve_diffusion_equation(fp_t** conc_old, fp_t** conc_new, fp_t** conc_lap,
+                              fp_t** mask_lap, int nx, int ny, int nm,
+                              fp_t bc[2][2], fp_t D, fp_t dt, fp_t* elapsed,
+                              struct Stopwatch* sw)
 {
+	double start_time=0.;
+
+	apply_boundary_conditions(conc_old, nx, ny, nm, bc);
+
+	start_time = GetTimer();
+	compute_convolution(conc_old, conc_lap, mask_lap, nx, ny, nm);
+	sw->conv += GetTimer() - start_time;
+
+	start_time = GetTimer();
+	/* Lambda function executed on each thread, updating diffusion equation */
 	tbb::parallel_for(tbb::blocked_range2d<int>(nm/2, nx-nm/2, nm/2, ny-nm/2),
 		[=](const tbb::blocked_range2d<int>& r) {
 			for (int j = r.cols().begin(); j != r.cols().end(); j++) {
 				for (int i = r.rows().begin(); i != r.rows().end(); i++) {
-					B[j][i] = conc_old[j][i] + dt * D * conc_lap[j][i];
+					conc_new[j][i] = conc_old[j][i] + dt * D * conc_lap[j][i];
 				}
 			}
 		}
 	);
 
 	*elapsed += dt;
+	sw->step += GetTimer() - start_time;
 }
 
-/**
- \brief Comparison algorithm for execution on the block of threads
-*/
-class ResidualSumOfSquares2D {
-	fp_t** my_conc_new;
-	int my_nx;
-	int my_ny;
-	fp_t my_dx;
-	fp_t my_dy;
-	int my_nm;
-	fp_t my_elapsed;
-	fp_t my_D;
-	fp_t my_c;
+class Reduction2D {
+	/* Local pointer to \a conc_new	*/
+	fp_t** my_conc;
 
 	public:
-		fp_t my_rss;
+		/**
+		 Local copy of variable to be reduced (summed) over my_conc
+		*/
+		fp_t my_sum;
 
-		/* constructors */
-		ResidualSumOfSquares2D(fp_t** conc_new, int nx, int ny, fp_t dx, fp_t dy, int nm,
-		                       fp_t elapsed, fp_t D, fp_t c)
-		                      : my_conc_new(conc_new), my_nx(nx), my_ny(ny),
-		                        my_dx(dx), my_dy(dy), my_nm(nm),
-		                        my_elapsed(elapsed), my_D(D), my_c(c), my_rss(0.0) {}
-		ResidualSumOfSquares2D(ResidualSumOfSquares2D& a, tbb::split)
-		                      : my_conc_new(a.my_conc_new), my_nx(a.my_nx), my_ny(a.my_ny),
-		                        my_dx(a.my_dx), my_dy(a.my_dy), my_nm(a.my_nm),
-		                        my_elapsed(a.my_elapsed), my_D(a.my_D), my_c(a.my_c),
-		                        my_rss(0.0) {}
+		/**
+		 Initializing constructor using \a conc_new
+		*/
+		Reduction2D(fp_t** conc) : my_conc(conc), my_sum(0.0) {}
 
-		/* modifier */
+		/**
+		 Copy constructor for dividing workload
+		*/
+		Reduction2D(Reduction2D& a, tbb::split)
+		                      : my_conc(a.my_conc), my_sum(0.0) {}
+
+		/**
+		 Lambda function executed on each thread, summing local values
+		*/
 		void operator()(const tbb::blocked_range2d<int>& r)
 		{
-			fp_t** conc_new = my_conc_new;
-			int nx = my_nx;
-			int ny = my_ny;
-			fp_t dx = my_dx;
-			fp_t dy = my_dy;
-			int nm = my_nm;
-			fp_t elapsed = my_elapsed;
-			fp_t D = my_D;
-			fp_t c = my_c;
-			fp_t sum = my_rss;
-			fp_t bc[2][2] = {{c, c}, {c, c}};
+			fp_t** conc = my_conc;
+			fp_t sum = my_sum;
 
+			for (int j = r.cols().begin(); j != r.cols().end(); j++) {
+				for (int i = r.rows().begin(); i != r.rows().end(); i++) {
+					sum += conc[j][i];
+				}
+			}
+			my_sum = sum;
+		}
+
+		/**
+		 Parallel reduction, combining values from threads as they finish
+		*/
+		void join(const Reduction2D& a)
+		{
+			my_sum += a.my_sum;
+		}
+};
+
+void check_solution(fp_t** conc_new, fp_t** conc_lap, int nx, int ny,
+                    fp_t dx, fp_t dy, int nm, fp_t elapsed, fp_t D,
+                    fp_t bc[2][2], fp_t* rss)
+{
+	/* Lambda function executed on each thread, checking local values */
+	tbb::parallel_for(tbb::blocked_range2d<int>(nm/2, nx-nm/2, nm/2, ny-nm/2),
+		[=](const tbb::blocked_range2d<int>& r) {
 			for (int j = r.cols().begin(); j != r.cols().end(); j++) {
 				for (int i = r.rows().begin(); i != r.rows().end(); i++) {
 					fp_t r, cal, car, ca, cn;
@@ -168,32 +159,14 @@ class ResidualSumOfSquares2D {
 					ca = cal + car;
 
 					/* residual sum of squares (RSS) */
-					sum += (ca - cn) * (ca - cn) / (fp_t)((nx-1-nm/2) * (ny-1-nm/2));
+					conc_lap[j][i] = (ca - cn) * (ca - cn) / (fp_t)((nx-1-nm/2) * (ny-1-nm/2));
 				}
 			}
-			my_rss = sum;
 		}
+	);
 
-		/* reduction */
-		void join(const ResidualSumOfSquares2D& a)
-		{
-			my_rss += a.my_rss;
-		}
-};
-
-/**
- \brief Compare numerical and analytical solutions of the diffusion equation
-
- Returns the residual sum of squares (RSS), normalized to the domain size.
-*/
-void check_solution(fp_t** conc_new, int nx, int ny, fp_t dx, fp_t dy, int nm,
-                    fp_t elapsed, fp_t D, fp_t bc[2][2], fp_t* rss)
-{
-	ResidualSumOfSquares2D R(conc_new, nx, ny, dx, dy, nm, elapsed, D, bc[1][0]);
-
+	Reduction2D R(conc_lap);
 	tbb::parallel_reduce(tbb::blocked_range2d<int>(nm/2, nx-nm/2, nm/2, ny-nm/2), R);
 
-	*rss = R.my_rss;
+	*rss = R.my_sum;
 }
-
-/** \} */

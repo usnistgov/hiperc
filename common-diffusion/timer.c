@@ -14,12 +14,8 @@
  *  limitations under the License.
  */
 
-/** \addtogroup DIFFUSION
- \{
-*/
-
 /**
- \file   common-diffusion/timer.c
+ \file   timer.c
  \brief  High-resolution cross-platform machine time reader
  \author NVIDIA
 */
@@ -49,9 +45,6 @@ __int64 timerStart = 0;
 struct timeval timerStart;
 #endif
 
-/**
- \brief Set CPU frequency and begin timing
-*/
 void StartTimer()
 {
 #ifdef WIN32
@@ -68,9 +61,6 @@ void StartTimer()
 #endif
 }
 
-/**
- \brief Return elapsed time in seconds
-*/
 double GetTimer()
 {
 #ifdef WIN32
@@ -84,5 +74,3 @@ double GetTimer()
     return timerElapsed.tv_sec+timerElapsed.tv_usec/1000000.0;
 #endif
 }
-
-/** \} */

@@ -7,15 +7,15 @@ Welcome to phasefield-accelerator-benchmarks's documentation!
 =============================================================
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 3
    :caption: Contents:
 
    DiffusionGroup
    CPUgroup  
    GPUgroup
 
-Indices and tables
-==================
+Looking for something specific?
+===============================
 
 * :ref:`genindex`
 * :ref:`search`

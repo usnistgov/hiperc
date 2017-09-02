@@ -17,24 +17,14 @@
  Questions/comments to Trevor Keller (trevor.keller@nist.gov)
  **********************************************************************************/
 
-/** \addtogroup openmp
- \{
-*/
-
 /**
- \file  cpu-openmp-diffusion/boundaries.c
- \brief Implementation of boundary condition functions with OpenMP threading
+ \file  serial_boundaries.c
+ \brief Implementation of boundary condition functions without threading
 */
 
 #include <math.h>
-#include <omp.h>
 #include "boundaries.h"
 
-/**
- \brief Set values to be used along the simulation domain boundaries
-
- Indexing is row-major, i.e. \f$A[y][x]\f$, so \f$\mathrm{bc} = [[y_{lo},y_{hi}], [x_{lo},x_{hi}]]\f$.
-*/
 void set_boundaries(fp_t bc[2][2])
 {
 	fp_t clo = 0.0, chi = 1.0;
@@ -44,59 +34,35 @@ void set_boundaries(fp_t bc[2][2])
 	bc[1][1] = chi; /* right boundary */
 }
 
-/**
- \brief Initialize flat composition field with fixed boundary conditions
-
- The boundary conditions are fixed values of \f$c_{hi}\f$ along the lower-left half and
- upper-right half walls, no flux everywhere else, with an initial values of \f$c_{lo}\f$
- everywhere. These conditions represent a carburizing process, with partial
- exposure (rather than the entire left and right walls) to produce an
- inhomogeneous workload and highlight numerical errors at the boundaries.
-*/
 void apply_initial_conditions(fp_t** conc, int nx, int ny, int nm, fp_t bc[2][2])
 {
-	#pragma omp parallel
-	{
-		int i, j;
+	int i, j;
 
-		#pragma omp for collapse(2)
-		for (j = 0; j < ny; j++)
-			for (i = 0; i < nx; i++)
-				conc[j][i] = bc[0][0];
+	for (j = 0; j < ny; j++)
+		for (i = 0; i < nx; i++)
+			conc[j][i] = bc[0][0];
 
-		#pragma omp for collapse(2)
-		for (j = 0; j < ny/2; j++)
-			for (i = 0; i < 1+nm/2; i++)
-				conc[j][i] = bc[1][0]; /* left half-wall */
+	for (j = 0; j < ny/2; j++)
+		for (i = 0; i < 1+nm/2; i++)
+			conc[j][i] = bc[1][0]; /* left half-wall */
 
-		#pragma omp for collapse(2)
-		for (j = ny/2; j < ny; j++)
-			for (i = nx-1-nm/2; i < nx; i++)
-				conc[j][i] = bc[1][1]; /* right half-wall */
-	}
+	for (j = ny/2; j < ny; j++)
+		for (i = nx-1-nm/2; i < nx; i++)
+			conc[j][i] = bc[1][1]; /* right half-wall */
 }
 
-/**
- \brief Set fixed value (\f$c_{hi}\f$) along left and bottom, zero-flux elsewhere
-*/
 void apply_boundary_conditions(fp_t** conc, int nx, int ny, int nm, fp_t bc[2][2])
 {
 	int i, j;
 
-	#pragma omp parallel
-	{
-		#pragma omp for collapse(2) private(i,j)
-		for (j = 0; j < ny/2; j++)
-			for (i = 0; i < 1+nm/2; i++)
-				conc[j][i] = bc[1][0]; /* left value */
+	for (j = 0; j < ny/2; j++)
+		for (i = 0; i < 1+nm/2; i++)
+			conc[j][i] = bc[1][0]; /* left value */
 
-		#pragma omp for collapse(2) private(i,j)
-		for (j = ny/2; j < ny; j++)
-			for (i = nx-1-nm/2; i < nx; i++)
-				conc[j][i] = bc[1][1]; /* right value */
-	}
+	for (j = ny/2; j < ny; j++)
+		for (i = nx-1-nm/2; i < nx; i++)
+			conc[j][i] = bc[1][1]; /* right value */
 
-	/* sequence matters: cannot trivially parallelize */
 	for (j = 0; j < ny; j++) {
 		for (i = nm/2; i > 0; i--)
 			conc[j][i-1] = conc[j][i]; /* left condition */
@@ -111,5 +77,3 @@ void apply_boundary_conditions(fp_t** conc, int nx, int ny, int nm, fp_t bc[2][2
 			conc[j+1][i] = conc[j][i]; /* top condition */
 	}
 }
-
-/** \} */

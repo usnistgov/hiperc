@@ -17,31 +17,71 @@
  Questions/comments to Trevor Keller (trevor.keller@nist.gov)
  **********************************************************************************/
 
-/** \addtogroup analytic
- \{
-*/
-
 /**
- \file  cpu-analytic-diffusion/discretization.c
- \brief Implementation of analytical solution functions
+ \file  serial_discretization.c
+ \brief Implementation of boundary condition functions without threading
 */
 
 #include <math.h>
+#include "boundaries.h"
 #include "discretization.h"
 #include "numerics.h"
+#include "timer.h"
 
-/**
- \brief Update the scalar composition field using analytical solution
-*/
-void solve_diffusion_equation(fp_t** conc_old, fp_t** conc_new, fp_t** conc_lap, int nx,
-                              int ny, fp_t dx, fp_t dy, int nm, fp_t D, fp_t dt, fp_t elapsed)
+void compute_convolution(fp_t** conc_old, fp_t** conc_lap, fp_t** mask_lap,
+                         int nx, int ny, int nm)
 {
-	int i, j;
-	fp_t r, cal, car;
-	fp_t bc[2][2] = {{1., 1.}, {1., 1.}};
+	int i, j, mi, mj;
+	fp_t value;
 
 	for (j = nm/2; j < ny-nm/2; j++) {
 		for (i = nm/2; i < nx-nm/2; i++) {
+			value = 0.0;
+			for (mj = -nm/2; mj < nm/2+1; mj++) {
+				for (mi = -nm/2; mi < nm/2+1; mi++) {
+					value += mask_lap[mj+nm/2][mi+nm/2] * conc_old[j+mj][i+mi];
+				}
+			}
+			conc_lap[j][i] = value;
+		}
+	}
+}
+
+void solve_diffusion_equation(fp_t** conc_old, fp_t** conc_new, fp_t** conc_lap,
+                              fp_t** mask_lap, int nx, int ny, int nm,
+                              fp_t bc[2][2], fp_t D, fp_t dt, fp_t* elapsed,
+                              struct Stopwatch* sw)
+{
+	int i, j;
+	double start_time=0.;
+
+	apply_boundary_conditions(conc_old, nx, ny, nm, bc);
+
+	start_time = GetTimer();
+	compute_convolution(conc_old, conc_lap, mask_lap, nx, ny, nm);
+	sw->conv += GetTimer() - start_time;
+
+	start_time = GetTimer();
+	for (j = nm/2; j < ny-nm/2; j++)
+		for (i = nm/2; i < nx-nm/2; i++)
+			conc_new[j][i] = conc_old[j][i] + dt * D * conc_lap[j][i];
+
+	*elapsed += dt;
+	sw->step += GetTimer() - start_time;
+}
+
+void check_solution(fp_t** conc_new, fp_t** conc_lap, int nx, int ny,
+                    fp_t dx, fp_t dy, int nm, fp_t elapsed, fp_t D,
+                    fp_t bc[2][2], fp_t* rss)
+{
+	int i, j;
+	fp_t r, cal, car, ca, cn, sum=0.;
+
+	for (j = nm/2; j < ny-nm/2; j++) {
+		for (i = nm/2; i < nx-nm/2; i++) {
+			/* numerical solution */
+			cn = conc_new[j][i];
+
 			/* shortest distance to left-wall source */
 			r = distance_point_to_segment(dx * (nm/2), dy * (nm/2),
 			                              dx * (nm/2), dy * (ny/2),
@@ -55,9 +95,18 @@ void solve_diffusion_equation(fp_t** conc_old, fp_t** conc_new, fp_t** conc_lap,
 			analytical_value(r, elapsed, D, bc, &car);
 
 			/* superposition of analytical solutions */
-			conc_new[j][i] = cal + car;
+			ca = cal + car;
+
+			/* residual sum of squares (RSS) */
+			conc_lap[j][i] = (ca - cn) * (ca - cn) / (fp_t)((nx-1-nm/2) * (ny-1-nm/2));
 		}
 	}
-}
 
-/** \} */
+	for (j = nm/2; j < ny-nm/2; j++) {
+		for (i = nm/2; i < nx-nm/2; i++) {
+			sum += conc_lap[j][i];
+		}
+	}
+
+	*rss = sum;
+}

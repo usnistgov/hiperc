@@ -232,9 +232,9 @@ summary file, ```runlog.csv```, containing the following columns:
  - **soln_time**: cumulative real time spent computing the analytical solution
  - **run_time**: elapsed real time
 
-At timestep 10,000 the expected ```wrss=0.002895``` using the 5-point stencil;
-the rendered initial and final images should look like these (grayscale,
-```0``` is black and ```1``` is white):
+At timestep 10,000 the expected ```wrss=0.002895``` (0.2%) using the 5-point
+stencil; the rendered initial and final images should look like these
+(grayscale, ```0``` is black and ```1``` is white):
 
 | *t* = 0&middot;&Delta;*t*           | *t*=10000&middot;&Delta;*t*     |
 | :---------------------------------: | :-----------------------------: |
@@ -247,10 +247,13 @@ partial exposure (rather than the entire left and right walls) to produce an
 inhomogeneous workload and highlight numerical errors at the boundaries.
 
 If your compiler returns warnings or errors, your simulation results do not look
-like this, or if your final ```wrss``` deviates from the expected value,
-something may be wrong with the installation, hardware, or implementation.
+like this, or if ```wrss``` at *t*=10000&middot;&Delta;*t* is greater than 0.5%
+or so, something may be wrong with the installation, hardware, or implementation.
 Please [file an issue][_issues] and share what happened.
 You probably found a bug!
+> Note that a flat field of zeros at *t*=10000&middot;&Delta;*t*, about as wrong
+an answer as possible, gives ```wrss=0.07493``` (7.5%) relative to the
+analytical solution. Small differences in ```wrss``` indicate large errors.
 
 ## Reusing the Demonstration Code
 

@@ -17,27 +17,15 @@
  Questions/comments to Trevor Keller (trevor.keller@nist.gov)
  **********************************************************************************/
 
-/** \addtogroup DIFFUSION
- \{
-*/
-
 /**
- \file  common-diffusion/mesh.c
+ \file  mesh.c
  \brief Implemenatation of mesh handling functions for diffusion benchmarks
 */
 
 #include <stdio.h>
 #include <stdlib.h>
-
 #include "mesh.h"
 
-/**
- \brief Allocate 2D arrays to store scalar composition values
-
- Arrays are allocated as 1D arrays, then 2D pointer arrays are mapped over the
- top. This facilitates use of either 1D or 2D data access, depending on whether
- the task is spatially dependent or not.
-*/
 void make_arrays(fp_t*** conc_old, fp_t*** conc_new, fp_t*** conc_lap, fp_t*** mask_lap,
                  int nx, int ny, int nm)
 {
@@ -67,9 +55,6 @@ void make_arrays(fp_t*** conc_old, fp_t*** conc_new, fp_t*** conc_lap, fp_t*** m
 	}
 }
 
-/**
- \brief Free dynamically allocated memory
-*/
 void free_arrays(fp_t** conc_old, fp_t** conc_new, fp_t** conc_lap, fp_t** mask_lap)
 {
 	free(conc_old[0]);
@@ -85,13 +70,6 @@ void free_arrays(fp_t** conc_old, fp_t** conc_new, fp_t** conc_lap, fp_t** mask_
 	free(mask_lap);
 }
 
-/**
- \brief Swap pointers to data underlying two arrays
-
- Rather than copy data from conc_old into conc_new, an expensive operation,
- simply trade the top-most pointers. New becomes old with no data lost and
- in almost no time.
-*/
 void swap_pointers(fp_t*** conc_old, fp_t*** conc_new)
 {
 	fp_t** temp;
@@ -100,5 +78,3 @@ void swap_pointers(fp_t*** conc_old, fp_t*** conc_new)
 	(*conc_old) = (*conc_new);
 	(*conc_new) = temp;
 }
-
-/** \} */

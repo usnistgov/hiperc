@@ -17,91 +17,74 @@
  Questions/comments to Trevor Keller (trevor.keller@nist.gov)
  **********************************************************************************/
 
-/** \addtogroup serial
- \{
-*/
-
 /**
- \file  cpu-serial-diffusion/discretization.c
- \brief Implementation of boundary condition functions without threading
+ \file  openmp_discretization.c
+ \brief Implementation of boundary condition functions with OpenMP threading
 */
 
 #include <math.h>
+#include <omp.h>
+#include "boundaries.h"
 #include "discretization.h"
 #include "numerics.h"
+#include "timer.h"
 
-/**
- \brief Set number of OpenMP threads to use in parallel code sections
-
- \warning Serial code contains no parallel sections: this setting has no effect.
-*/
-void set_threads(int n)
-{
-	/* nothing to do here */
-}
-
-/**
- \brief Specify which stencil to use for the Laplacian
-*/
-void set_mask(fp_t dx, fp_t dy, int nm, fp_t** mask_lap)
-{
-	five_point_Laplacian_stencil(dx, dy, mask_lap);
-}
-
-/**
- \brief Perform the convolution of the mask matrix with the composition matrix
-
- If the convolution mask is the Laplacian stencil, the convolution evaluates
- the discrete Laplacian of the composition field. Other masks are possible, for
- example the Sobel filters for edge detection. This function is general
- purpose: as long as the dimensions \c nx, \c ny, and \c nm are properly specified,
- the convolution will be correctly computed.
-*/
 void compute_convolution(fp_t** conc_old, fp_t** conc_lap, fp_t** mask_lap,
                          int nx, int ny, int nm)
 {
-	int i, j, mi, mj;
-	fp_t value;
+	#pragma omp parallel
+	{
+		int i, j, mi, mj;
+		fp_t value;
 
-	for (j = nm/2; j < ny-nm/2; j++) {
-		for (i = nm/2; i < nx-nm/2; i++) {
-			value = 0.0;
-			for (mj = -nm/2; mj < nm/2+1; mj++) {
-				for (mi = -nm/2; mi < nm/2+1; mi++) {
-					value += mask_lap[mj+nm/2][mi+nm/2] * conc_old[j+mj][i+mi];
+		#pragma omp for collapse(2)
+		for (j = nm/2; j < ny-nm/2; j++) {
+			for (i = nm/2; i < nx-nm/2; i++) {
+				value = 0.0;
+				for (mj = -nm/2; mj < nm/2+1; mj++) {
+					for (mi = -nm/2; mi < nm/2+1; mi++) {
+						value += mask_lap[mj+nm/2][mi+nm/2] * conc_old[j+mj][i+mi];
+					}
 				}
+				conc_lap[j][i] = value;
 			}
-			conc_lap[j][i] = value;
 		}
 	}
 }
 
-/**
- \brief Update the scalar composition field using old and Laplacian values
-*/
 void solve_diffusion_equation(fp_t** conc_old, fp_t** conc_new, fp_t** conc_lap,
-                              int nx, int ny, int nm, fp_t D, fp_t dt, fp_t* elapsed)
+                              fp_t** mask_lap, int nx, int ny, int nm,
+                              fp_t bc[2][2], fp_t D, fp_t dt, fp_t* elapsed,
+                              struct Stopwatch* sw)
 {
 	int i, j;
 
+	double start_time=0.;
+
+	apply_boundary_conditions(conc_old, nx, ny, nm, bc);
+
+	start_time = GetTimer();
+	compute_convolution(conc_old, conc_lap, mask_lap, nx, ny, nm);
+	sw->conv += GetTimer() - start_time;
+
+	start_time = GetTimer();
+	#pragma omp parallel for private(i,j) collapse(2)
 	for (j = nm/2; j < ny-nm/2; j++)
 		for (i = nm/2; i < nx-nm/2; i++)
 			conc_new[j][i] = conc_old[j][i] + dt * D * conc_lap[j][i];
 
 	*elapsed += dt;
+	sw->step += GetTimer() - start_time;
 }
 
-/**
- \brief Compare numerical and analytical solutions of the diffusion equation
- \return Residual sum of squares (RSS), normalized to the domain size.
-*/
-void check_solution(fp_t** conc_new, int nx, int ny, fp_t dx, fp_t dy, int nm,
+void check_solution(fp_t** conc_new, fp_t** conc_lap, int nx, int ny, fp_t dx, fp_t dy, int nm,
                     fp_t elapsed, fp_t D, fp_t bc[2][2], fp_t* rss)
 {
+	fp_t sum=0.;
 	int i, j;
 	fp_t r, cal, car, ca, cn;
-	*rss = 0.0;
 
+	#pragma omp parallel for collapse(2) private(i,j)
 	for (j = nm/2; j < ny-nm/2; j++) {
 		for (i = nm/2; i < nx-nm/2; i++) {
 			/* numerical solution */
@@ -123,9 +106,16 @@ void check_solution(fp_t** conc_new, int nx, int ny, fp_t dx, fp_t dy, int nm,
 			ca = cal + car;
 
 			/* residual sum of squares (RSS) */
-			*rss += (ca - cn) * (ca - cn) / (fp_t)((nx-1-nm/2) * (ny-1-nm/2));
+			conc_lap[j][i] = (ca - cn) * (ca - cn) / (fp_t)((nx-1-nm/2) * (ny-1-nm/2));
 		}
 	}
-}
 
-/** \} */
+	#pragma omp parallel for collapse(2) private(i,j) reduction(+:sum)
+	for (j = nm/2; j < ny-nm/2; j++) {
+		for (i = nm/2; i < nx-nm/2; i++) {
+			sum += conc_lap[j][i];
+		}
+	}
+
+	*rss = sum;
+}

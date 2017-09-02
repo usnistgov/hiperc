@@ -17,12 +17,8 @@
  Questions/comments to Trevor Keller (trevor.keller@nist.gov)
  **********************************************************************************/
 
-/** \addtogroup openacc
- \{
-*/
-
 /**
- \file  gpu-openacc-diffusion/discretization.c
+ \file  openacc_discretization.c
  \brief Implementation of boundary condition functions with OpenACC threading
 */
 
@@ -32,41 +28,28 @@
 #include "discretization.h"
 #include "numerics.h"
 
-/**
- \brief Set number of OpenMP threads to use in CPU code sections
-*/
-void set_threads(int n)
-{
-	omp_set_num_threads(n);
-}
-
-/**
- \brief Specify which stencil to use for the Laplacian
-*/
-void set_mask(fp_t dx, fp_t dy, int nm, fp_t** mask_lap)
-{
-	five_point_Laplacian_stencil(dx, dy, mask_lap);
-}
-
-/**
- \brief Perform the convolution of the mask matrix with the composition matrix
-
- If the convolution mask is the Laplacian stencil, the convolution evaluates
- the discrete Laplacian of the composition field. Other masks are possible, for
- example the Sobel filters for edge detection. This function is general
- purpose: as long as the dimensions \c nx, \c ny, and \c nm are properly specified,
- the convolution will be correctly computed.
-*/
 void compute_convolution(fp_t** conc_old, fp_t** conc_lap, fp_t** mask_lap,
                          int nx, int ny, int nm)
 {
-	#pragma acc data copyin(conc_old[0:ny][0:nx], mask_lap[0:nm][0:nm]) copyout(conc_lap[0:ny][0:nx])
+	/* OpenAcc does not support nested accelerator functions */
+}
+
+void solve_diffusion_equation(fp_t** conc_old, fp_t** conc_new, fp_t** conc_lap,
+                              fp_t** mask_lap, int nx, int ny, int nm,
+                              fp_t bc[2][2], fp_t D, fp_t dt, fp_t* elapsed,
+                              struct Stopwatch* sw)
+{
+	int i, j, mi, mj;
+	fp_t value=0.;
+	double start_time=0.;
+
+	apply_boundary_conditions(conc_old, nx, ny, nm, bc);
+
+	start_time = GetTimer();
+	#pragma acc data copyin(conc_old[0:ny][0:nx], mask_lap[0:nm][0:nm]) create(conc_lap[0:ny][0:nx]) copyout(conc_new[0:ny][0:nx])
 	{
 		#pragma acc parallel
 		{
-			int i, j, mi, mj;
-			fp_t value;
-
 			#pragma acc loop
 			for (j = nm/2; j < ny-nm/2; j++) {
 				#pragma acc loop
@@ -81,21 +64,11 @@ void compute_convolution(fp_t** conc_old, fp_t** conc_lap, fp_t** mask_lap,
 				}
 			}
 		}
-	}
-}
+		sw->conv += GetTimer() - start_time;
 
-/**
- \brief Update the scalar composition field using old and Laplacian values
-*/
-void solve_diffusion_equation(fp_t** conc_old, fp_t** conc_new, fp_t** conc_lap, int nx,
-                              int ny, int nm, fp_t D, fp_t dt, fp_t* elapsed)
-{
-	#pragma acc data copyin(conc_old[0:ny][0:nx], conc_lap[0:ny][0:nx]) copyout(conc_new[0:ny][0:nx])
-	{
+		start_time = GetTimer();
 		#pragma acc parallel
 		{
-			int i, j;
-
 			#pragma acc loop
 			for (j = nm/2; j < ny-nm/2; j++) {
 				#pragma acc loop
@@ -107,31 +80,23 @@ void solve_diffusion_equation(fp_t** conc_old, fp_t** conc_new, fp_t** conc_lap,
 	}
 
 	*elapsed += dt;
+	sw->step += GetTimer() - start_time;
 }
 
-/**
- \brief Compare numerical and analytical solutions of the diffusion equation
-
- Returns the residual sum of squares (RSS), normalized to the domain size.
-
- For 1D diffusion through a semi-infinite domain with initial and far-field
- composition \f$ c_{\infty} \f$ and boundary value \f$ c(x=0, t) = c_0 \f$
- with constant diffusivity \e D, the solution to Fick's second law is
- \f[ c(x,t) = c_0 - (c_0 - c_{\infty})\mathrm{erf}\left(\frac{x}{\sqrt{4Dt}}\right) \f]
- which reduces, when \f$ c_{\infty} = 0 \f$, to
- \f[ c(x,t) = c_0\left[1 - \mathrm{erf}\left(\frac{x}{\sqrt{4Dt}}\right)\right]. \f]
-*/
-void check_solution(fp_t** conc_new, int nx, int ny, fp_t dx, fp_t dy, int nm,
-                    fp_t elapsed, fp_t D, fp_t bc[2][2], fp_t* rss)
+void check_solution(fp_t** conc_new, fp_t** conc_lap, int nx, int ny,
+                    fp_t dx, fp_t dy, int nm, fp_t elapsed, fp_t D,
+                    fp_t bc[2][2], fp_t* rss)
 {
 	/* OpenCL does not have a GPU-based erf() definition, using Maclaurin series approximation */
+
+	int i, j;
 	fp_t sum=0.;
+
 	#pragma acc data copyin(conc_new[0:ny][0:nx], bc[0:2][0:2]) copy(sum)
 	{
-		#pragma acc parallel reduction(+:sum)
+		#pragma acc parallel
 		{
-			int i, j;
-			fp_t ca, cal, car, cn, poly_erf, r, trss, z, z2;
+			fp_t ca, cal, car, cn, poly_erf, r, z, z2;
 
 			#pragma acc loop
 			for (j = nm/2; j < ny-nm/2; j++) {
@@ -166,8 +131,18 @@ void check_solution(fp_t** conc_new, int nx, int ny, fp_t dx, fp_t dy, int nm,
 					ca = cal + car;
 
 					/* residual sum of squares (RSS) */
-					trss = (ca - cn) * (ca - cn) / (fp_t)((nx-1-nm/2) * (ny-1-nm/2));
-					sum += trss;
+					conc_lap[j][i] = (ca - cn) * (ca - cn) / (fp_t)((nx-1-nm/2) * (ny-1-nm/2));
+				}
+			}
+		}
+
+		#pragma acc parallel reduction(+:sum)
+		{
+			#pragma acc loop
+			for (j = nm/2; j < ny-nm/2; j++) {
+				#pragma acc loop
+				for (i = nm/2; i < nx-nm/2; i++) {
+					sum += conc_lap[j][i];
 				}
 			}
 		}
@@ -175,5 +150,3 @@ void check_solution(fp_t** conc_new, int nx, int ny, fp_t dx, fp_t dy, int nm,
 
 	*rss = sum;
 }
-
-/** \} */

@@ -17,12 +17,8 @@
  Questions/comments to Trevor Keller (trevor.keller@nist.gov)
  **********************************************************************************/
 
-/** \addtogroup tbb
- \{
-*/
-
 /**
- \file  cpu-tbb-diffusion/boundaries.cpp
+ \file  tbb_boundaries.cpp
  \brief Implementation of boundary condition functions with TBB threading
 */
 
@@ -33,11 +29,6 @@
 #include <tbb/blocked_range2d.h>
 #include "boundaries.h"
 
-/**
- \brief Set values to be used along the simulation domain boundaries
-
- Indexing is row-major, i.e. \f$A[y][x]\f$, so \f$\mathrm{bc} = [[y_{lo},y_{hi}], [x_{lo},x_{hi}]]\f$.
-*/
 void set_boundaries(fp_t bc[2][2])
 {
 	fp_t clo = 0.0, chi = 1.0;
@@ -47,18 +38,9 @@ void set_boundaries(fp_t bc[2][2])
 	bc[1][1] = chi; /* right boundary */
 }
 
-/**
- \brief Initialize flat composition field with fixed boundary conditions
-
- The boundary conditions are fixed values of \f$c_{hi}\f$ along the lower-left half and
- upper-right half walls, no flux everywhere else, with an initial values of \f$c_{lo}\f$
- everywhere. These conditions represent a carburizing process, with partial
- exposure (rather than the entire left and right walls) to produce an
- inhomogeneous workload and highlight numerical errors at the boundaries.
-*/
 void apply_initial_conditions(fp_t** conc, int nx, int ny, int nm, fp_t bc[2][2])
 {
-	/* apply flat field values  (lambda function) */
+	/* Lambda function executed on each thread, applying flat field values */
 	tbb::parallel_for(tbb::blocked_range2d<int>(0, nx, 0, ny),
 		[=](const tbb::blocked_range2d<int>& r) {
 			for (int j = r.cols().begin(); j != r.cols().end(); j++) {
@@ -69,7 +51,7 @@ void apply_initial_conditions(fp_t** conc, int nx, int ny, int nm, fp_t bc[2][2]
 		}
 	);
 
-	/* apply left boundary values  (lambda function) */
+	/* Lambda function executed on each thread, applying left boundary values */
 	tbb::parallel_for(tbb::blocked_range2d<int>(0, 1+nm/2, 0, ny/2),
 		[=](const tbb::blocked_range2d<int>& r) {
 			for (int j = r.cols().begin(); j != r.cols().end(); j++) {
@@ -80,8 +62,8 @@ void apply_initial_conditions(fp_t** conc, int nx, int ny, int nm, fp_t bc[2][2]
 		}
 	);
 
-	/* apply right boundary values  (lambda function) */
-	tbb::parallel_for( tbb::blocked_range2d<int>(nx-1-nm/2, nx, ny/2, ny),
+	/* Lambda function executed on each thread, applying right boundary values */
+	tbb::parallel_for(tbb::blocked_range2d<int>(nx-1-nm/2, nx, ny/2, ny),
 		[=](const tbb::blocked_range2d<int>& r) {
 			for (int j = r.cols().begin(); j != r.cols().end(); j++) {
 				for (int i = r.rows().begin(); i != r.rows().end(); i++) {
@@ -92,12 +74,9 @@ void apply_initial_conditions(fp_t** conc, int nx, int ny, int nm, fp_t bc[2][2]
 	);
 }
 
-/**
- \brief Set fixed value (\f$c_{hi}\f$) along left and bottom, zero-flux elsewhere
-*/
 void apply_boundary_conditions(fp_t** conc, int nx, int ny, int nm, fp_t bc[2][2])
 {
-	/* apply left boundary values  (lambda function) */
+	/* Lambda function executed on each thread, applying left boundary values */
 	tbb::parallel_for(tbb::blocked_range2d<int>(0, 1+nm/2, 0, ny/2),
 		[=](const tbb::blocked_range2d<int>& r) {
 			for (int j = r.cols().begin(); j != r.cols().end(); j++) {
@@ -108,8 +87,8 @@ void apply_boundary_conditions(fp_t** conc, int nx, int ny, int nm, fp_t bc[2][2
 		}
 	);
 
-	/* apply right boundary values  (lambda function) */
-	tbb::parallel_for( tbb::blocked_range2d<int>(nx-1-nm/2, nx, ny/2, ny),
+	/* Lambda function executed on each thread, applying right boundary values */
+	tbb::parallel_for(tbb::blocked_range2d<int>(nx-1-nm/2, nx, ny/2, ny),
 		[=](const tbb::blocked_range2d<int>& r) {
 			for (int j = r.cols().begin(); j != r.cols().end(); j++) {
 				for (int i = r.rows().begin(); i != r.rows().end(); i++) {
@@ -134,5 +113,3 @@ void apply_boundary_conditions(fp_t** conc, int nx, int ny, int nm, fp_t bc[2][2
 			conc[j+1][i] = conc[j][i]; /* top condition */
 	}
 }
-
-/** \} */

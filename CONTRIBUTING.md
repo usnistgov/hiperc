@@ -1,4 +1,4 @@
-# Contributing to the [Phase-field Accelerator Benchmarks][_PFAB] Repository
+# Contributing to the [Phase-field Accelerator Benchmarks][_PFAB]
 
 Thank you for spending some time with the source code. I hope you'll contribute!
 
@@ -55,12 +55,12 @@ summarized below. Please do not commit directly to the ```master``` branch.
    your fork directly in the browser, then file a [pull request][_pr].
 3. For most changes, clone your fork to your local machine, then create a
    working branch off of ```master```. If you're working, for example, on issue
-   #42, **summarize usage in pseudocode**, create a branch called
+   #42, *summarize usage in pseudocode*, create a branch called
    ```issue42_summarize-usage-in-pseudocode``` by executing
    ```git checkout -b issue42_summarize-usage-in-pseudocode master```.
 4. Make changes on the issue branch. In your commit messages, use the keywords
    ["Addresses" or "Closes"][_ghkey] where appropriate.
-5. When finished, push the **working branch** to your fork on GitHub, **e.g.**
+5. When finished, push the *working branch* to your fork on GitHub, *e.g.*
    ```git push origin issue42_summarize-usage-in-pseudocode```.
 6. Visit GitHub and make the pull request official.
 
@@ -72,6 +72,7 @@ which we typically conduct using [reviewable][_review].
 [_PFAB]:    https://github.com/usnistgov/phasefield-accelerator-benchmarks
 [_branch]:  http://nvie.com/posts/a-successful-git-branching-model/
 [_conduct]: https://github.com/usnistgov/phasefield-accelerator-benchmarks/blob/master/CODE_OF_CONDUCT.md
+[_doxy]:    https://www.stack.nl/~dimitri/doxygen/manual/docblocks.html
 [_gcc]:     https://gcc.gnu.org/
 [_ghhelp]:  https://help.github.com/
 [_ghkey]:   https://help.github.com/articles/closing-issues-using-keywords/

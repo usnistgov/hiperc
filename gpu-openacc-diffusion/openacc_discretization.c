@@ -89,18 +89,18 @@ void check_solution(fp_t** conc_new, fp_t** conc_lap, int nx, int ny,
 {
 	/* OpenCL does not have a GPU-based erf() definition, using Maclaurin series approximation */
 
-	int i, j;
 	fp_t sum=0.;
 
 	#pragma acc data copyin(conc_new[0:ny][0:nx], bc[0:2][0:2]) copy(sum)
 	{
-		#pragma acc parallel
+		#pragma acc parallel reduction(+:sum)
 		{
+			int i, j;
 			fp_t ca, cal, car, cn, poly_erf, r, z, z2;
 
-			#pragma acc loop
+			#pragma acc loop private(ca,cal,car,cn,i,j,r)
 			for (j = nm/2; j < ny-nm/2; j++) {
-				#pragma acc loop
+				#pragma acc loop private(ca,cal,car,cn,i,j,r)
 				for (i = nm/2; i < nx-nm/2; i++) {
 					/* numerical solution */
 					cn = conc_new[j][i];
@@ -134,13 +134,10 @@ void check_solution(fp_t** conc_new, fp_t** conc_lap, int nx, int ny,
 					conc_lap[j][i] = (ca - cn) * (ca - cn) / (fp_t)((nx-1-nm/2) * (ny-1-nm/2));
 				}
 			}
-		}
 
-		#pragma acc parallel reduction(+:sum)
-		{
-			#pragma acc loop
+			#pragma acc loop private(i,j)
 			for (j = nm/2; j < ny-nm/2; j++) {
-				#pragma acc loop
+				#pragma acc loop private(i,j)
 				for (i = nm/2; i < nx-nm/2; i++) {
 					sum += conc_lap[j][i];
 				}

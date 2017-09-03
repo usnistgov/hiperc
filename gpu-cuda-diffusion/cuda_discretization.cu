@@ -205,39 +205,43 @@ void check_solution(fp_t** conc_new, fp_t** conc_lap, int nx, int ny,
                     fp_t bc[2][2], fp_t* rss)
 {
 	fp_t sum=0.;
-	int i, j;
-	fp_t r, cal, car, ca, cn;
 
-	#pragma omp parallel for collapse(2) private(i,j)
-	for (j = nm/2; j < ny-nm/2; j++) {
-		for (i = nm/2; i < nx-nm/2; i++) {
-			/* numerical solution */
-			cn = conc_new[j][i];
+	#pragma omp parallel reduction(+:sum)
+	{
+		int i, j;
+		fp_t r, cal, car, ca, cn;
 
-			/* shortest distance to left-wall source */
-			r = distance_point_to_segment(dx * (nm/2), dy * (nm/2),
-			                              dx * (nm/2), dy * (ny/2),
-			                              dx * i, dy * j);
-			analytical_value(r, elapsed, D, bc, &cal);
+		#pragma omp for collapse(2) private(ca,cal,car,cn,i,j,r)
+		for (j = nm/2; j < ny-nm/2; j++) {
+			for (i = nm/2; i < nx-nm/2; i++) {
+				/* numerical solution */
+				cn = conc_new[j][i];
 
-			/* shortest distance to right-wall source */
-			r = distance_point_to_segment(dx * (nx-1-nm/2), dy * (ny/2),
-			                              dx * (nx-1-nm/2), dy * (ny-1-nm/2),
-			                              dx * i, dy * j);
-			analytical_value(r, elapsed, D, bc, &car);
+				/* shortest distance to left-wall source */
+				r = distance_point_to_segment(dx * (nm/2), dy * (nm/2),
+				                              dx * (nm/2), dy * (ny/2),
+				                              dx * i, dy * j);
+				analytical_value(r, elapsed, D, bc, &cal);
 
-			/* superposition of analytical solutions */
-			ca = cal + car;
+				/* shortest distance to right-wall source */
+				r = distance_point_to_segment(dx * (nx-1-nm/2), dy * (ny/2),
+				                              dx * (nx-1-nm/2), dy * (ny-1-nm/2),
+				                              dx * i, dy * j);
+				analytical_value(r, elapsed, D, bc, &car);
 
-			/* residual sum of squares (RSS) */
-			conc_lap[j][i] = (ca - cn) * (ca - cn) / (fp_t)((nx-1-nm/2) * (ny-1-nm/2));
+				/* superposition of analytical solutions */
+				ca = cal + car;
+
+				/* residual sum of squares (RSS) */
+				conc_lap[j][i] = (ca - cn) * (ca - cn) / (fp_t)((nx-1-nm/2) * (ny-1-nm/2));
+			}
 		}
-	}
 
-	#pragma omp parallel for collapse(2) private(i,j) reduction(+:sum)
-	for (j = nm/2; j < ny-nm/2; j++) {
-		for (i = nm/2; i < nx-nm/2; i++) {
-			sum += conc_lap[j][i];
+		#pragma omp for collapse(2) private(i,j)
+		for (j = nm/2; j < ny-nm/2; j++) {
+			for (i = nm/2; i < nx-nm/2; i++) {
+				sum += conc_lap[j][i];
+			}
 		}
 	}
 

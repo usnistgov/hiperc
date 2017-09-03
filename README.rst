@@ -63,11 +63,12 @@ CUDA_
    gpucc), libraries, and a compatible graphics card or accelerator.
 
 `Xeon Phi`_
-   Low-level and loop-level massive parallelism for
-   ccNUMA_ multicore CPU-based accelerators supporting AVX-512
-   vectorized instructions. Programmed like threaded CPU code, but with more
-   opportunities for tuning and much greater performance. Only available
-   through the Intel compiler, and requires Xeon Phi hardware.
+   Low-level and loop-level massive parallelism for ccNUMA_ many-integrated-core
+   CPU architectures supporting AVX-512 vectorized instructions. First-gen
+   Knights Corner (KNC_) cards were coprocessors, but second-gen Knights
+   Landing (KNL_) devices can run code natively. Programmed like threaded CPU
+   code, but with more opportunities for tuning and much greater performance.
+   Only available through the Intel compiler, and requires Xeon Phi hardware.
 
 Generically speaking, OpenMP_ and OpenAcc_ provide low barriers
 for entry into acceleration; CUDA_ and `Xeon Phi`_ require high
@@ -201,7 +202,7 @@ write the final values to ``diffusion.0100000.csv``. It will also write a
 summary file, ``runlog.csv``, containing the following columns:
 
 - **iter**: number of completed iterations
-- **sim_time**: elapsed simulation time (with Δ*t*=1, the first two columns are equal)
+- **sim_time**: elapsed simulation time (with :math:`\Delta t=1`, the first two columns are equal)
 - **wrss**: weighted sum-of-squares residual between the numerical values and analytical solution
 - **conv_time**: cumulative real time spent computing the Laplacian (convolution)
 - **step_time**: cumulative real time spent updating the composition (time-stepping)
@@ -213,11 +214,11 @@ At timestep 10,000 the expected ``wrss=0.002895`` (0.2%) using the 5-point
 stencil; the rendered initial and final images should look like these
 (grayscale, ``0`` is black and ``1`` is white):
 
-+------------------+-------------------+
-| *t* = 0·Δ *t*    | *t* = 10000·Δ *t* |
-+==================+===================+
-| |`initial conc`| | |`final conc`|    |
-+------------------+-------------------+
++--------------------------+------------------------------+
+| :math:`t=0\cdot\Delta t` | :math:`t=10000\cdot\Delta t` |
++==========================+==============================+
+| |`initial conc`|         | |`final conc`|               |
++--------------------------+------------------------------+
 
 The boundary conditions are fixed values of ``1`` along the lower-left half
 and upper-right half walls, no flux everywhere else, with an initial value of
@@ -226,12 +227,11 @@ partial exposure (rather than the entire left and right walls) to produce an
 inhomogeneous workload and highlight numerical errors at the boundaries.
 
 If your compiler returns warnings or errors, your simulation results do not look
-like this, or if ``wrss`` at *t*=10000·Δ*t* is greater than 0.5%
+like this, or if ``wrss`` at :math:`t=10000\cdot\Delta t` is greater than 0.5%
 or so, something may be wrong with the installation, hardware, or implementation.
-Please `file an issue`_ and share what happened.
-You probably found a bug!
+Please `file an issue`_ and share what happened. You probably found a bug!
 
-    Note that a flat field of zeros at *t* =10000·Δ *t*, about as wrong
+    Note that a flat field of zeros at :math:`t=10000\cdot\Delta t`, about as wrong
     an answer as possible, gives ``wrss=0.07493`` (7.5%) relative to the
     analytical solution. Small differences in ``wrss`` indicate large errors.
 
@@ -329,6 +329,8 @@ the best available for the purpose.
 .. _GNU: https://gcc.gnu.org/
 .. _htop: http://hisham.hm/htop/
 .. _`intel_gpu_top`: https://github.com/ChrisCummins/intel-gpu-tools
+.. _KNC: https://ark.intel.com/products/codename/57721/Knights-Corner
+.. _KNL: https://ark.intel.com/products/codename/48999/Knights-Landing
 .. _LaTeX: https://www.latex-project.org/
 .. _Make: https://www.gnu.org/software/make/
 .. _MCUDA: http://impact.crhc.illinois.edu/mcuda.aspx

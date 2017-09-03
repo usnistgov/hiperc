@@ -1,3 +1,6 @@
+# Build files
+
+.directory
 *.aux
 *.csv
 *.db
@@ -7,11 +10,18 @@
 *.pdf
 *.png
 *.txt
-_build
-.directory
+
+
+# Executables
+
 diffusion
 spinodal
 ripening
+
+# Documentation Output
+
+_build
 html
 latex
+rst
 xml

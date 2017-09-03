@@ -60,10 +60,10 @@ void apply_initial_conditions(fp_t** conc, int nx, int ny, int nm, fp_t bc[2][2]
 
 void apply_boundary_conditions(fp_t** conc, int nx, int ny, int nm, fp_t bc[2][2])
 {
-	int i, j;
-
 	#pragma omp parallel
 	{
+		int i, j;
+
 		#pragma omp for collapse(2) private(i,j)
 		for (j = 0; j < ny/2; j++)
 			for (i = 0; i < 1+nm/2; i++)
@@ -73,20 +73,25 @@ void apply_boundary_conditions(fp_t** conc, int nx, int ny, int nm, fp_t bc[2][2
 		for (j = ny/2; j < ny; j++)
 			for (i = nx-1-nm/2; i < nx; i++)
 				conc[j][i] = bc[1][1]; /* right value */
-	}
 
-	/* sequence matters: cannot trivially parallelize */
-	for (j = 0; j < ny; j++) {
 		for (i = nm/2; i > 0; i--)
-			conc[j][i-1] = conc[j][i]; /* left condition */
-		for (i = nx-1-nm/2; i < nx-1; i++)
-			conc[j][i+1] = conc[j][i]; /* right condition */
-	}
+			#pragma omp for private(j)
+			for (j = 0; j < ny; j++)
+				conc[j][i-1] = conc[j][i]; /* left condition */
 
-	for (i = 0; i < nx; i++) {
+		for (i = nx-1-nm/2; i < nx-1; i++)
+			#pragma omp for private(j)
+			for (j = 0; j < ny; j++)
+				conc[j][i+1] = conc[j][i]; /* right condition */
+
 		for (j = nm/2; j > 0; j--)
-			conc[j-1][i] = conc[j][i]; /* bottom condition */
+			#pragma omp for private(i)
+			for (i = 0; i < nx; i++)
+				conc[j-1][i] = conc[j][i]; /* bottom condition */
+
 		for (j = ny-1-nm/2; j < ny-1; j++)
-			conc[j+1][i] = conc[j][i]; /* top condition */
+			#pragma omp for private(i)
+			for (i = 0; i < nx; i++)
+				conc[j+1][i] = conc[j][i]; /* top condition */
 	}
 }

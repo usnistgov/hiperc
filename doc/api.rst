@@ -1,17 +1,11 @@
-.. _string-formatting-diffusion:
+.. _string-formatting-api:
 
 *******************
-Diffusion Reference
+API Reference
 *******************
 
 common-diffusion
 ================
-
-type.h
-------
-
-.. doxygenfile:: type.h
-   :project: phasefield-accelerator-benchmarks
 
 boundaries.h
 ------------
@@ -55,15 +49,15 @@ timer.h
 .. doxygenfile:: timer.h
    :project: phasefield-accelerator-benchmarks
 
-timer.c
--------
+type.h
+------
 
-.. doxygenfile:: timer.c
+.. doxygenfile:: type.h
    :project: phasefield-accelerator-benchmarks
 
+
 Looking for something specific?
-===============================
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 * :ref:`genindex`
 * :ref:`search`
-

@@ -16,9 +16,16 @@
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
-import os, sys
+import glob
+import os
+import shutil
 import subprocess
-sys.path.insert(0, os.path.abspath('.'))
+import sys
+import recommonmark
+from recommonmark.parser import CommonMarkParser
+from recommonmark.transform import AutoStructify
+
+sys.path.insert(0, os.path.abspath('..'))
 
 # readthedocs requires this tag
 if os.environ.get('READTHEDOCS', None) == 'True':
@@ -44,10 +51,11 @@ templates_path = ['_templates']
 # You can specify multiple suffix as a list of string:
 #
 #source_suffix = ['.rst', '.md']
-source_suffix = '.rst'
+source_parsers = {'.md' : CommonMarkParser}
+source_suffix = ['.rst', '.md']
 
 # The master toctree document.
-master_doc = 'index'
+master_doc = 'contents'
 
 # General information about the project.
 project = u'phasefield-accelerator-benchmarks'
@@ -73,7 +81,7 @@ language = None
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
 # This patterns also effect to html_static_path and html_extra_path
-exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
+exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store', 'README.md']
 
 # The reST default role (used for this markup: `text`) to use for all documents.
 default_role = 'cpp:any'
@@ -180,6 +188,47 @@ texinfo_documents = [
      author, 'phasefield-accelerator-benchmarks', 'Computer hardware benchmarks for materials scientists.',
      'Miscellaneous'),
 ]
+
+
+# Copy Markdown files, after https://github.com/materialsinnovation/pymks/blob/master/doc/conf.py
+
+def url_resolver(url):
+    """Resolve url for both documentation and Github online.
+    If the url is an IPython notebook links to the correct path.
+    Args:
+      url: the path to the link (not always a full url)
+    Returns:
+      a local url to either the documentation or the Github
+    """
+    if url[-6:] == '.ipynb':
+        return url[4:-6] + '.html'
+    else:
+        return url
+
+def setup(app):
+    app.add_config_value('recommonmark_config', {
+            'url_resolver': url_resolver,
+            'auto_toc_tree_section': 'Contents',
+            }, True)
+    app.add_transform(AutoStructify)
+
+rst_directory = 'rst'
+img_directory = os.path.join(rst_directory, 'common-diffusion')
+
+for directory in [rst_directory, img_directory]:
+    if not os.path.exists(directory):
+        os.makedirs(directory)
+
+files_to_copy = (
+    'README.rst',
+    'LICENSE.md',
+    'common-diffusion/diffusion.*.png'
+)
+
+for fpath in files_to_copy:
+    for fpath_glob in glob.glob(os.path.join('..', fpath)):
+        fpath_glob_ = '/'.join(fpath_glob.split('/')[1:])
+        shutil.copy(fpath_glob, os.path.join(rst_directory, fpath_glob_))
 
 
 # -- Options for Breathe output ---------------------------------------------

@@ -27,12 +27,10 @@
 
 extern "C" {
 #include "boundaries.h"
-#include "cuda_kernels.cuh"
 }
 
-/**
- \brief Boundary condition array on the GPU, allocated in protected memory
-*/
+#include "cuda_kernels.cuh"
+
 __constant__ fp_t d_bc[2][2];
 
 void set_boundaries(fp_t bc[2][2])
@@ -70,7 +68,7 @@ void apply_initial_conditions(fp_t** conc, int nx, int ny, int nm, fp_t bc[2][2]
 __global__ void boundary_kernel(fp_t* conc, int nx, int ny, int nm)
 {
 	int tx, ty, row, col;
-	int i, ihi, ilo, j, jhi, jlo, offset;
+	int ihi, ilo, jhi, jlo, offset;
 
 	/* determine indices on which to operate */
 

@@ -17,15 +17,17 @@
  Questions/comments to Trevor Keller (trevor.keller@nist.gov)
  **********************************************************************************/
 
-#ifndef _BOUNDARIES_H_
-#define _BOUNDARIES_H_
-
-#include "type.h"
-
 /**
  \file  boundaries.h
  \brief Declaration of boundary condition function prototypes
 */
+
+/** \cond SuppressGuard */
+#ifndef _BOUNDARIES_H_
+#define _BOUNDARIES_H_
+/** \endcond */
+
+#include "type.h"
 
 /**
  \brief Set values to be used along the simulation domain boundaries
@@ -52,4 +54,6 @@ void apply_initial_conditions(fp_t** conc_old, int nx, int ny, int nm, fp_t bc[2
 */
 void apply_boundary_conditions(fp_t** conc_old, int nx, int ny, int nm, fp_t bc[2][2]);
 
+/** \cond SuppressGuard */
 #endif /* _BOUNDARIES_H_ */
+/** \endcond */

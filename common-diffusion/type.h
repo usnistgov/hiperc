@@ -17,13 +17,15 @@
  Questions/comments to Trevor Keller (trevor.keller@nist.gov)
  **********************************************************************************/
 
-#ifndef _TYPE_H_
-#define _TYPE_H_
-
 /**
  \file  type.h
  \brief Definition of scalar data type and Doxygen diffusion group
 */
+
+/** \cond SuppressGuard */
+#ifndef _TYPE_H_
+#define _TYPE_H_
+/** \endcond */
 
 /**
  Specify the basic data type to achieve the desired accuracy in floating-point
@@ -58,4 +60,6 @@ struct Stopwatch {
 	double soln;
 };
 
+/** \cond SuppressGuard */
 #endif /* _TYPE_H_ */
+/** \endcond */

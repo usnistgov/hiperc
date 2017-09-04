@@ -31,13 +31,11 @@ extern "C" {
 #include "boundaries.h"
 #include "discretization.h"
 #include "timer.h"
-#include "cuda_kernels.cuh"
 }
 
-/**
- \brief Convolution mask array on the GPU, allocated in protected memory
-*/
-__constant__ fp_t Mc[MAX_MASK_W * MAX_MASK_H];
+#include "cuda_kernels.cuh"
+
+__constant__ fp_t d_mask[MAX_MASK_W * MAX_MASK_H];
 
 __global__ void convolution_kernel(fp_t* conc_old, fp_t* conc_lap, int nx, int ny, int nm)
 {
@@ -83,7 +81,7 @@ __global__ void convolution_kernel(fp_t* conc_old, fp_t* conc_lap, int nx, int n
 	if (tx < dst_tile_w && ty < dst_tile_h) {
 		for (j = 0; j < nm; j++) {
 			for (i = 0; i < nm; i++) {
-				value += Mc[j * nm + i] * conc_tile[j+ty][i+tx];
+				value += d_mask[j * nm + i] * conc_tile[j+ty][i+tx];
 			}
 		}
 		/* record value */
@@ -143,7 +141,7 @@ void solve_diffusion_equation(fp_t** conc_old, fp_t** conc_new, fp_t** conc_lap,
 	dim3 blocks(ceil(fp_t(nx)/threads.x)+1, ceil(fp_t(ny)/threads.y)+1, 1);
 
 	/* transfer mask in to constant device memory */
-	cudaMemcpyToSymbol(Mc, mask_lap[0], nm * nm * sizeof(fp_t));
+	cudaMemcpyToSymbol(d_mask, mask_lap[0], nm * nm * sizeof(fp_t));
 
 	/* transfer data from host in to device */
 	cudaMemcpy(d_conc_old, conc_old[0], nx * ny * sizeof(fp_t), cudaMemcpyHostToDevice);

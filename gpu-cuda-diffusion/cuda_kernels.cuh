@@ -17,17 +17,19 @@
  Questions/comments to Trevor Keller (trevor.keller@nist.gov)
  **********************************************************************************/
 
-#ifndef _CUDA_KERNELS_H_
-#define _CUDA_KERNELS_H_
-
-extern "C" {
-#include "numerics.h"
-}
-
 /**
  \file  cuda_kernels.cuh
  \brief Declaration of functions to execute on the GPU (CUDA kernels)
 */
+
+/** \cond SuppressGuard */
+#ifndef _CUDA_KERNELS_H_
+#define _CUDA_KERNELS_H_
+/** \endcond */
+
+extern "C" {
+#include "numerics.h"
+}
 
 /**
  \brief Maximum width of an input tile, including halo cells, for GPU memory allocation
@@ -38,6 +40,16 @@ extern "C" {
  \brief Maximum height of an input tile, including halo cells, for GPU memory allocation
 */
 #define MAX_TILE_H 32
+
+/**
+ \brief Convolution mask array on the GPU, allocated in protected memory
+*/
+__constant__ extern fp_t d_mask[MAX_MASK_W * MAX_MASK_H];
+
+/**
+ \brief Boundary condition array on the GPU, allocated in protected memory
+*/
+__constant__ extern fp_t d_bc[2][2];
 
 /**
  \brief Boundary condition kernel for execution on the GPU
@@ -72,4 +84,6 @@ __global__ void convolution_kernel(fp_t* conc_old, fp_t* conc_lap, int nx, int n
 __global__ void diffusion_kernel(fp_t* conc_old, fp_t* conc_new, fp_t* conc_lap,
                                  int nx, int ny, int nm, fp_t D, fp_t dt);
 
+/** \cond SuppressGuard */
 #endif /* _CUDA_KERNELS_H_ */
+/** \endcond */

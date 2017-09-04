@@ -17,15 +17,17 @@
  Questions/comments to Trevor Keller (trevor.keller@nist.gov)
  **********************************************************************************/
 
-#ifndef _MESH_H_
-#define _MESH_H_
-
-#include "type.h"
-
 /**
  \file  mesh.h
  \brief Declaration of mesh function prototypes for diffusion benchmarks
 */
+
+/** \cond SuppressGuard */
+#ifndef _MESH_H_
+#define _MESH_H_
+/** \endcond */
+
+#include "type.h"
 
 /**
  \brief Allocate 2D arrays to store scalar composition values
@@ -51,4 +53,6 @@ void free_arrays(fp_t** conc_old, fp_t** conc_new, fp_t** conc_lap, fp_t** mask_
 */
 void swap_pointers(fp_t*** conc_old, fp_t*** conc_new);
 
+/** \cond SuppressGuard */
 #endif /* _MESH_H_ */
+/** \endcond */

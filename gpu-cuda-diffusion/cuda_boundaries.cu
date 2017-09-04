@@ -69,7 +69,8 @@ void apply_initial_conditions(fp_t** conc, int nx, int ny, int nm, fp_t bc[2][2]
 
 __global__ void boundary_kernel(fp_t* conc, int nx, int ny, int nm)
 {
-	int i, j, tx, ty, row, col;
+	int tx, ty, row, col;
+	int i, ihi, ilo, j, jhi, jlo, offset;
 
 	/* determine indices on which to operate */
 
@@ -94,30 +95,24 @@ __global__ void boundary_kernel(fp_t* conc, int nx, int ny, int nm)
 
 	/* apply no-flux boundary conditions: inside to out, sequence matters */
 
-	for (i = nm/2; i > 0; i--) {
-		if (col == i-1 && row >= 0 && row < ny) {
-			conc[row * nx + col] = conc[row * nx + i]; /* left condition */
+	for (offset = 0; offset < nm/2; offset++) {
+		ilo = nm/2 - offset;
+		ihi = nx - 1 - nm/2 + offset;
+		if (col == ilo-1 && row >= 0 && row < ny) {
+			conc[row * nx + col] = conc[row * nx + ilo]; /* left condition */
+		} else if (col == ihi+1 && row >= 0 && row < ny) {
+			conc[row * nx + col] = conc[row * nx + ihi]; /* right condition */
 		}
 		__syncthreads();
 	}
 
-	for (i = nx-1-nm/2; i < nx-1; i++) {
-		if (col == i+1 && row >= 0 && row < ny) {
-			conc[row * nx + col] = conc[row * nx + i]; /* right condition */
-		}
-		__syncthreads();
-	}
-
-	for (j = nm/2; j > 0; j--) {
-		if (row == j-1 && col >= 0 && col < nx) {
-			conc[row * nx + col] = conc[j * nx + col]; /* bottom condition */
-		}
-		__syncthreads();
-	}
-
-	for (j = ny-1-nm/2; j < ny-1; j++) {
-		if (row == j+1 && col >= 0 && col < nx) {
-			conc[row * nx + col] = conc[j * nx + col]; /* top condition */
+	for (offset = 0; offset < nm/2; offset++) {
+		jlo = nm/2 - offset;
+		jhi = ny - 1 - nm/2 + offset;
+		if (row == jlo-1 && col >= 0 && col < nx) {
+			conc[row * nx + col] = conc[jlo * nx + col]; /* bottom condition */
+		} else if (row == jhi+1 && col >= 0 && col < nx) {
+			conc[row * nx + col] = conc[jhi * nx + col]; /* top condition */
 		}
 		__syncthreads();
 	}

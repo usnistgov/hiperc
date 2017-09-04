@@ -76,6 +76,8 @@ void apply_initial_conditions(fp_t** conc, int nx, int ny, int nm, fp_t bc[2][2]
 
 void apply_boundary_conditions(fp_t** conc, int nx, int ny, int nm, fp_t bc[2][2])
 {
+	/* apply fixed boundary values: sequence does not matter */
+
 	/* Lambda function executed on each thread, applying left boundary values */
 	tbb::parallel_for(tbb::blocked_range2d<int>(0, 1+nm/2, 0, ny/2),
 		[=](const tbb::blocked_range2d<int>& r) {
@@ -98,41 +100,31 @@ void apply_boundary_conditions(fp_t** conc, int nx, int ny, int nm, fp_t bc[2][2
 		}
 	);
 
-	for (int i = nm/2; i > 0; i--) {
+	/* apply no-flux boundary conditions: inside to out, sequence matters */
+
+	for (int offset = 0; offset < nm/2; offset++) {
+		int ilo = nm/2 - offset;
+		int ihi = nx - 1 - nm/2 + offset;
+		/* Lambda function executed on each thread, applying x-axis boundary condition */
 		tbb::parallel_for(tbb::blocked_range<int>(0, ny),
 			[=](const tbb::blocked_range<int>& r) {
 				for (int j = r.begin(); j != r.end(); j++) {
-					conc[j][i-1] = conc[j][i]; /* left condition */
+					conc[j][ilo-1] = conc[j][ilo]; /* left */
+					conc[j][ihi+1] = conc[j][ihi]; /* right */
 				}
 			}
 		);
 	}
 
-	for (int i = nx-1-nm/2; i < nx-1; i++) {
-		tbb::parallel_for(tbb::blocked_range<int>(0, ny),
-			[=](const tbb::blocked_range<int>& r) {
-				for (int j = r.begin(); j != r.end(); j++) {
-					conc[j][i+1] = conc[j][i]; /* right condition */
-				}
-			}
-		);
-	}
-
-	for (int j = nm/2; j > 0; j--) {
+	for (int offset = 0; offset < nm/2; offset++) {
+		int jlo = nm/2 - offset;
+		int jhi = ny - 1 - nm/2 + offset;
+		/* Lambda function executed on each thread, applying y-axis boundary condition */
 		tbb::parallel_for(tbb::blocked_range<int>(0, nx),
 			[=](const tbb::blocked_range<int>& r) {
 				for (int i = r.begin(); i != r.end(); i++) {
-					conc[j-1][i] = conc[j][i]; /* bottom condition */
-				}
-			}
-		);
-	}
-
-	for (int j = ny-1-nm/2; j < ny-1; j++) {
-		tbb::parallel_for(tbb::blocked_range<int>(0, nx),
-			[=](const tbb::blocked_range<int>& r) {
-				for (int i = r.begin(); i != r.end(); i++) {
-					conc[j+1][i] = conc[j][i]; /* top condition */
+					conc[jlo-1][i] = conc[jlo][i]; /* bottom */
+					conc[jhi+1][i] = conc[jhi][i]; /* top */
 				}
 			}
 		);

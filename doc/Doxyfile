@@ -5,16 +5,21 @@ OUTPUT_DIRECTORY      = .
 PROJECT_NUMBER        = pre-alpha
 FULL_PATH_NAMES       = NO
 HIDE_UNDOC_MEMBERS    = YES
-HIDE_UNDOC_CLASSES    = YES
+HIDE_UNDOC_CLASSES    = NO
 SOURCE_BROWSER        = YES
-INPUT                 = ../common-diffusion/ ../cpu-analytic-diffusion/ ../cpu-serial-diffusion/ ../cpu-openmp-diffusion/ ../cpu-tbb-diffusion/ ../gpu-cuda-diffusion/ ../gpu-openacc-diffusion/
+INPUT                 = ../common-diffusion/ ../cpu-analytic-diffusion/ \
+                        ../cpu-serial-diffusion/ ../cpu-openmp-diffusion/ ../cpu-tbb-diffusion/ \
+                        ../gpu-cuda-diffusion/ ../gpu-openacc-diffusion/
 RECURSIVE             = YES
-FILE_PATTERNS         = *.c *.cl *.cpp *.cu *.h
+FILE_PATTERNS         = *.c *.cl *.cpp *.cu *.cuh *.h
 EXCLUDE_PATTERNS      = *.git doc
-EXTENSION_MAPPING     = cl=C++ cu=C++
+EXTENSION_MAPPING     = cl=C++ cu=C++ cuh=C++
 ALPHABETICAL_INDEX    = YES
 COLS_IN_ALPHA_INDEX   = 3
 ENABLE_PREPROCESSING  = YES
+MACRO_EXPANSION       = YES
+SEARCH_INCLUDES       = YES
+PREDEFINED            = __constant__ __global__ __host__
 WARNINGS              = YES
 GENERATE_HTML         = NO
 GENERATE_XML          = YES

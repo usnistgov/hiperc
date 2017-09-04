@@ -26,13 +26,12 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "type.h"
+#include "boundaries.h"
+#include "discretization.h"
 #include "mesh.h"
 #include "numerics.h"
 #include "output.h"
 #include "timer.h"
-#include "boundaries.h"
-#include "discretization.h"
 
 /**
  \brief Run simulation using input parameters specified on the command line

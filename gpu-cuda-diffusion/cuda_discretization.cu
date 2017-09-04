@@ -30,39 +30,15 @@
 extern "C" {
 #include "boundaries.h"
 #include "discretization.h"
-#include "numerics.h"
 #include "timer.h"
+#include "cuda_kernels.cuh"
 }
 
 /**
- \brief Maximum width of an input tile, including halo cells, for GPU memory allocation
-*/
-#define MAX_TILE_W 32
-
-/**
- \brief Maximum height of an input tile, including halo cells, for GPU memory allocation
-*/
-#define MAX_TILE_H 32
-
-/**
  \brief Convolution mask array on the GPU, allocated in protected memory
- \fn fp_t Mc[MAX_MASK_W * MAX_MASK_H]
 */
 __constant__ fp_t Mc[MAX_MASK_W * MAX_MASK_H];
 
-/**
- \brief Tiled convolution algorithm for execution on the GPU
- \fn void convolution_kernel(fp_t* conc_old, fp_t* conc_lap, int nx, int ny, int nm)
-
- This function accesses 1D data rather than the 2D array representation of the
- scalar composition field, mapping into 2D tiles on the GPU with halo cells
- before computing the convolution. Note:
- - The source matrix (\a conc_old) and destination matrix (\a conc_lap) must be identical in size
- - One CUDA core operates on one array index: there is no nested loop over matrix elements
- - The halo (\a nm/2 perimeter cells) in \a conc_lap are unallocated garbage
- - The same cells in \a conc_old are boundary values, and contribute to the convolution
- - \a conc_tile is the shared tile of input data, accessible by all threads in this block
-*/
 __global__ void convolution_kernel(fp_t* conc_old, fp_t* conc_lap, int nx, int ny, int nm)
 {
 	int i, j, tx, ty,
@@ -125,13 +101,6 @@ void compute_convolution(fp_t** conc_old, fp_t** conc_lap, fp_t** mask_lap,
 {
 }
 
-/**
- \brief Vector addition algorithm for execution on the GPU
- \fn void diffusion_kernel(fp_t* conc_old, fp_t* conc_new, fp_t* conc_lap, int nx, int ny, int nm, fp_t D, fp_t dt)
-
- This function accesses 1D data rather than the 2D array representation of the
- scalar composition field
-*/
 __global__ void diffusion_kernel(fp_t* conc_old, fp_t* conc_new, fp_t* conc_lap,
                                  int nx, int ny, int nm, fp_t D, fp_t dt)
 {

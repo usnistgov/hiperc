@@ -15,7 +15,7 @@ all: diffusion
 diffusion: ../common-diffusion/main.c $(OBJS)
 	$(NVCXX) $(NVCXXFLAGS) $(OBJS) $< -o $@ $(LINKS)
 
-boundaries.o: cuda_boundaries.c
+boundaries.o: cuda_boundaries.cu
 	$(NVCXX) $(NVCXXFLAGS) -dc $< -o $@
 
 discretization.o: cuda_discretization.cu
@@ -25,7 +25,7 @@ mesh.o: ../common-diffusion/mesh.c
 	$(NVCXX) $(NVCXXFLAGS) -dc $< -o $@
 
 numerics.o: ../common-diffusion/numerics.c
-	$(NVCXX) $(NVCXXFLAGS) -c $<
+	$(NVCXX) $(NVCXXFLAGS) -dc $<
 
 output.o: ../common-diffusion/output.c
 	$(NVCXX) $(NVCXXFLAGS) -dc $< -o $@

@@ -31,7 +31,7 @@
 void compute_convolution(fp_t** conc_old, fp_t** conc_lap, fp_t** mask_lap,
                          int nx, int ny, int nm)
 {
-	/* OpenAcc does not support nested accelerator functions */
+	/* OpenACC does not support nested accelerator functions */
 }
 
 void solve_diffusion_equation(fp_t** conc_old, fp_t** conc_new, fp_t** conc_lap,

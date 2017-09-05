@@ -26,6 +26,7 @@
 #include <omp.h>
 #include <openacc.h>
 #include "discretization.h"
+#include "mesh.h"
 #include "openacc_kernels.h"
 
 void convolution_kernel(fp_t** conc_old, fp_t** conc_lap, fp_t** mask_lap, int nx, int ny, int nm)
@@ -77,24 +78,29 @@ void compute_convolution(fp_t** conc_old, fp_t** conc_lap, fp_t** mask_lap,
 void solve_diffusion_equation(fp_t** conc_old, fp_t** conc_new, fp_t** conc_lap,
                               fp_t** mask_lap, int nx, int ny, int nm,
                               fp_t bc[2][2], fp_t D, fp_t dt, fp_t* elapsed,
-                              struct Stopwatch* sw)
+                              struct Stopwatch* sw, int checks)
 {
-	#pragma acc data copyin(conc_old[0:ny][0:nx], mask_lap[0:nm][0:nm], bc[0:2][0:2]) create(conc_lap[0:ny][0:nx]) copyout(conc_new[0:ny][0:nx])
+	#pragma acc data copy(conc_old[0:ny][0:nx], mask_lap[0:nm][0:nm], bc[0:2][0:2]) create(conc_lap[0:ny][0:nx], conc_new[0:ny][0:nx])
 	{
 		double start_time=0.;
+		int check=0;
 
-		boundary_kernel(conc_old, nx, ny, nm, bc);
+		for (check = 0; check < checks; check++) {
+			boundary_kernel(conc_old, nx, ny, nm, bc);
 
-		start_time = GetTimer();
-		convolution_kernel(conc_old, conc_lap, mask_lap, nx, ny, nm);
-		sw->conv += GetTimer() - start_time;
+			start_time = GetTimer();
+			convolution_kernel(conc_old, conc_lap, mask_lap, nx, ny, nm);
+			sw->conv += GetTimer() - start_time;
 
-		start_time = GetTimer();
-		diffusion_kernel(conc_old, conc_new, conc_lap, nx, ny, nm, D, dt);
-		sw->step += GetTimer() - start_time;
+			start_time = GetTimer();
+			diffusion_kernel(conc_old, conc_new, conc_lap, nx, ny, nm, D, dt);
+			sw->step += GetTimer() - start_time;
+
+			swap_pointers(&conc_old, &conc_new)
+		}
 	}
 
-	*elapsed += dt;
+	*elapsed += dt * checks;
 }
 
 void check_solution(fp_t** conc_new, fp_t** conc_lap,  int nx, int ny,

@@ -56,7 +56,7 @@ int main(int argc, char* argv[])
 
 	/* declare materials and numerical parameters */
 	fp_t D=0.00625, linStab=0.1, dt=1., elapsed=0., rss=0.;
-	int step=0, steps=100000, checks=10000;
+	int i=0, step=0, steps=100000, checks=10000;
 	double start_time=0.;
 	struct Stopwatch sw = {0., 0., 0., 0.};
 
@@ -90,29 +90,43 @@ int main(int argc, char* argv[])
 
 	fprintf(output, "iter,sim_time,wrss,conv_time,step_time,IO_time,soln_time,run_time\n");
 	fprintf(output, "%i,%f,%f,%f,%f,%f,%f,%f\n", step, elapsed, rss, sw.conv, sw.step, sw.file, sw.soln, GetTimer());
+	fflush(output);
+
+	/* Note: block is equivalent to a typical
+	  for (int step=1; step < steps+1; step++),
+	  1-indexed so as not to overwrite the initial condition image,
+	  but the loop-internals are farmed out to a coprocessor.
+	  So we use a while loop instead. */
 
 	/* do the work */
-	for (step = 1; step < steps+1; step++) {
-		print_progress(step-1, steps);
+	step = 0;
+	print_progress(step, steps);
+	while (step < steps) {
+		if (checks > steps - step)
+			checks = steps - step;
 
-		solve_diffusion_equation(conc_old, conc_new, conc_lap, mask_lap,
-		                         nx, ny, nm, bc, D, dt, &elapsed, &sw);
+		solve_diffusion_equation(conc_old, conc_new, conc_lap, mask_lap, nx, ny,
+		                         nm, bc, D, dt, &elapsed, &sw, checks);
 
-		if (step % checks == 0) {
-			start_time = GetTimer();
-			write_png(conc_new, nx, ny, step);
-			sw.file += GetTimer() - start_time;
+		/* the function returns after swapping pointers:
+		   new data is in conc_old */
+
+		for (i = 0; i < checks; i++) {
+			step++;
+			if (step < steps)
+				print_progress(step, steps);
 		}
 
-		if (step % 100 == 0) {
-			start_time = GetTimer();
-			check_solution(conc_new, conc_lap, nx, ny, dx, dy, nm, elapsed, D, bc, &rss);
-			sw.soln += GetTimer() - start_time;
+		start_time = GetTimer();
+		write_png(conc_old, nx, ny, step);
+		sw.file += GetTimer() - start_time;
 
-			fprintf(output, "%i,%f,%f,%f,%f,%f,%f,%f\n", step, elapsed, rss, sw.conv, sw.step, sw.file, sw.soln, GetTimer());
-		}
+		start_time = GetTimer();
+		check_solution(conc_old, conc_lap, nx, ny, dx, dy, nm, elapsed, D, bc, &rss);
+		sw.soln += GetTimer() - start_time;
 
-		swap_pointers(&conc_old, &conc_new);
+		fprintf(output, "%i,%f,%f,%f,%f,%f,%f,%f\n", step, elapsed, rss, sw.conv, sw.step, sw.file, sw.soln, GetTimer());
+		fflush(output);
 	}
 
 	write_csv(conc_old, nx, ny, dx, dy, steps);

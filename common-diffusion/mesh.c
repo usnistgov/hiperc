@@ -78,3 +78,12 @@ void swap_pointers(fp_t*** conc_old, fp_t*** conc_new)
 	(*conc_old) = (*conc_new);
 	(*conc_new) = temp;
 }
+
+void swap_pointers_1D(fp_t** conc_old, fp_t** conc_new)
+{
+	fp_t* temp;
+
+	temp = (*conc_old);
+	(*conc_old) = (*conc_new);
+	(*conc_new) = temp;
+}

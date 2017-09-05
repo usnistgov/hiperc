@@ -30,6 +30,7 @@
 extern "C" {
 #include "boundaries.h"
 #include "discretization.h"
+#include "mesh.h"
 #include "timer.h"
 }
 
@@ -155,10 +156,11 @@ __global__ void diffusion_kernel(fp_t* conc_old, fp_t* conc_new, fp_t* conc_lap,
 void solve_diffusion_equation(fp_t** conc_old, fp_t** conc_new, fp_t** conc_lap,
                               fp_t** mask_lap, int nx, int ny, int nm,
                               fp_t bc[2][2], fp_t D, fp_t dt, fp_t* elapsed,
-                              struct Stopwatch* sw)
+                              struct Stopwatch* sw, int checks)
 {
 	fp_t* d_conc_old, *d_conc_new, *d_conc_lap;
 	double start_time;
+	int check=0;
 
 	/* divide matrices into blocks of (MAX_TILE_W x MAX_TILE_W) threads */
 	dim3 threads(MAX_TILE_W - nm/2, MAX_TILE_H - nm/2, 1);
@@ -177,23 +179,30 @@ void solve_diffusion_equation(fp_t** conc_old, fp_t** conc_new, fp_t** conc_lap,
 	cudaMemcpyToSymbol(d_mask, mask_lap[0], nm * nm * sizeof(fp_t));
 	sw->file += GetTimer() - start_time;
 
-	/* apply boundary conditions */
-	boundary_kernel<<<blocks,threads>>>(d_conc_old, nx, ny, nm);
+	for (check = 0; check < checks; check++) {
+		/* apply boundary conditions */
+		boundary_kernel<<<blocks,threads>>>(d_conc_old, nx, ny, nm);
 
-	/* compute Laplacian */
-	start_time = GetTimer();
-	convolution_kernel<<<blocks,threads>>>(d_conc_old, d_conc_lap, nx, ny, nm);
-	sw->conv += GetTimer() - start_time;
+		/* compute Laplacian */
+		start_time = GetTimer();
+		convolution_kernel<<<blocks,threads>>>(d_conc_old, d_conc_lap, nx, ny, nm);
+		sw->conv += GetTimer() - start_time;
 
-	/* compute result */
-	start_time = GetTimer();
-	diffusion_kernel<<<blocks,threads>>>(d_conc_old, d_conc_new, d_conc_lap,
-	                                     nx, ny, nm, D, dt);
-	sw->step += GetTimer() - start_time;
+		/* compute result */
+		start_time = GetTimer();
+		diffusion_kernel<<<blocks,threads>>>(d_conc_old, d_conc_new, d_conc_lap,
+		                                     nx, ny, nm, D, dt);
+		sw->step += GetTimer() - start_time;
+
+		swap_pointers(&conc_old, &conc_new);
+		swap_pointers_1D(&d_conc_old, &d_conc_new);
+	}
+
+	*elapsed += dt * checks;
 
 	/* transfer from device out to host */
 	start_time = GetTimer();
-	cudaMemcpy(conc_new[0], d_conc_new, nx * ny * sizeof(fp_t),
+	cudaMemcpy(conc_old[0], d_conc_old, nx * ny * sizeof(fp_t),
 	           cudaMemcpyDeviceToHost);
 	sw->file += GetTimer() - start_time;
 
@@ -201,8 +210,6 @@ void solve_diffusion_equation(fp_t** conc_old, fp_t** conc_new, fp_t** conc_lap,
 	cudaFree(d_conc_old);
 	cudaFree(d_conc_lap);
 	cudaFree(d_conc_new);
-
-	*elapsed += dt;
 }
 
 void check_solution(fp_t** conc_new, fp_t** conc_lap, int nx, int ny,

@@ -17,15 +17,17 @@
  Questions/comments to Trevor Keller (trevor.keller@nist.gov)
  **********************************************************************************/
 
-#ifndef _MESH_H_
-#define _MESH_H_
-
-#include "type.h"
-
 /**
  \file  mesh.h
  \brief Declaration of mesh function prototypes for diffusion benchmarks
 */
+
+/** \cond SuppressGuard */
+#ifndef _MESH_H_
+#define _MESH_H_
+/** \endcond */
+
+#include "type.h"
 
 /**
  \brief Allocate 2D arrays to store scalar composition values
@@ -43,12 +45,23 @@ void make_arrays(fp_t*** conc_old, fp_t*** conc_new, fp_t*** conc_lap, fp_t*** m
 void free_arrays(fp_t** conc_old, fp_t** conc_new, fp_t** conc_lap, fp_t** mask_lap);
 
 /**
- \brief Swap pointers to data underlying two arrays
+ \brief Swap pointers to 2D arrays
 
- Rather than copy data from \a conc_old into \a conc_new, an expensive
- operation, simply trade the top-most pointers. New becomes old with no data
- lost and in almost no time.
+ Rather than copy data from \c fp_t** \a conc_old into \c fp_t** \a conc_new,
+ an expensive operation, simply trade the top-most pointers. New becomes old,
+ old becomes new, with no data lost and in almost no time.
 */
 void swap_pointers(fp_t*** conc_old, fp_t*** conc_new);
 
+/**
+ \brief Swap pointers to data underlying 1D arrays
+
+ Rather than copy data from \c fp_t* \a conc_old[0] into \c fp_t*
+ \a conc_new[0], an expensive operation, simply trade the top-most pointers.
+ New becomes old, old becomes new,  with no data lost and in almost no time.
+*/
+void swap_pointers_1D(fp_t** conc_old, fp_t** conc_new);
+
+/** \cond SuppressGuard */
 #endif /* _MESH_H_ */
+/** \endcond */

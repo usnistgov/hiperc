@@ -55,6 +55,15 @@ type.h
 .. doxygenfile:: type.h
    :project: phasefield-accelerator-benchmarks
 
+gpu-cuda-diffusion
+==================
+
+cuda_kernels.cuh
+----------------
+
+.. doxygenfile:: cuda_kernels.cuh
+   :project: phasefield-accelerator-benchmarks
+
 
 Looking for something specific?
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

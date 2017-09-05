@@ -25,4 +25,4 @@ sphinx: dox
 
 .PHONY: clean
 clean:
-	rm -rf _build/* _static/* latex xml
+	rm -rf _build/* _static/* latex xml rst/*

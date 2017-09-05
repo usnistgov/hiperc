@@ -26,7 +26,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "type.h"
 #include "mesh.h"
 #include "numerics.h"
 #include "output.h"

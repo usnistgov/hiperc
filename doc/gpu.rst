@@ -7,10 +7,10 @@ GPU Specifics
 gpu-cuda-diffusion
 ==================
 
-cuda_boundaries.c
------------------
+cuda_boundaries.cu
+------------------
 
-.. doxygenfile:: cuda_boundaries.c
+.. doxygenfile:: cuda_boundaries.cu
    :project: phasefield-accelerator-benchmarks
 
 cuda_discretization.cu

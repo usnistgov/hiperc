@@ -17,15 +17,17 @@
  Questions/comments to Trevor Keller (trevor.keller@nist.gov)
  **********************************************************************************/
 
-#ifndef _OUTPUT_H_
-#define _OUTPUT_H_
-
-#include "type.h"
-
 /**
  \file  output.h
  \brief Declaration of output function prototypes for diffusion benchmarks
 */
+
+/** \cond SuppressGuard */
+#ifndef _OUTPUT_H_
+#define _OUTPUT_H_
+/** \endcond */
+
+#include "type.h"
 
 /**
  \brief Read parameters from file specified on the command line
@@ -56,4 +58,6 @@ void write_csv(fp_t** conc, int nx, int ny, fp_t dx, fp_t dy, int step);
 */
 void write_png(fp_t** conc, int nx, int ny, int step);
 
+/** \cond SuppressGuard */
 #endif /* _OUTPUT_H_ */
+/** \endcond */

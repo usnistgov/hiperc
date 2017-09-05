@@ -25,6 +25,7 @@
 #include <math.h>
 #include <omp.h>
 #include "boundaries.h"
+#include "openacc_kernels.h"
 
 void set_boundaries(fp_t bc[2][2])
 {
@@ -58,35 +59,56 @@ void apply_initial_conditions(fp_t** conc, int nx, int ny, int nm, fp_t bc[2][2]
 	}
 }
 
+void boundary_kernel(fp_t** conc, int nx, int ny, int nm, fp_t bc[2][2])
+{
+	/* apply fixed boundary values: sequence does not matter */
+
+	#pragma acc parallel
+	{
+		#pragma acc loop
+		for (int j = 0; j < ny/2; j++) {
+			#pragma acc loop
+			for (int i = 0; i < 1+nm/2; i++) {
+				conc[j][i] = bc[1][0]; /* left value */
+			}
+		}
+
+		#pragma acc loop
+		for (int j = ny/2; j < ny; j++) {
+			#pragma acc loop
+			for (int i = nx-1-nm/2; i < nx; i++) {
+				conc[j][i] = bc[1][1]; /* right value */
+			}
+		}
+
+		/* apply no-flux boundary conditions: inside to out, sequence matters */
+
+		for (int offset = 0; offset < nm/2; offset++) {
+			int ilo = nm/2 - offset;
+			int ihi = nx - 1 - nm/2 + offset;
+			#pragma acc loop
+			for (int j = 0; j < ny; j++) {
+				conc[j][ilo-1] = conc[j][ilo]; /* left condition */
+				conc[j][ihi+1] = conc[j][ihi]; /* right condition */
+			}
+		}
+
+		for (int offset = 0; offset < nm/2; offset++) {
+			int jlo = nm/2 - offset;
+			int jhi = ny - 1 - nm/2 + offset;
+			#pragma acc loop
+			for (int i = 0; i < nx; i++) {
+				conc[jlo-1][i] = conc[jlo][i]; /* bottom condition */
+				conc[jhi+1][i] = conc[jhi][i]; /* top condition */
+			}
+		}
+	}
+}
+
 void apply_boundary_conditions(fp_t** conc, int nx, int ny, int nm, fp_t bc[2][2])
 {
-	int i, j;
-
-	#pragma omp parallel
+	#pragma acc data copy(conc[0:ny][0:nx]) copyin (bc[0:2][0:2])
 	{
-		#pragma omp for collapse(2) private(i,j)
-		for (j = 0; j < ny/2; j++)
-			for (i = 0; i < 1+nm/2; i++)
-				conc[j][i] = bc[1][0]; /* left value */
-
-		#pragma omp for collapse(2) private(i,j)
-		for (j = ny/2; j < ny; j++)
-			for (i = nx-1-nm/2; i < nx; i++)
-				conc[j][i] = bc[1][1]; /* right value */
-	}
-
-	/* sequence matters: cannot trivially parallelize */
-	for (j = 0; j < ny; j++) {
-		for (i = nm/2; i > 0; i--)
-			conc[j][i-1] = conc[j][i]; /* left condition */
-		for (i = nx-1-nm/2; i < nx-1; i++)
-			conc[j][i+1] = conc[j][i]; /* right condition */
-	}
-
-	for (i = 0; i < nx; i++) {
-		for (j = nm/2; j > 0; j--)
-			conc[j-1][i] = conc[j][i]; /* bottom condition */
-		for (j = ny-1-nm/2; j < ny-1; j++)
-			conc[j+1][i] = conc[j][i]; /* top condition */
+		boundary_kernel(conc, nx, ny, nm, bc);
 	}
 }

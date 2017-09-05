@@ -26,6 +26,7 @@
 #include <omp.h>
 #include "boundaries.h"
 #include "discretization.h"
+#include "mesh.h"
 #include "numerics.h"
 #include "timer.h"
 
@@ -55,26 +56,29 @@ void compute_convolution(fp_t** conc_old, fp_t** conc_lap, fp_t** mask_lap,
 void solve_diffusion_equation(fp_t** conc_old, fp_t** conc_new, fp_t** conc_lap,
                               fp_t** mask_lap, int nx, int ny, int nm,
                               fp_t bc[2][2], fp_t D, fp_t dt, fp_t* elapsed,
-                              struct Stopwatch* sw)
+                              struct Stopwatch* sw, int checks)
 {
-	int i, j;
-
+	int i, j, check;
 	double start_time=0.;
 
-	apply_boundary_conditions(conc_old, nx, ny, nm, bc);
+	for (check = 0; check < checks; check++) {
+		apply_boundary_conditions(conc_old, nx, ny, nm, bc);
 
-	start_time = GetTimer();
-	compute_convolution(conc_old, conc_lap, mask_lap, nx, ny, nm);
-	sw->conv += GetTimer() - start_time;
+		start_time = GetTimer();
+		compute_convolution(conc_old, conc_lap, mask_lap, nx, ny, nm);
+		sw->conv += GetTimer() - start_time;
 
-	start_time = GetTimer();
-	#pragma omp parallel for private(i,j) collapse(2)
-	for (j = nm/2; j < ny-nm/2; j++)
+		start_time = GetTimer();
+		#pragma omp parallel for private(i,j) collapse(2)
+		for (j = nm/2; j < ny-nm/2; j++)
 		for (i = nm/2; i < nx-nm/2; i++)
 			conc_new[j][i] = conc_old[j][i] + dt * D * conc_lap[j][i];
 
-	*elapsed += dt;
-	sw->step += GetTimer() - start_time;
+		*elapsed += dt;
+		sw->step += GetTimer() - start_time;
+
+		swap_pointers(&conc_old, &conc_new);
+	}
 }
 
 void check_solution(fp_t** conc_new, fp_t** conc_lap, int nx, int ny, fp_t dx, fp_t dy, int nm,

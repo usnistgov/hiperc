@@ -17,15 +17,17 @@
  Questions/comments to Trevor Keller (trevor.keller@nist.gov)
  **********************************************************************************/
 
-#ifndef _NUMERICS_H_
-#define _NUMERICS_H_
-
-#include "type.h"
-
 /**
  \file  numerics.h
  \brief Declaration of Laplacian operator and analytical solution functions
 */
+
+/** \cond SuppressGuard */
+#ifndef _NUMERICS_H_
+#define _NUMERICS_H_
+/** \endcond */
+
+#include "type.h"
 
 /**
  \brief Maximum width of the convolution mask (Laplacian stencil) array
@@ -84,17 +86,11 @@ void slow_nine_point_Laplacian_stencil(fp_t dx, fp_t dy, fp_t** mask_lap, int nm
 /**
  \brief Compute Euclidean distance between two points, \a a and \a b
 */
-#ifdef _OPENACC
-#pragma acc routine worker nohost
-#endif
 fp_t euclidean_distance(fp_t ax, fp_t ay, fp_t bx, fp_t by);
 
 /**
  \brief Compute Manhattan distance between two points, \a a and \a b
 */
-#ifdef _OPENACC
-#pragma acc routine worker nohost
-#endif
 fp_t manhattan_distance(fp_t ax, fp_t ay, fp_t bx, fp_t by);
 
 /**
@@ -104,9 +100,6 @@ fp_t manhattan_distance(fp_t ax, fp_t ay, fp_t bx, fp_t by);
  projected range to [0, 1] to handle projections that fall outside of \a ab.
  Implemented after Grumdrig on Stackoverflow, https://stackoverflow.com/a/1501725.
 */
-#ifdef _OPENACC
-#pragma acc routine worker nohost
-#endif
 fp_t distance_point_to_segment(fp_t ax, fp_t ay, fp_t bx, fp_t by, fp_t px, fp_t py);
 
 /**
@@ -121,4 +114,6 @@ fp_t distance_point_to_segment(fp_t ax, fp_t ay, fp_t bx, fp_t by, fp_t px, fp_t
 */
 void analytical_value(fp_t x, fp_t t, fp_t D, fp_t bc[2][2], fp_t* c);
 
+/** \cond SuppressGuard */
 #endif /* _NUMERICS_H_ */
+/** \endcond */

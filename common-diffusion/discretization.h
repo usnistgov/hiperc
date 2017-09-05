@@ -17,15 +17,17 @@
  Questions/comments to Trevor Keller (trevor.keller@nist.gov)
  **********************************************************************************/
 
-#ifndef _DISCRETIZATION_H_
-#define _DISCRETIZATION_H_
-
-#include "type.h"
-
 /**
  \file  discretization.h
  \brief Declaration of discretized mathematical function prototypes
 */
+
+/** \cond SuppressGuard */
+#ifndef _DISCRETIZATION_H_
+#define _DISCRETIZATION_H_
+/** \endcond */
+
+#include "type.h"
 
 /**
  \brief Perform the convolution of the mask matrix with the composition matrix
@@ -45,7 +47,7 @@ void compute_convolution(fp_t** conc_old, fp_t** conc_lap, fp_t** mask_lap,
 void solve_diffusion_equation(fp_t** conc_old, fp_t** conc_new, fp_t** conc_lap,
                               fp_t** mask_lap, int nx, int ny, int nm,
                               fp_t bc[2][2], fp_t D, fp_t dt, fp_t *elapsed,
-                              struct Stopwatch* sw);
+                              struct Stopwatch* sw, int checks);
 
 /**
  \brief Compare numerical and analytical solutions of the diffusion equation
@@ -57,4 +59,6 @@ void solve_diffusion_equation(fp_t** conc_old, fp_t** conc_new, fp_t** conc_lap,
 void check_solution(fp_t** conc_new, fp_t** conc_lap, int nx, int ny, fp_t dx, fp_t dy,
                     int nm, fp_t elapsed, fp_t D, fp_t bc[2][2], fp_t* rss);
 
+/** \cond SuppressGuard */
 #endif /* _DISCRETIZATION_H_ */
+/** \endcond */

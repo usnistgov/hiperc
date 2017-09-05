@@ -18,26 +18,34 @@
  **********************************************************************************/
 
 /**
- \file  timer.h
- \brief Declaration of timer function prototypes for diffusion benchmarks
+ \file  openacc_kernels.h
+ \brief Declaration of functions to execute on the GPU (OpenACC kernels)
 */
 
-
 /** \cond SuppressGuard */
-#ifndef _TIMER_H_
-#define _TIMER_H_
+#ifndef _OPENACC_KERNELS_H_
+#define _OPENACC_KERNELS_H_
 /** \endcond */
 
-/**
- \brief Set CPU frequency and begin timing
-*/
-void StartTimer();
+#include "numerics.h"
 
 /**
- \brief Return elapsed time in seconds
+ \brief Boundary condition kernel for execution on the GPU
 */
-double GetTimer();
+void boundary_kernel(fp_t** conc, int nx, int ny, int nm, fp_t bc[2][2]);
+
+/**
+ \brief Tiled convolution algorithm for execution on the GPU
+*/
+void convolution_kernel(fp_t** conc_old, fp_t** conc_lap, fp_t** mask_lap,
+                        int nx, int ny, int nm);
+
+/**
+ \brief Vector addition algorithm for execution on the GPU
+*/
+void diffusion_kernel(fp_t** conc_old, fp_t** conc_new, fp_t** conc_lap,
+                      int nx, int ny, int nm, fp_t D, fp_t dt);
 
 /** \cond SuppressGuard */
-#endif /* _TIMER_H_ */
+#endif /* _OPENACC_KERNELS_H_ */
 /** \endcond */

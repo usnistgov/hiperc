@@ -70,7 +70,7 @@ CUDA_
    code, but with more opportunities for tuning and much greater performance.
    Only available through the Intel compiler, and requires Xeon Phi hardware.
 
-Generically speaking, OpenMP_ and OpenAcc_ provide low barriers
+Generically speaking, OpenMP_ and OpenACC_ provide low barriers
 for entry into acceleration; CUDA_ and `Xeon Phi`_ require high
 investments for hardware and compilers, but offer the greatest capabilities for
 performance and optimization of a specific application. CUDA hardware can be
@@ -333,7 +333,7 @@ the best available for the purpose.
 .. _`Conversation on Gitter`: https://gitter.im/phasefield-accelerator-benchmarks/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge
 .. _`Contributing Guidelines`: CONTRIBUTING.md
 .. _`file an issue`: https://github.com/usnistgov/phasefield-accelerator-benchmarks/issues
-.. _OpenAcc: https://www.openacc.org/
+.. _OpenACC: https://www.openacc.org/
 .. _radeontop: https://github.com/clbr/radeontop
 .. _ccNUMA: https://en.wikipedia.org/wiki/Non-uniform_memory_access#Cache_coherent_NUMA
 .. _convolution: https://en.wikipedia.org/wiki/Discrete_Laplace_operator#Image_Processing

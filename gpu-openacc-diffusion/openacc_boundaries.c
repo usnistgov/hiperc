@@ -24,7 +24,6 @@
 
 #include <math.h>
 #include <omp.h>
-
 #include "boundaries.h"
 #include "openacc_kernels.h"
 

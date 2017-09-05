@@ -27,6 +27,7 @@
 
 extern "C" {
 #include "boundaries.h"
+#include "cuda_kernels.cuh"
 }
 
 #include "cuda_kernels.cuh"
@@ -114,8 +115,6 @@ __global__ void boundary_kernel(fp_t* conc, int nx, int ny, int nm)
 		}
 		__syncthreads();
 	}
-
-	__syncthreads();
 }
 
 void apply_boundary_conditions(fp_t** conc, int nx, int ny, int nm, fp_t bc[2][2])

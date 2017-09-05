@@ -158,7 +158,6 @@ void solve_diffusion_equation(fp_t** conc_old, fp_t** conc_new, fp_t** conc_lap,
                               struct Stopwatch* sw)
 {
 	fp_t* d_conc_old, *d_conc_new, *d_conc_lap;
-	fp_t sum=0.;
 	double start_time;
 
 	/* divide matrices into blocks of (MAX_TILE_W x MAX_TILE_W) threads */
@@ -206,115 +205,50 @@ void solve_diffusion_equation(fp_t** conc_old, fp_t** conc_new, fp_t** conc_lap,
 	*elapsed += dt;
 }
 
-__device__ fp_t d_euclidean_distance(fp_t ax, fp_t ay, fp_t bx, fp_t by)
-{
-	return sqrt((ax - bx) * (ax - bx) + (ay - by) * (ay - by));
-}
-
-__device__ fp_t d_distance_point_to_segment(fp_t ax, fp_t ay,
-                                            fp_t bx, fp_t by,
-                                            fp_t px, fp_t py)
-{
-	fp_t L2, t, zx, zy;
-
-	L2 = (ax - bx) * (ax - bx) + (ay - by) * (ay - by);
-	if (L2 == 0.) /* line segment is just a point */
-		return d_euclidean_distance(ax, ay, px, py);
-	t = fmax(0., fmin(1., ((px - ax) * (bx - ax)
-	                     + (py - ay) * (by - ay)) / L2));
-	zx = ax + t * (bx - ax);
-	zy = ay + t * (by - ay);
-	return d_euclidean_distance(px, py, zx, zy);
-}
-
-__device__ void d_analytical_value(fp_t x, fp_t t,
-                                   fp_t D, fp_t bc[2][2], fp_t* c)
-{
-	*c = bc[1][0] * (1.0 - erf(x / sqrt(4.0 * D * t)));
-}
-
-__global__ void solution_kernel(fp_t* conc_new, fp_t* conc_lap, int nx, int ny,
-                                fp_t dx, fp_t dy, int nm, fp_t elapsed, fp_t D,
-                                fp_t bc[2][2])
-{
-	int tx, ty, row, col;
-	fp_t r, cal, car, ca, cn;
-
-	/* determine indices on which to operate */
-	tx = threadIdx.x;
-	ty = threadIdx.y;
-
-	row = blockDim.y * blockIdx.y + ty;
-	col = blockDim.x * blockIdx.x + tx;
-
-	/* explicit Euler solution to the equation of motion */
-	if (row > nm/2 && row < ny-1-nm/2 && col > nm/2 && col < nx-1-nm/2) {
-		/* numerical solution */
-		cn = conc_new[row * nx + col];
-
-		/* shortest distance to left-wall source */
-		r = d_distance_point_to_segment(dx * (nm/2), dy * (nm/2),
-		                                dx * (nm/2), dy * (ny/2),
-		                                dx * col, dy * row);
-		d_analytical_value(r, elapsed, D, bc, &cal);
-
-		/* shortest distance to right-wall source */
-		r = d_distance_point_to_segment(dx * (nx-1-nm/2), dy * (ny/2),
-		                                dx * (nx-1-nm/2), dy * (ny-1-nm/2),
-		                                dx * col, dy * row);
-		d_analytical_value(r, elapsed, D, bc, &car);
-
-		/* superposition of analytical solutions */
-		ca = cal + car;
-
-		/* residual sum of squares (RSS) */
-		conc_lap[row * nx + col] = (ca - cn) * (ca - cn)
-		                         / (fp_t)((nx-1-nm/2) * (ny-1-nm/2));
-	}
-
-	/* wait for all threads to finish writing */
-	__syncthreads();
-}
-
 void check_solution(fp_t** conc_new, fp_t** conc_lap, int nx, int ny,
                     fp_t dx, fp_t dy, int nm, fp_t elapsed, fp_t D,
                     fp_t bc[2][2], fp_t* rss)
 {
 	fp_t sum=0.;
-	fp_t* d_conc_new, *d_conc_lap;
 
-	/* divide matrices into blocks of (MAX_TILE_W x MAX_TILE_W) threads */
-	dim3 threads(MAX_TILE_W - nm/2, MAX_TILE_H - nm/2, 1);
-	dim3 blocks(ceil(fp_t(nx)/threads.x)+1, ceil(fp_t(ny)/threads.y)+1, 1);
+	#pragma omp parallel reduction(+:sum)
+	{
+		int i, j;
+		fp_t r, cal, car, ca, cn;
 
-	/* allocate memory on device */
-	cudaMalloc((void **) &d_conc_new, nx * ny * sizeof(fp_t));
-	cudaMalloc((void **) &d_conc_lap, nx * ny * sizeof(fp_t));
+		#pragma omp for collapse(2) private(ca,cal,car,cn,i,j,r)
+		for (j = nm/2; j < ny-nm/2; j++) {
+			for (i = nm/2; i < nx-nm/2; i++) {
+				/* numerical solution */
+				cn = conc_new[j][i];
 
-	/* transfer data from host in to device */
-	cudaMemcpy(d_conc_new, conc_new[0], nx * ny * sizeof(fp_t),
-	           cudaMemcpyHostToDevice);
-	cudaMemcpyToSymbol(d_bc, bc[0], 2 * 2 * sizeof(fp_t));
+				/* shortest distance to left-wall source */
+				r = distance_point_to_segment(dx * (nm/2), dy * (nm/2),
+				                              dx * (nm/2), dy * (ny/2),
+				                              dx * i, dy * j);
+				analytical_value(r, elapsed, D, bc, &cal);
 
-	/* compute analytical solution */
-	solution_kernel<<<blocks,threads>>>(d_conc_new, d_conc_lap,
-	                                    nx, ny, dx, dy, nm, elapsed, D, bc);
+				/* shortest distance to right-wall source */
+				r = distance_point_to_segment(dx * (nx-1-nm/2), dy * (ny/2),
+				                              dx * (nx-1-nm/2), dy * (ny-1-nm/2),
+				                              dx * i, dy * j);
+				analytical_value(r, elapsed, D, bc, &car);
 
-	/* transfer from device out to host */
-	cudaMemcpy(conc_lap[0], d_conc_lap, nx * ny * sizeof(fp_t),
-	           cudaMemcpyDeviceToHost);
+				/* superposition of analytical solutions */
+				ca = cal + car;
 
-	/* perform parallel reduction of result */
-	#pragma omp parallel for collapse(2) reduction(+:sum)
-	for (int j = nm/2; j < ny-nm/2; j++) {
-		for (int i = nm/2; i < nx-nm/2; i++) {
-			sum += conc_lap[j][i];
+				/* residual sum of squares (RSS) */
+				conc_lap[j][i] = (ca - cn) * (ca - cn) / (fp_t)((nx-1-nm/2) * (ny-1-nm/2));
+			}
+		}
+
+		#pragma omp for collapse(2) private(i,j)
+		for (j = nm/2; j < ny-nm/2; j++) {
+			for (i = nm/2; i < nx-nm/2; i++) {
+				sum += conc_lap[j][i];
+			}
 		}
 	}
 
 	*rss = sum;
-
-	/* free memory on device */
-	cudaFree(d_conc_new);
-	cudaFree(d_conc_lap);
 }

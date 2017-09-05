@@ -97,71 +97,50 @@ void solve_diffusion_equation(fp_t** conc_old, fp_t** conc_new, fp_t** conc_lap,
 	*elapsed += dt;
 }
 
-void solution_kernel(fp_t** conc_new, fp_t** conc_lap,  int nx, int ny,
+void check_solution(fp_t** conc_new, fp_t** conc_lap,  int nx, int ny,
                     fp_t dx, fp_t dy, int nm, fp_t elapsed, fp_t D,
                     fp_t bc[2][2], fp_t* rss)
 {
 	fp_t sum=0.;
 
-	#pragma acc parallel
+	#pragma omp parallel reduction(+:sum)
 	{
-		#pragma acc loop
-		for (int j = nm/2; j < ny-nm/2; j++) {
-			#pragma acc loop
-			for (int i = nm/2; i < nx-nm/2; i++) {
+		int i, j;
+		fp_t r, cal, car, ca, cn;
+
+		#pragma omp for collapse(2) private(ca,cal,car,cn,i,j,r)
+		for (j = nm/2; j < ny-nm/2; j++) {
+			for (i = nm/2; i < nx-nm/2; i++) {
 				/* numerical solution */
-				fp_t cn = conc_new[j][i];
+				cn = conc_new[j][i];
 
 				/* shortest distance to left-wall source */
-				fp_t r = distance_point_to_segment(dx * (nm/2), dy * (nm/2),
+				r = distance_point_to_segment(dx * (nm/2), dy * (nm/2),
 				                              dx * (nm/2), dy * (ny/2),
 				                              dx * i, dy * j);
-				fp_t z = r / sqrt(4. * D * elapsed);
-				fp_t z2 = z * z;
-				fp_t poly_erf = (z < 1.5)
-				         ? 2. * z * (1. + z2 * (-1./3 + z2 * (1./10 + z2 * (-1./42 + z2 / 216)))) / sqrt(M_PI)
-				         : 1.;
-				fp_t cal = bc[1][0] * (1. - poly_erf);
+				analytical_value(r, elapsed, D, bc, &cal);
 
 				/* shortest distance to right-wall source */
-				distance_point_to_segment(dx * (nx-1-nm/2), dy * (ny/2),
+				r = distance_point_to_segment(dx * (nx-1-nm/2), dy * (ny/2),
 				                              dx * (nx-1-nm/2), dy * (ny-1-nm/2),
 				                              dx * i, dy * j);
-				z = r / sqrt(4. * D * elapsed);
-				z2 = z * z;
-				poly_erf = (z < 1.5)
-				         ? 2. * z * (1. + z2 * (-1./3 + z2 * (1./10 + z2 * (-1./42 + z2 / 216)))) / sqrt(M_PI)
-				         : 1.;
-				fp_t car = bc[1][0] * (1. - poly_erf);
+				analytical_value(r, elapsed, D, bc, &car);
 
 				/* superposition of analytical solutions */
-				fp_t ca = cal + car;
+				ca = cal + car;
 
 				/* residual sum of squares (RSS) */
 				conc_lap[j][i] = (ca - cn) * (ca - cn) / (fp_t)((nx-1-nm/2) * (ny-1-nm/2));
 			}
 		}
 
-		#pragma acc loop reduction(+:sum)
-		for (int j = nm/2; j < ny-nm/2; j++) {
-			#pragma acc loop
-			for (int i = nm/2; i < nx-nm/2; i++) {
+		#pragma omp for collapse(2) private(i,j)
+		for (j = nm/2; j < ny-nm/2; j++) {
+			for (i = nm/2; i < nx-nm/2; i++) {
 				sum += conc_lap[j][i];
 			}
 		}
 	}
 
 	*rss = sum;
-}
-
-void check_solution(fp_t** conc_new, fp_t** conc_lap,  int nx, int ny,
-                    fp_t dx, fp_t dy, int nm, fp_t elapsed, fp_t D,
-                    fp_t bc[2][2], fp_t* rss)
-{
-	/* OpenCL does not have a GPU-based erf() definition, using Maclaurin series approximation */
-
-	#pragma acc data copyin(conc_new[0:ny][0:nx], bc[0:2][0:2]) create(conc_lap[0:ny][0:nx])
-	{
-		solution_kernel(conc_new, conc_lap, nx, ny, dx, dy, nm, elapsed, D, bc, rss);
-	}
 }

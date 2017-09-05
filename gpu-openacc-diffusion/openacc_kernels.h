@@ -46,13 +46,6 @@ void convolution_kernel(fp_t** conc_old, fp_t** conc_lap, fp_t** mask_lap,
 void diffusion_kernel(fp_t** conc_old, fp_t** conc_new, fp_t** conc_lap,
                       int nx, int ny, int nm, fp_t D, fp_t dt);
 
-/**
- \brief Analytical solution comparison algorithm for execution on the GPU
-*/
-void solution_kernel(fp_t** conc_new, fp_t** conc_lap,  int nx, int ny,
-                    fp_t dx, fp_t dy, int nm, fp_t elapsed, fp_t D,
-                    fp_t bc[2][2], fp_t* rss);
-
 /** \cond SuppressGuard */
 #endif /* _OPENACC_KERNELS_H_ */
 /** \endcond */

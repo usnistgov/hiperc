@@ -83,58 +83,30 @@ void solve_diffusion_equation(fp_t** conc_old, fp_t** conc_new, fp_t** conc_lap,
 	sw->step += GetTimer() - start_time;
 }
 
-class Reduction2D {
-	/* Local pointer to \a conc_new	*/
-	fp_t** my_conc;
-
-	public:
-		/**
-		 Local copy of variable to be reduced (summed) over my_conc
-		*/
-		fp_t my_sum;
-
-		/**
-		 Initializing constructor using \a conc_new
-		*/
-		Reduction2D(fp_t** conc) : my_conc(conc), my_sum(0.0) {}
-
-		/**
-		 Copy constructor for dividing workload
-		*/
-		Reduction2D(Reduction2D& a, tbb::split)
-		                      : my_conc(a.my_conc), my_sum(0.0) {}
-
-		/**
-		 Lambda function executed on each thread, summing local values
-		*/
-		void operator()(const tbb::blocked_range2d<int>& r)
-		{
-			fp_t** conc = my_conc;
-			fp_t sum = my_sum;
-
-			for (int j = r.cols().begin(); j != r.cols().end(); j++) {
-				for (int i = r.rows().begin(); i != r.rows().end(); i++) {
-					sum += conc[j][i];
-				}
-			}
-			my_sum = sum;
-		}
-
-		/**
-		 Parallel reduction, combining values from threads as they finish
-		*/
-		void join(const Reduction2D& a)
-		{
-			my_sum += a.my_sum;
-		}
-};
-
 void check_solution(fp_t** conc_new, fp_t** conc_lap, int nx, int ny,
                     fp_t dx, fp_t dy, int nm, fp_t elapsed, fp_t D,
                     fp_t bc[2][2], fp_t* rss)
 {
+	/* Note: tbb::parallel_reduce can only operate on a blocked_range, */
+	/* *not* a blocked_range2d. This requires some creativity to get around. */
+
+	/* Lambda function executed on each thread, zeroing conc_lap */
+	tbb::parallel_for
+	(
+		tbb::blocked_range2d<int>(0, nx, 0, ny),
+		[=](const tbb::blocked_range2d<int>& r) {
+			for (int j = r.cols().begin(); j != r.cols().end(); j++) {
+				for (int i = r.rows().begin(); i != r.rows().end(); i++) {
+					conc_lap[j][i] = 0.;
+				}
+			}
+		}
+	);
+
 	/* Lambda function executed on each thread, checking local values */
-	tbb::parallel_for(tbb::blocked_range2d<int>(nm/2, nx-nm/2, nm/2, ny-nm/2),
+	tbb::parallel_for
+	(
+		tbb::blocked_range2d<int>(nm/2, nx-nm/2, nm/2, ny-nm/2),
 		[=](const tbb::blocked_range2d<int>& r) {
 			for (int j = r.cols().begin(); j != r.cols().end(); j++) {
 				for (int i = r.rows().begin(); i != r.rows().end(); i++) {
@@ -165,8 +137,18 @@ void check_solution(fp_t** conc_new, fp_t** conc_lap, int nx, int ny,
 		}
 	);
 
-	Reduction2D R(conc_lap);
-	tbb::parallel_reduce(tbb::blocked_range2d<int>(nm/2, nx-nm/2, nm/2, ny-nm/2), R);
-
-	*rss = R.my_sum;
+	/* Lambda function executed on each thread, summing up the vector */
+	*rss = tbb::parallel_reduce
+	(
+		tbb::blocked_range<fp_t*>(conc_lap[0], conc_lap[0] + nx*ny), 0.,
+		[](const tbb::blocked_range<fp_t*>& r, fp_t sum)->fp_t {
+			for (fp_t* p = r.begin(); p != r.end(); p++) {
+				sum += *p;
+			}
+			return sum;
+		},
+		[](fp_t x, fp_t y)->fp_t {
+			return x+y;
+		}
+	);
 }

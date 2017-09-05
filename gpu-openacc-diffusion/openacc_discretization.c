@@ -96,7 +96,7 @@ void solve_diffusion_equation(fp_t** conc_old, fp_t** conc_new, fp_t** conc_lap,
 			diffusion_kernel(conc_old, conc_new, conc_lap, nx, ny, nm, D, dt);
 			sw->step += GetTimer() - start_time;
 
-			swap_pointers(&conc_old, &conc_new)
+			swap_pointers(&conc_old, &conc_new);
 		}
 	}
 

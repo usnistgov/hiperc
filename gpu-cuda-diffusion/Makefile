@@ -9,9 +9,7 @@ LINKS = -lm -lpng -lcuda
 
 OBJS = boundaries.o data.o discretization.o mesh.o numerics.o output.o timer.o
 
-all: diffusion
-.PHONY: all
-
+# Executable
 diffusion: cuda_main.c $(OBJS)
 	$(NVCXX) $(NVCXXFLAGS) $(OBJS) $< -o $@ $(LINKS)
 
@@ -40,7 +38,7 @@ output.o: ../common-diffusion/output.c
 timer.o: ../common-diffusion/timer.c
 	$(NVCXX) $(NVCXXFLAGS) -dc $< -o $@
 
-# Phony targets
+# Helper scripts
 
 .PHONY: run
 run: diffusion

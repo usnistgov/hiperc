@@ -65,7 +65,10 @@ void apply_initial_conditions(fp_t** conc, int nx, int ny, int nm, fp_t bc[2][2]
 	}
 }
 
-__global__ void boundary_kernel(fp_t* d_conc, int nx, int ny, int nm)
+__global__ void boundary_kernel(fp_t* d_conc,
+                                const int nx,
+                                const int ny,
+                                const int nm)
 {
 	int tx, ty, row, col;
 	int ihi, ilo, jhi, jlo, offset;

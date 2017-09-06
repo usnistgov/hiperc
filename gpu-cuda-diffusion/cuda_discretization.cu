@@ -40,8 +40,11 @@ extern "C" {
 
 __constant__ fp_t d_mask[MAX_MASK_W * MAX_MASK_H];
 
-__global__ void convolution_kernel(fp_t* d_conc_old, fp_t* d_conc_lap,
-                                   int nx, int ny, int nm)
+__global__ void convolution_kernel(fp_t* d_conc_old,
+                                   fp_t* d_conc_lap,
+                                   const int nx,
+                                   const int ny,
+                                   const int nm)
 {
 	int i, j, tx, ty;
 	int dst_row, dst_col, dst_tile_w, dst_tile_h;
@@ -67,7 +70,7 @@ __global__ void convolution_kernel(fp_t* d_conc_old, fp_t* d_conc_lap,
 	src_col = dst_col - nm/2;
 
 	/* copy tile: __shared__ gives access to all threads working on this tile	*/
-	__shared__ fp_t d_conc_tile[MAX_TILE_H + MAX_MASK_H - 1][MAX_TILE_W + MAX_MASK_W - 1];
+	__shared__ fp_t d_conc_tile[TILE_H + MAX_MASK_H - 1][TILE_W + MAX_MASK_W - 1];
 
 	if ((src_row >= 0) && (src_row < ny) &&
 	    (src_col >= 0) && (src_col < nx)) {
@@ -98,8 +101,14 @@ __global__ void convolution_kernel(fp_t* d_conc_old, fp_t* d_conc_lap,
 	__syncthreads();
 }
 
-__global__ void diffusion_kernel(fp_t* d_conc_old, fp_t* d_conc_new, fp_t* d_conc_lap,
-                                 int nx, int ny, int nm, fp_t D, fp_t dt)
+__global__ void diffusion_kernel(fp_t* d_conc_old,
+                                 fp_t* d_conc_new,
+                                 fp_t* d_conc_lap,
+                                 const int nx,
+                                 const int ny,
+                                 const int nm,
+                                 const fp_t D,
+                                 const fp_t dt)
 {
 	int tx, ty, row, col;
 
@@ -128,8 +137,8 @@ void cuda_diffusion_solver(struct CudaData* dev, fp_t** conc_new,
 	double start_time;
 	int check=0;
 
-	/* divide matrices into blocks of (MAX_TILE_W x MAX_TILE_W) threads */
-	dim3 threads(MAX_TILE_W - nm/2, MAX_TILE_H - nm/2, 1);
+	/* divide matrices into blocks of (TILE_W x TILE_H) threads */
+	dim3 threads(TILE_W - nm/2, TILE_H - nm/2, 1);
 	dim3 blocks(ceil(fp_t(nx)/threads.x)+1, ceil(fp_t(ny)/threads.y)+1, 1);
 
 	for (check = 0; check < checks; check++) {
@@ -227,8 +236,8 @@ void compute_convolution(fp_t** conc_old, fp_t** conc_lap, fp_t** mask_lap,
 	cudaMalloc((void **) &d_conc_old, nx * ny * sizeof(fp_t));
 	cudaMalloc((void **) &d_conc_lap, nx * ny * sizeof(fp_t));
 
-	/* divide matrices into blocks of (MAX_TILE_W x MAX_TILE_W) threads */
-	dim3 threads(MAX_TILE_W - nm/2, MAX_TILE_H - nm/2, 1);
+	/* divide matrices into blocks of (TILE_W x TILE_W) threads */
+	dim3 threads(TILE_W - nm/2, TILE_H - nm/2, 1);
 	dim3 blocks(ceil(fp_t(nx)/threads.x)+1, ceil(fp_t(ny)/threads.y)+1, 1);
 
 	/* transfer mask in to constant device memory */

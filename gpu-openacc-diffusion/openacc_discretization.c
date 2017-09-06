@@ -77,8 +77,8 @@ void compute_convolution(fp_t** conc_old, fp_t** conc_lap, fp_t** mask_lap,
 
 void solve_diffusion_equation(fp_t** conc_old, fp_t** conc_new, fp_t** conc_lap,
                               fp_t** mask_lap, int nx, int ny, int nm,
-                              fp_t bc[2][2], fp_t D, fp_t dt, fp_t* elapsed,
-                              struct Stopwatch* sw, int checks)
+                              fp_t bc[2][2], fp_t D, fp_t dt, int checks,
+                              fp_t* elapsed, struct Stopwatch* sw)
 {
 	#pragma acc data copy(conc_old[0:ny][0:nx], mask_lap[0:nm][0:nm], bc[0:2][0:2]) create(conc_lap[0:ny][0:nx], conc_new[0:ny][0:nx])
 	{

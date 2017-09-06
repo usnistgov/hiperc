@@ -32,14 +32,14 @@ extern "C" {
 }
 
 /**
- \brief Maximum width of an input tile, including halo cells, for GPU memory allocation
+ \brief Width of an input tile, including halo cells, for GPU memory allocation
 */
-#define MAX_TILE_W 32
+#define TILE_W 32
 
 /**
- \brief Maximum height of an input tile, including halo cells, for GPU memory allocation
+ \brief Height of an input tile, including halo cells, for GPU memory allocation
 */
-#define MAX_TILE_H 32
+#define TILE_H 32
 
 /**
  \brief Convolution mask array on the GPU, allocated in protected memory
@@ -57,7 +57,10 @@ __constant__ extern fp_t d_bc[2][2];
  This function accesses 1D data rather than the 2D array representation of the
  scalar composition field
 */
-__global__ void boundary_kernel(fp_t* conc, int nx, int ny, int nm);
+__global__ void boundary_kernel(fp_t* conc,
+                                const int nx,
+                                const int ny,
+                                const int nm);
 
 /**
  \brief Tiled convolution algorithm for execution on the GPU
@@ -73,7 +76,11 @@ __global__ void boundary_kernel(fp_t* conc, int nx, int ny, int nm);
  - The same cells in \a conc_old are boundary values, and contribute to the convolution
  - \a conc_tile is the shared tile of input data, accessible by all threads in this block
 */
-__global__ void convolution_kernel(fp_t* conc_old, fp_t* conc_lap, int nx, int ny, int nm);
+__global__ void convolution_kernel(fp_t* conc_old,
+                                   fp_t* conc_lap,
+                                   const int nx,
+                                   const int ny,
+                                   const int nm);
 
 /**
  \brief Vector addition algorithm for execution on the GPU
@@ -81,8 +88,14 @@ __global__ void convolution_kernel(fp_t* conc_old, fp_t* conc_lap, int nx, int n
  This function accesses 1D data rather than the 2D array representation of the
  scalar composition field
 */
-__global__ void diffusion_kernel(fp_t* conc_old, fp_t* conc_new, fp_t* conc_lap,
-                                 int nx, int ny, int nm, fp_t D, fp_t dt);
+__global__ void diffusion_kernel(fp_t* conc_old,
+                                 fp_t* conc_new,
+                                 fp_t* conc_lap,
+                                 const int nx,
+                                 const int ny,
+                                 const int nm,
+                                 const fp_t D,
+                                 const fp_t dt);
 
 /** \cond SuppressGuard */
 #endif /* _CUDA_KERNELS_H_ */

@@ -22,11 +22,13 @@
  \brief CUDA implementation of semi-infinite diffusion equation
 */
 
+/* system includes */
 #include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
+/* common includes */
 #include "boundaries.h"
 #include "discretization.h"
 #include "mesh.h"
@@ -34,15 +36,8 @@
 #include "output.h"
 #include "timer.h"
 
+/* specific includes */
 #include "cuda_data.h"
-
-/**
- \brief Timestep the diffusion equation within the GPU
-*/
-extern void cuda_diffusion_solver(struct CudaData* dev, fp_t** conc_new,
-                                  int nx, int ny, int nm,
-                                  fp_t bc[2][2], fp_t D, fp_t dt, int checks,
-                                  fp_t *elapsed, struct Stopwatch* sw);
 
 /**
  \brief Run simulation using input parameters specified on the command line

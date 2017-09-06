@@ -120,10 +120,10 @@ __global__ void diffusion_kernel(fp_t* d_conc_old, fp_t* d_conc_new, fp_t* d_con
 	__syncthreads();
 }
 
-void solve_diffusion_equation(struct CudaData* dev, fp_t** conc_new,
-                              fp_t** mask_lap, int nx, int ny, int nm,
-                              fp_t bc[2][2], fp_t D, fp_t dt, int checks,
-                              fp_t* elapsed, struct Stopwatch* sw)
+void cuda_diffusion_solver(struct CudaData* dev, fp_t** conc_new,
+                           int nx, int ny, int nm, fp_t bc[2][2],
+                           fp_t D, fp_t dt, int checks,
+                           fp_t* elapsed, struct Stopwatch* sw)
 {
 	double start_time;
 	int check=0;

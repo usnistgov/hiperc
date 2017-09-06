@@ -45,6 +45,14 @@ void init_cuda(fp_t** conc_old, fp_t** mask_lap, fp_t bc[2][2],
                int nx, int ny, int nm, struct CudaData* dev);
 
 /**
+ \brief Specialization of solve_diffusion_equation() using CUDA
+*/
+void cuda_diffusion_solver(struct CudaData* dev, fp_t** conc_new,
+                           int nx, int ny, int nm,
+                           fp_t bc[2][2], fp_t D, fp_t dt, int checks,
+                           fp_t *elapsed, struct Stopwatch* sw);
+
+/**
  \brief Free CUDA device memory after marching
 */
 void free_cuda(struct CudaData* dev);

@@ -1,16 +1,29 @@
+# Build files
+
+.directory
 *.aux
 *.csv
 *.db
 *.log
 *.o
+*.orig
 *.out
 *.pdf
 *.png
-_build
-.directory
+*.swp
+*.txt
+
+
+# Executables
+
 diffusion
 spinodal
 ripening
+
+# Documentation Output
+
+_build
 html
 latex
+rst
 xml

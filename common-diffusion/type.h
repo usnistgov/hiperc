@@ -17,28 +17,49 @@
  Questions/comments to Trevor Keller (trevor.keller@nist.gov)
  **********************************************************************************/
 
-/** \defgroup DIFFUSION Diffusion equation benchmark */
-
-/** \addtogroup DIFFUSION
- \{
-*/
-
 /**
- \file  common-diffusion/type.h
+ \file  type.h
  \brief Definition of scalar data type and Doxygen diffusion group
 */
 
+/** \cond SuppressGuard */
 #ifndef _TYPE_H_
 #define _TYPE_H_
+/** \endcond */
 
 /**
  Specify the basic data type to achieve the desired accuracy in floating-point
  arithmetic: float for single-precision, double for double-precision. This
  choice propagates throughout the code, and may significantly affect runtime
- on GPU hardware. 
+ on GPU hardware.
 */
 typedef double fp_t;
 
-#endif /* _TYPE_H_ */
+/**
+ Container for timing data
+*/
+struct Stopwatch {
+	/**
+	 Cumulative time executing compute_convolution()
+	*/
+	double conv;
 
-/** \} */
+	/**
+	 Cumulative time executing solve_diffusion_equation()
+	*/
+	double step;
+
+	/**
+	 Cumulative time executing write_csv() and write_png()
+	*/
+	double file;
+
+	/**
+	 Cumulative time executing check_solution()
+	*/
+	double soln;
+};
+
+/** \cond SuppressGuard */
+#endif /* _TYPE_H_ */
+/** \endcond */

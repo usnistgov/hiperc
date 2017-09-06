@@ -17,25 +17,51 @@
  Questions/comments to Trevor Keller (trevor.keller@nist.gov)
  **********************************************************************************/
 
-/** \addtogroup DIFFUSION
- \{
-*/
-
 /**
- \file  common-diffusion/mesh.h
+ \file  mesh.h
  \brief Declaration of mesh function prototypes for diffusion benchmarks
 */
 
-#include "type.h"
-
+/** \cond SuppressGuard */
 #ifndef _MESH_H_
 #define _MESH_H_
+/** \endcond */
 
+#include "type.h"
+
+/**
+ \brief Allocate 2D arrays to store scalar composition values
+
+ Arrays are allocated as 1D arrays, then 2D pointer arrays are mapped over the
+ top. This facilitates use of either 1D or 2D data access, depending on whether
+ the task is spatially dependent or not.
+*/
 void make_arrays(fp_t*** conc_old, fp_t*** conc_new, fp_t*** conc_lap, fp_t*** mask_lap,
                  int nx, int ny, int nm);
+
+/**
+ \brief Free dynamically allocated memory
+*/
 void free_arrays(fp_t** conc_old, fp_t** conc_new, fp_t** conc_lap, fp_t** mask_lap);
+
+/**
+ \brief Swap pointers to 2D arrays
+
+ Rather than copy data from \c fp_t** \a conc_old into \c fp_t** \a conc_new,
+ an expensive operation, simply trade the top-most pointers. New becomes old,
+ old becomes new, with no data lost and in almost no time.
+*/
 void swap_pointers(fp_t*** conc_old, fp_t*** conc_new);
 
-#endif /* _MESH_H_ */
+/**
+ \brief Swap pointers to data underlying 1D arrays
 
-/** \} */
+ Rather than copy data from \c fp_t* \a conc_old[0] into \c fp_t*
+ \a conc_new[0], an expensive operation, simply trade the top-most pointers.
+ New becomes old, old becomes new,  with no data lost and in almost no time.
+*/
+void swap_pointers_1D(fp_t** conc_old, fp_t** conc_new);
+
+/** \cond SuppressGuard */
+#endif /* _MESH_H_ */
+/** \endcond */

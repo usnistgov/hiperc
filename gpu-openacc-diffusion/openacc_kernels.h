@@ -17,24 +17,35 @@
  Questions/comments to Trevor Keller (trevor.keller@nist.gov)
  **********************************************************************************/
 
-/** \addtogroup openmp
- \{
+/**
+ \file  openacc_kernels.h
+ \brief Declaration of functions to execute on the GPU (OpenACC kernels)
 */
+
+/** \cond SuppressGuard */
+#ifndef _OPENACC_KERNELS_H_
+#define _OPENACC_KERNELS_H_
+/** \endcond */
+
+#include "numerics.h"
 
 /**
- \file  cpu-openmp-diffusion/boundaries.h
- \brief Declaration of boundary condition function prototypes for OpenMP benchmarks
+ \brief Boundary condition kernel for execution on the GPU
 */
+void boundary_kernel(fp_t** conc, int nx, int ny, int nm, fp_t bc[2][2]);
 
-#include "type.h"
+/**
+ \brief Tiled convolution algorithm for execution on the GPU
+*/
+void convolution_kernel(fp_t** conc_old, fp_t** conc_lap, fp_t** mask_lap,
+                        int nx, int ny, int nm);
 
-#ifndef _BOUNDARIES_H_
-#define _BOUNDARIES_H_
+/**
+ \brief Vector addition algorithm for execution on the GPU
+*/
+void diffusion_kernel(fp_t** conc_old, fp_t** conc_new, fp_t** conc_lap,
+                      int nx, int ny, int nm, fp_t D, fp_t dt);
 
-void set_boundaries(fp_t bc[2][2]);
-void apply_initial_conditions(fp_t** conc_old, int nx, int ny, int nm, fp_t bc[2][2]);
-void apply_boundary_conditions(fp_t** conc_old, int nx, int ny, int nm, fp_t bc[2][2]);
-
-#endif /* _BOUNDARIES_H_ */
-
-/** \} */
+/** \cond SuppressGuard */
+#endif /* _OPENACC_KERNELS_H_ */
+/** \endcond */

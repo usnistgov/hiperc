@@ -17,23 +17,27 @@
  Questions/comments to Trevor Keller (trevor.keller@nist.gov)
  **********************************************************************************/
 
-/** \addtogroup DIFFUSION
- \{
-*/
-
 /**
- \file  common-diffusion/timer.h
+ \file  timer.h
  \brief Declaration of timer function prototypes for diffusion benchmarks
 */
 
-#include "type.h"
 
+/** \cond SuppressGuard */
 #ifndef _TIMER_H_
 #define _TIMER_H_
+/** \endcond */
 
+/**
+ \brief Set CPU frequency and begin timing
+*/
 void StartTimer();
+
+/**
+ \brief Return elapsed time in seconds
+*/
 double GetTimer();
 
+/** \cond SuppressGuard */
 #endif /* _TIMER_H_ */
-
-/** \} */
+/** \endcond */

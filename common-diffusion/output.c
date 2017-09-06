@@ -17,12 +17,8 @@
  Questions/comments to Trevor Keller (trevor.keller@nist.gov)
  **********************************************************************************/
 
-/** \addtogroup DIFFUSION
- \{
-*/
-
 /**
- \file  common-diffusion/output.c
+ \file  output.c
  \brief Implementation of file output functions for diffusion benchmarks
 */
 
@@ -31,21 +27,99 @@
 #include <string.h>
 #include <iso646.h>
 #include <png.h>
-
 #include "output.h"
 
-/**
- \brief Prints timestamps and a 20-point progress bar to stdout
+void param_parser(int argc, char* argv[], int* nx, int* ny, int* nm, int* code, fp_t* dx, fp_t* dy, fp_t* D, fp_t* linStab, int* steps, int* checks)
+{
+	FILE * input;
+	char buffer[256];
+	char* pch;
+	int inx=0, iny=0, idx=0, idy=0, ins=0, inc=0, idc=0, ico=0, isc=0;
 
- Call inside the timestepping loop, near the top, e.g.
- \code
- for (int step=0; step<steps; step++) {
- 	print_progress(step, steps);
- 	take_a_step();
- 	elapsed += dt;
- }
- \endcode
-*/
+	if (argc != 2) {
+		printf("Error: improper arguments supplied.\nUsage: ./%s filename\n", argv[0]);
+		exit(-1);
+	}
+
+	input = fopen(argv[1], "r");
+	if (input == NULL) {
+		printf("Warning: unable to open parameter file %s. Marching with default values.\n", argv[1]);
+	} else {
+		/* read parameters */
+		while ( !feof(input))
+		{
+			/* process key-value pairs line-by-line */
+			if (fgets(buffer, 256, input) != NULL)
+			{
+				pch = strtok(buffer, " ");
+
+				if (strcmp(pch, "nx") == 0) {
+					pch = strtok(NULL, " ");
+					*nx = atoi(pch);
+					inx = 1;
+				} else if (strcmp(pch, "ny") == 0) {
+					pch = strtok(NULL, " ");
+					*ny = atoi(pch);
+					iny = 1;
+				} else if (strcmp(pch, "dx") == 0) {
+					pch = strtok(NULL, " ");
+					*dx = atof(pch);
+					idx = 1;
+				} else if (strcmp(pch, "dy") == 0) {
+					pch = strtok(NULL, " ");
+					*dy = atof(pch);
+					idy = 1;
+				} else if (strcmp(pch, "ns") == 0) {
+					pch = strtok(NULL, " ");
+					*steps = atoi(pch);
+					ins = 1;
+				} else if (strcmp(pch, "nc") == 0) {
+					pch = strtok(NULL, " ");
+					*checks = atoi(pch);
+					inc = 1;
+				} else if (strcmp(pch, "dc") == 0) {
+					pch = strtok(NULL, " ");
+					*D = atof(pch);
+					idc = 1;
+				} else if (strcmp(pch, "co") == 0) {
+					pch = strtok(NULL, " ");
+					*linStab = atof(pch);
+					ico = 1;
+				} else if (strcmp(pch, "sc") == 0) {
+					pch = strtok(NULL, " ");
+					*nm = atoi(pch);
+					pch = strtok(NULL, " ");
+					*code = atoi(pch);
+					isc = 1;
+				} else {
+					printf("Warning: unknown key %s. Ignoring value.\n", pch);
+				}
+			}
+		}
+
+		/* make sure we got everyone */
+		if (! inx) {
+			printf("Warning: parameter %s undefined. Using default value, %i.\n", "nx", *nx);
+		} else if (! iny) {
+			printf("Warning: parameter %s undefined. Using default value, %i.\n", "ny", *ny);
+		} else if (! idx) {
+			printf("Warning: parameter %s undefined. Using default value, %f.\n", "dx", *dx);
+		} else if (! idy) {
+			printf("Warning: parameter %s undefined. Using default value, %f.\n", "dy", *dy);
+		} else if (! ins) {
+			printf("Warning: parameter %s undefined. Using default value, %i.\n", "ns", *steps);
+		} else if (! inc) {
+			printf("Warning: parameter %s undefined. Using default value, %i.\n", "nc", *checks);
+		} else if (! idc) {
+			printf("Warning: parameter %s undefined. Using default value, %f.\n", "dc", *D);
+		} else if (! ico) {
+			printf("Warning: parameter %s undefined. Using default value, %f.\n", "co", *linStab);
+		} else if (! isc) {
+			printf("Warning: parameter %s undefined. Using default values, %i and %i.\n", "sc", *nm, *code);
+		}
+	}
+}
+
 void print_progress(const int step, const int steps)
 {
 	char* timestring;
@@ -71,9 +145,6 @@ void print_progress(const int step, const int steps)
 	}
 }
 
-/**
- \brief Writes scalar composition field to diffusion.???????.csv
-*/
 void write_csv(fp_t** conc, int nx, int ny, fp_t dx, fp_t dy, int step)
 {
 	int i, j;
@@ -108,13 +179,10 @@ void write_csv(fp_t** conc, int nx, int ny, fp_t dx, fp_t dy, int step)
 	fclose(output);
 }
 
-/**
- \brief Writes scalar composition field to diffusion.???????.png
-*/
 void write_png(fp_t** conc, int nx, int ny, int step)
 {
 	/* After "A simple libpng example program," http://zarb.org/~gc/html/libpng.html
-	   and the libong manual, http://www.libpng.org/pub/png */
+	   and the libpng manual, http://www.libpng.org/pub/png */
 
 	fp_t min, max, *c;
 	int i, j, w, h, n;
@@ -219,5 +287,3 @@ void write_png(fp_t** conc, int nx, int ny, int step)
 	free(row_pointers);
 	free(buffer);
 }
-
-/** \} */

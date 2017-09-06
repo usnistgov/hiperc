@@ -17,24 +17,47 @@
  Questions/comments to Trevor Keller (trevor.keller@nist.gov)
  **********************************************************************************/
 
-/** \addtogroup DIFFUSION
- \{
-*/
-
 /**
- \file  common-diffusion/output.h
+ \file  output.h
  \brief Declaration of output function prototypes for diffusion benchmarks
 */
 
-#include "type.h"
-
+/** \cond SuppressGuard */
 #ifndef _OUTPUT_H_
 #define _OUTPUT_H_
+/** \endcond */
 
+#include "type.h"
+
+/**
+ \brief Read parameters from file specified on the command line
+*/
+void param_parser(int argc, char* argv[], int* nx, int* ny, int* nm, int* code, fp_t* dx, fp_t* dy, fp_t* D, fp_t* linStab, int* steps, int* checks);
+
+/**
+ \brief Prints timestamps and a 20-point progress bar to stdout
+
+ Call inside the timestepping loop, near the top, e.g.
+ \code
+ for (int step=0; step<steps; step++) {
+ 	print_progress(step, steps);
+ 	take_a_step();
+ 	elapsed += dt;
+ }
+ \endcode
+*/
 void print_progress(const int step, const int steps);
+
+/**
+ \brief Writes scalar composition field to diffusion.???????.csv
+*/
 void write_csv(fp_t** conc, int nx, int ny, fp_t dx, fp_t dy, int step);
+
+/**
+ \brief Writes scalar composition field to diffusion.???????.png
+*/
 void write_png(fp_t** conc, int nx, int ny, int step);
 
+/** \cond SuppressGuard */
 #endif /* _OUTPUT_H_ */
-
-/** \} */
+/** \endcond */

@@ -17,23 +17,14 @@
  Questions/comments to Trevor Keller (trevor.keller@nist.gov)
  **********************************************************************************/
 
-/** \addtogroup serial
- \{
-*/
-
 /**
- \file  cpu-serial-diffusion/boundaries.c
+ \file  serial_boundaries.c
  \brief Implementation of boundary condition functions without threading
 */
 
 #include <math.h>
 #include "boundaries.h"
 
-/**
- \brief Set values to be used along the simulation domain boundaries
-
- Indexing is row-major, i.e. \f$A[y][x]\f$, so \f$\mathrm{bc} = [[y_{lo},y_{hi}], [x_{lo},x_{hi}]]\f$.
-*/
 void set_boundaries(fp_t bc[2][2])
 {
 	fp_t clo = 0.0, chi = 1.0;
@@ -43,15 +34,6 @@ void set_boundaries(fp_t bc[2][2])
 	bc[1][1] = chi; /* right boundary */
 }
 
-/**
- \brief Initialize flat composition field with fixed boundary conditions
-
- The boundary conditions are fixed values of \f$c_{hi}\f$ along the lower-left half and
- upper-right half walls, no flux everywhere else, with an initial values of \f$c_{lo}\f$
- everywhere. These conditions represent a carburizing process, with partial
- exposure (rather than the entire left and right walls) to produce an
- inhomogeneous workload and highlight numerical errors at the boundaries.
-*/
 void apply_initial_conditions(fp_t** conc, int nx, int ny, int nm, fp_t bc[2][2])
 {
 	int i, j;
@@ -69,34 +51,42 @@ void apply_initial_conditions(fp_t** conc, int nx, int ny, int nm, fp_t bc[2][2]
 			conc[j][i] = bc[1][1]; /* right half-wall */
 }
 
-/**
- \brief Set fixed value (\f$c_{hi}\f$) along left and bottom, zero-flux elsewhere
-*/
 void apply_boundary_conditions(fp_t** conc, int nx, int ny, int nm, fp_t bc[2][2])
 {
-	int i, j;
+	int i, ihi, ilo, j, jhi, jlo, offset;
 
-	for (j = 0; j < ny/2; j++)
-		for (i = 0; i < 1+nm/2; i++)
+	/* apply fixed boundary values: sequence does not matter */
+
+	for (j = 0; j < ny/2; j++) {
+		for (i = 0; i < 1+nm/2; i++) {
 			conc[j][i] = bc[1][0]; /* left value */
+		}
+	}
 
-	for (j = ny/2; j < ny; j++)
-		for (i = nx-1-nm/2; i < nx; i++)
+	for (j = ny/2; j < ny; j++) {
+		for (i = nx-1-nm/2; i < nx; i++) {
 			conc[j][i] = bc[1][1]; /* right value */
-
-	for (j = 0; j < ny; j++) {
-		for (i = nm/2; i > 0; i--)
-			conc[j][i-1] = conc[j][i]; /* left condition */
-		for (i = nx-1-nm/2; i < nx-1; i++)
-			conc[j][i+1] = conc[j][i]; /* right condition */
+		}
 	}
 
-	for (i = 0; i < nx; i++) {
-		for (j = nm/2; j > 0; j--)
-			conc[j-1][i] = conc[j][i]; /* bottom condition */
-		for (j = ny-1-nm/2; j < ny-1; j++)
-			conc[j+1][i] = conc[j][i]; /* top condition */
+	/* apply no-flux boundary conditions: inside to out, sequence matters */
+
+	for (offset = 0; offset < nm/2; offset++) {
+		ilo = nm/2 - offset;
+		ihi = nx - 1 - nm/2 + offset;
+		for (j = 0; j < ny; j++) {
+			conc[j][ilo-1] = conc[j][ilo]; /* left condition */
+			conc[j][ihi+1] = conc[j][ihi]; /* right condition */
+		}
 	}
+
+	for (offset = 0; offset < nm/2; offset++) {
+		jlo = nm/2 - offset;
+		jhi = ny - 1 - nm/2 + offset;
+		for (i = 0; i < nx; i++) {
+			conc[jlo-1][i] = conc[jlo][i]; /* bottom condition */
+			conc[jhi+1][i] = conc[jhi][i]; /* top condition */
+		}
+	}
+
 }
-
-/** \} */

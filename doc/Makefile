@@ -5,20 +5,24 @@ SPHINX = sphinx-build
 DOXYGEN = doxygen
 
 all: pdf
+.PHONY: all
 
-.PHONY: all clean dox pdf sphinx tex
-
+.PHONY: dox
 dox:
 	$(DOXYGEN)
 
+.PHONY: tex
 tex: dox
 	$(MAKE) -C latex && cd latex && $(LATEX) refman.tex
 
+.PHONY: pdf
 pdf: tex
 	cp latex/refman.pdf phasefield-accelerator-benchmarks_guide.pdf
 
+.PHONY: sphinx
 sphinx: dox
 	$(SPHINX) -b html . _build
 
+.PHONY: clean
 clean:
-	rm -r _build/* latex xml
+	rm -rf _build/* _static/* latex xml rst/*

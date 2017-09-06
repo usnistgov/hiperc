@@ -2,7 +2,7 @@
 # serial implementation (no parallel model)
 
 CC = gcc
-CFLAGS = -O3 -Wall -pedantic -I. -I../common-diffusion
+CFLAGS = -O3 -Wall -pedantic -I../common-diffusion
 LINKS = -lm -lpng
 
 OBJS = boundaries.o discretization.o mesh.o numerics.o output.o timer.o
@@ -10,7 +10,7 @@ OBJS = boundaries.o discretization.o mesh.o numerics.o output.o timer.o
 all: diffusion
 .PHONY: all
 
-diffusion: ../common-diffusion/main.c $(OBJS)
+diffusion: serial_main.c $(OBJS)
 	$(CC) $(CFLAGS) $(OBJS) $< -o $@ $(LINKS)
 
 boundaries.o: serial_boundaries.c

@@ -2,7 +2,7 @@
 # Analytical solution
 
 CC = gcc
-CFLAGS = -O3 -Wall -pedantic -I. -I../common-diffusion
+CFLAGS = -O3 -Wall -pedantic -I../common-diffusion
 LINKS = -lm -lpng
 
 OBJS = mesh.o numerics.o output.o timer.o

@@ -2,7 +2,7 @@
 # Threading Building Blocks implementation
 
 CXX = g++
-CXXFLAGS = -O3 -Wall -pedantic -std=c++11 -I. -I../common-diffusion
+CXXFLAGS = -O3 -Wall -pedantic -std=c++11 -I../common-diffusion
 LINKS = -lm -lpng -ltbb
 
 OBJS = boundaries.o discretization.o mesh.o numerics.o output.o timer.o
@@ -10,7 +10,7 @@ OBJS = boundaries.o discretization.o mesh.o numerics.o output.o timer.o
 all: diffusion
 .PHONY: all
 
-diffusion: ../common-diffusion/main.c $(OBJS)
+diffusion: tbb_main.c $(OBJS)
 	$(CXX) $(CXXFLAGS) $(OBJS) $< -o $@ $(LINKS)
 
 boundaries.o: tbb_boundaries.cpp

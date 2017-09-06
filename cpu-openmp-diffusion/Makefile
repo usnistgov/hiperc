@@ -2,7 +2,7 @@
 # OpenMP implementation
 
 CC = gcc
-CFLAGS = -O3 -Wall -pedantic -I. -I../common-diffusion -fopenmp
+CFLAGS = -O3 -Wall -pedantic -I../common-diffusion -fopenmp
 LINKS = -lm -lpng
 
 OBJS = boundaries.o discretization.o mesh.o numerics.o output.o timer.o
@@ -10,7 +10,7 @@ OBJS = boundaries.o discretization.o mesh.o numerics.o output.o timer.o
 all: diffusion
 .PHONY: all
 
-diffusion: ../common-diffusion/main.c $(OBJS)
+diffusion: openmp_main.c $(OBJS)
 	$(CC) $(CFLAGS) $(OBJS) -include omp.h $< -o $@ $(LINKS)
 
 boundaries.o: openmp_boundaries.c

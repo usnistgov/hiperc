@@ -65,7 +65,7 @@ void apply_initial_conditions(fp_t** conc, int nx, int ny, int nm, fp_t bc[2][2]
 	}
 }
 
-__global__ void boundary_kernel(fp_t* conc, int nx, int ny, int nm)
+__global__ void boundary_kernel(fp_t* d_conc, int nx, int ny, int nm)
 {
 	int tx, ty, row, col;
 	int ihi, ilo, jhi, jlo, offset;
@@ -81,11 +81,11 @@ __global__ void boundary_kernel(fp_t* conc, int nx, int ny, int nm)
 	/* apply fixed boundary values: sequence does not matter */
 
 	if (row >= 0 && row < ny/2 && col >= 0 && col < 1+nm/2) {
-		conc[row * nx + col] = d_bc[1][0]; /* left value */
+		d_conc[row * nx + col] = d_bc[1][0]; /* left value */
 	}
 
 	if (row >= ny/2 && row < ny && col >= nx-1-nm/2 && col < nx) {
-		conc[row * nx + col] = d_bc[1][1]; /* right value */
+		d_conc[row * nx + col] = d_bc[1][1]; /* right value */
 	}
 
 	/* wait for all threads to finish writing */
@@ -97,9 +97,9 @@ __global__ void boundary_kernel(fp_t* conc, int nx, int ny, int nm)
 		ilo = nm/2 - offset;
 		ihi = nx - 1 - nm/2 + offset;
 		if (col == ilo-1 && row >= 0 && row < ny) {
-			conc[row * nx + col] = conc[row * nx + ilo]; /* left condition */
+			d_conc[row * nx + col] = d_conc[row * nx + ilo]; /* left condition */
 		} else if (col == ihi+1 && row >= 0 && row < ny) {
-			conc[row * nx + col] = conc[row * nx + ihi]; /* right condition */
+			d_conc[row * nx + col] = d_conc[row * nx + ihi]; /* right condition */
 		}
 		__syncthreads();
 	}
@@ -108,37 +108,10 @@ __global__ void boundary_kernel(fp_t* conc, int nx, int ny, int nm)
 		jlo = nm/2 - offset;
 		jhi = ny - 1 - nm/2 + offset;
 		if (row == jlo-1 && col >= 0 && col < nx) {
-			conc[row * nx + col] = conc[jlo * nx + col]; /* bottom condition */
+			d_conc[row * nx + col] = d_conc[jlo * nx + col]; /* bottom condition */
 		} else if (row == jhi+1 && col >= 0 && col < nx) {
-			conc[row * nx + col] = conc[jhi * nx + col]; /* top condition */
+			d_conc[row * nx + col] = d_conc[jhi * nx + col]; /* top condition */
 		}
 		__syncthreads();
 	}
-}
-
-void apply_boundary_conditions(fp_t** conc, int nx, int ny, int nm, fp_t bc[2][2])
-{
-	fp_t* d_conc;
-
-	/* allocate memory on device */
-	cudaMalloc((void **) &d_conc, nx * ny * sizeof(fp_t));
-
-	/* divide matrices into blocks of (MAX_TILE_W x MAX_TILE_W) threads */
-	dim3 threads(MAX_TILE_W - nm/2, MAX_TILE_W - nm/2, 1);
-	dim3 blocks(ceil(fp_t(nx)/threads.x)+1, ceil(fp_t(ny)/threads.y)+1, 1);
-
-	/* transfer mask in to constant device memory */
-	cudaMemcpyToSymbol(d_bc, bc[0], 2 * 2 * sizeof(fp_t));
-
-	/* transfer data from host in to device */
-	cudaMemcpy(d_conc, conc[0], nx * ny * sizeof(fp_t), cudaMemcpyHostToDevice);
-
-	/* apply boundary conditions */
-	boundary_kernel<<<blocks, threads>>>(d_conc, nx, ny, nm);
-
-	/* transfer from device out to host */
-	cudaMemcpy(conc[0], d_conc, nx * ny * sizeof(fp_t), cudaMemcpyDeviceToHost);
-
-	/* free memory on device */
-	cudaFree(d_conc);
 }

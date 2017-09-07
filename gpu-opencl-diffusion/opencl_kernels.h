@@ -59,8 +59,8 @@ __constant extern fp_t d_bc[2][2];
 */
 void build_program(const char* filename,
                   cl_context context,
-                  cl_device_id* gpu,
-                  cl_program* program,
+                  cl_device_id gpu,
+                  cl_program program,
                   cl_int* status);
 
 /**

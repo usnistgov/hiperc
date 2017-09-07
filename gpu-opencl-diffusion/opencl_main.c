@@ -45,6 +45,7 @@
 int main(int argc, char* argv[])
 {
 	FILE * output;
+	struct OpenCLData dev;
 
 	/* declare default mesh size and resolution */
 	fp_t **conc_old, **conc_new, **conc_lap, **mask_lap;
@@ -75,7 +76,6 @@ int main(int argc, char* argv[])
 	sw.step = GetTimer() - start_time;
 
 	/* initialize GPU */
-	struct OpenCLData dev;
 	init_opencl(conc_old, mask_lap, bc, nx, ny, nm, &dev);
 
 	/* write initial condition data */

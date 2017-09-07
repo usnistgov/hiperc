@@ -32,6 +32,16 @@
 #include "type.h"
 
 /**
+ \brief Greatest number of expected platforms
+*/
+#define MAX_PLATFORMS 4
+
+/**
+ \brief Greatest number of expected devices
+*/
+#define MAX_DEVICES 32
+
+/**
  \brief Container for GPU array pointers and parameters
 */
 struct OpenCLData {
@@ -60,8 +70,11 @@ struct OpenCLData {
 
 /**
  \brief Report error code when status is not \c CL_SUCCESS
+
+ Refer to https://streamhpc.com/blog/2013-04-28/opencl-error-codes/
+ for help interpreting error codes.
 */
-void report_error(cl_int error);
+void report_error(cl_int error, const char* message);
 
 /**
  \brief Initialize OpenCL device memory before marching

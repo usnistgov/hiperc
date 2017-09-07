@@ -18,10 +18,11 @@
  **********************************************************************************/
 
 /**
- \file  main.c
- \brief Implementation of semi-infinite diffusion equation
+ \file  serial_main.c
+ \brief Serial implementation of semi-infinite diffusion equation
 */
 
+#include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -48,13 +49,13 @@ int main(int argc, char* argv[])
 {
 	FILE * output;
 
-	/* declare mesh size and resolution */
+	/* declare default mesh size and resolution */
 	fp_t **conc_old, **conc_new, **conc_lap, **mask_lap;
 	int nx=512, ny=512, nm=3, code=53;
 	fp_t dx=0.5, dy=0.5, h=0.5;
 	fp_t bc[2][2];
 
-	/* declare materials and numerical parameters */
+	/* declare default materials and numerical parameters */
 	fp_t D=0.00625, linStab=0.1, dt=1., elapsed=0., rss=0.;
 	int i=0, step=0, steps=100000, checks=10000;
 	double start_time=0.;
@@ -105,16 +106,15 @@ int main(int argc, char* argv[])
 		if (checks > steps - step)
 			checks = steps - step;
 
-		solve_diffusion_equation(conc_old, conc_new, conc_lap, mask_lap, nx, ny,
-		                         nm, bc, D, dt, &elapsed, &sw, checks);
+		assert(step + checks <= steps);
 
-		/* the function returns after swapping pointers:
-		   new data is in conc_old */
+		solve_diffusion_equation(conc_old, conc_new, conc_lap, mask_lap, nx, ny,
+		                         nm, bc, D, dt, checks, &elapsed, &sw);
+		/* returns after swapping pointers: new data is in conc_old */
 
 		for (i = 0; i < checks; i++) {
 			step++;
-			if (step < steps)
-				print_progress(step, steps);
+			print_progress(step, steps);
 		}
 
 		start_time = GetTimer();
@@ -129,7 +129,7 @@ int main(int argc, char* argv[])
 		fflush(output);
 	}
 
-	write_csv(conc_old, nx, ny, dx, dy, steps);
+	write_csv(conc_old, nx, ny, dx, dy, step);
 
 	/* clean up */
 	fclose(output);

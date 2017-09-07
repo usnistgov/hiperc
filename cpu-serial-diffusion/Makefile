@@ -2,23 +2,23 @@
 # serial implementation (no parallel model)
 
 CC = gcc
-CFLAGS = -O3 -Wall -pedantic -I. -I../common-diffusion
+CFLAGS = -O3 -Wall -pedantic -I../common-diffusion
 LINKS = -lm -lpng
 
 OBJS = boundaries.o discretization.o mesh.o numerics.o output.o timer.o
 
-all: diffusion
-.PHONY: all
-
-diffusion: ../common-diffusion/main.c $(OBJS)
+# Executable
+diffusion: serial_main.c $(OBJS)
 	$(CC) $(CFLAGS) $(OBJS) $< -o $@ $(LINKS)
 
+# Serial objects
 boundaries.o: serial_boundaries.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
 discretization.o: serial_discretization.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
+# Common objects
 mesh.o: ../common-diffusion/mesh.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
@@ -31,6 +31,7 @@ output.o: ../common-diffusion/output.c
 timer.o: ../common-diffusion/timer.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
+# Helper scripts
 .PHONY: run
 run: diffusion
 	/usr/bin/time -f' Time (%E wall, %U user, %S sys)' ./diffusion ../common-diffusion/params.txt

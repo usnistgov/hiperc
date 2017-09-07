@@ -9,7 +9,7 @@ HIDE_UNDOC_CLASSES    = NO
 SOURCE_BROWSER        = YES
 INPUT                 = ../common-diffusion/ ../cpu-analytic-diffusion/ \
                         ../cpu-serial-diffusion/ ../cpu-openmp-diffusion/ ../cpu-tbb-diffusion/ \
-                        ../gpu-cuda-diffusion/ ../gpu-openacc-diffusion/
+                        ../gpu-cuda-diffusion/ ../gpu-openacc-diffusion/ ../gpu-opencl-diffusion/
 RECURSIVE             = YES
 FILE_PATTERNS         = *.c *.cl *.cpp *.cu *.cuh *.h
 EXCLUDE_PATTERNS      = *.git doc

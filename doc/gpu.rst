@@ -34,6 +34,21 @@ openacc_discretization.c
 .. doxygenfile:: openacc_discretization.c
    :project: phasefield-accelerator-benchmarks
 
+gpu-opencl-diffusion
+=====================
+
+opencl_boundaries.c
+--------------------
+
+.. doxygenfile:: opencl_boundaries.c
+   :project: phasefield-accelerator-benchmarks
+
+opencl_discretization.c
+------------------------
+
+.. doxygenfile:: opencl_discretization.c
+   :project: phasefield-accelerator-benchmarks
+
 
 Looking for something specific?
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

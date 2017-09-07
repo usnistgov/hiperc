@@ -135,7 +135,7 @@ void print_progress(const int step, const int steps)
 		timestring[strlen(timestring)-1] = '\0';
 		printf("%s [", timestring);
 		fflush(stdout);
-	} else if (step==steps-1) {
+	} else if (step==steps) {
 		unsigned long deltat = time(NULL)-tstart;
 		printf("•] %2luh:%2lum:%2lus\n",deltat/3600,(deltat%3600)/60,deltat%60);
 		fflush(stdout);

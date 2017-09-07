@@ -55,8 +55,8 @@ void compute_convolution(fp_t** conc_old, fp_t** conc_lap, fp_t** mask_lap,
 
 void solve_diffusion_equation(fp_t** conc_old, fp_t** conc_new, fp_t** conc_lap,
                               fp_t** mask_lap, int nx, int ny, int nm,
-                              fp_t bc[2][2], fp_t D, fp_t dt, fp_t* elapsed,
-                              struct Stopwatch* sw, int checks)
+                              fp_t bc[2][2], fp_t D, fp_t dt, int checks,
+                              fp_t* elapsed, struct Stopwatch* sw)
 {
 	int i, j, check;
 	double start_time=0.;

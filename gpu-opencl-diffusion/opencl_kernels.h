@@ -18,18 +18,18 @@
  **********************************************************************************/
 
 /**
- \file  cuda_kernels.cuh
- \brief Declaration of functions to execute on the GPU (CUDA kernels)
+ \file  opencl_kernels.h
+ \brief Declaration of functions to execute on the GPU (OpenCL kernels)
 */
 
 /** \cond SuppressGuard */
-#ifndef _CUDA_KERNELS_H_
-#define _CUDA_KERNELS_H_
+#ifndef _OPENCL_KERNELS_H_
+#define _OPENCL_KERNELS_H_
 /** \endcond */
 
-extern "C" {
+#include <CL/cl.h>
+
 #include "numerics.h"
-}
 
 /**
  \brief Width of an input tile, including halo cells, for GPU memory allocation
@@ -41,15 +41,27 @@ extern "C" {
 */
 #define TILE_H 32
 
-/**
+/* OpenCL requires initializers for __constant arrays
  \brief Convolution mask array on the GPU, allocated in protected memory
+__constant extern fp_t d_mask[MAX_MASK_W * MAX_MASK_H];
 */
-__constant__ extern fp_t d_mask[MAX_MASK_W * MAX_MASK_H];
+
+/*
+ \brief Boundary condition array on the GPU, allocated in protected memory
+__constant extern fp_t d_bc[2][2];
+*/
 
 /**
- \brief Boundary condition array on the GPU, allocated in protected memory
+ \brief Build kernel program from text input
+
+ Source follows the OpenCL Programming Book,
+ https://www.fixstars.com/en/opencl/book/OpenCLProgrammingBook/calling-the-kernel/
 */
-__constant__ extern fp_t d_bc[2][2];
+void build_program(const char* filename,
+                  cl_context context,
+                  cl_device_id* gpu,
+                  cl_program* program,
+                  cl_int* status);
 
 /**
  \brief Boundary condition kernel for execution on the GPU
@@ -57,10 +69,8 @@ __constant__ extern fp_t d_bc[2][2];
  This function accesses 1D data rather than the 2D array representation of the
  scalar composition field
 */
-__global__ void boundary_kernel(fp_t* conc,
-                                const int nx,
-                                const int ny,
-                                const int nm);
+void boundary_kernel(fp_t* d_conc, fp_t d_bc[2][2],
+                     int nx, int ny, int nm);
 
 /**
  \brief Tiled convolution algorithm for execution on the GPU
@@ -70,33 +80,32 @@ __global__ void boundary_kernel(fp_t* conc,
  before computing the convolution.
 
  Note:
- - The source matrix (\a conc_old) and destination matrix (\a conc_lap) must be identical in size
- - One CUDA core operates on one array index: there is no nested loop over matrix elements
- - The halo (\a nm/2 perimeter cells) in \a conc_lap are unallocated garbage
- - The same cells in \a conc_old are boundary values, and contribute to the convolution
- - \a conc_tile is the shared tile of input data, accessible by all threads in this block
+ - The source matrix (\a d_conc_old) and destination matrix (\a d_conc_lap)
+   must be identical in size
+ - One OpenCL worker operates on one array index: there is no nested loop over
+   matrix elements
+ - The halo (\a nm/2 perimeter cells) in \a d_conc_lap are unallocated garbage
+ - The same cells in \a d_conc_old are boundary values, and contribute to the
+   convolution
+ - \a d_conc_tile is the shared tile of input data, accessible by all threads
+   in this block
+ - The \a __local specifier allocates the small \a d_conc_tile array in cache
+ - The \a __constant specifier allocates the small \a d_mask array in cache
 */
-__global__ void convolution_kernel(fp_t* conc_old,
-                                   fp_t* conc_lap,
-                                   const int nx,
-                                   const int ny,
-                                   const int nm);
+void convolution_kernel(fp_t* d_conc_old, fp_t* d_conc_lap, fp_t** d_mask,
+                        int nx, int ny, int nm);
 
 /**
- \brief Vector addition algorithm for execution on the GPU
+ \brief Diffusion equation kernel for execution on the GPU
 
  This function accesses 1D data rather than the 2D array representation of the
  scalar composition field
 */
-__global__ void diffusion_kernel(fp_t* conc_old,
-                                 fp_t* conc_new,
-                                 fp_t* conc_lap,
-                                 const int nx,
-                                 const int ny,
-                                 const int nm,
-                                 const fp_t D,
-                                 const fp_t dt);
+void diffusion_kernel(fp_t* d_conc_old, fp_t* d_conc_new, fp_t* d_conc_lap,
+                      int nx, int ny, int nm,
+                      fp_t D, fp_t dt);
+
 
 /** \cond SuppressGuard */
-#endif /* _CUDA_KERNELS_H_ */
+#endif /* _OPENCL_KERNELS_H_ */
 /** \endcond */

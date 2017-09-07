@@ -19,12 +19,6 @@ discretization.h
 .. doxygenfile:: discretization.h
    :project: phasefield-accelerator-benchmarks
 
-main.c
-------
-
-.. doxygenfile:: main.c
-   :project: phasefield-accelerator-benchmarks
-
 mesh.h
 ------
 
@@ -62,6 +56,21 @@ cuda_kernels.cuh
 ----------------
 
 .. doxygenfile:: cuda_kernels.cuh
+   :project: phasefield-accelerator-benchmarks
+
+gpu-opencl-diffusion
+====================
+
+opencl_data.h
+-------------
+
+.. doxygenfile:: opencl_data.h
+   :project: phasefield-accelerator-benchmarks
+
+opencl_kernels.h
+----------------
+
+.. doxygenfile:: opencl_kernels.h
    :project: phasefield-accelerator-benchmarks
 
 

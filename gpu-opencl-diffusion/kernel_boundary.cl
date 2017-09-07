@@ -18,81 +18,37 @@
  **********************************************************************************/
 
 /**
- \file  cuda_boundaries.cu
- \brief Implementation of boundary condition functions with OpenMP threading
+ \brief Boundary condition kernel for execution on the GPU
+ \fn void boundary_kernel(fp_t* d_conc, fp_t d_bc[2][2], int nx, int ny, int nm)
+
+ This function accesses 1D data rather than the 2D array representation of the
+ scalar composition field
 */
-
-#include <math.h>
-#include <omp.h>
-
-extern "C" {
-#include "boundaries.h"
-}
-
-#include "cuda_kernels.cuh"
-
-__constant__ fp_t d_bc[2][2];
-
-void set_boundaries(fp_t bc[2][2])
+__kernel void boundary_kernel(__global fp_t* d_conc,
+                              __constant fp_t d_bc[2][2],
+                              int nx, int ny, int nm)
 {
-	fp_t clo = 0.0, chi = 1.0;
-	bc[0][0] = clo; /* bottom boundary */
-	bc[0][1] = clo; /* top boundary */
-	bc[1][0] = chi; /* left boundary */
-	bc[1][1] = chi; /* right boundary */
-}
-
-void apply_initial_conditions(fp_t** conc, int nx, int ny, int nm, fp_t bc[2][2])
-{
-	#pragma omp parallel
-	{
-		int i, j;
-
-		#pragma omp for collapse(2)
-		for (j = 0; j < ny; j++)
-			for (i = 0; i < nx; i++)
-				conc[j][i] = bc[0][0];
-
-		#pragma omp for collapse(2)
-		for (j = 0; j < ny/2; j++)
-			for (i = 0; i < 1+nm/2; i++)
-				conc[j][i] = bc[1][0]; /* left half-wall */
-
-		#pragma omp for collapse(2)
-		for (j = ny/2; j < ny; j++)
-			for (i = nx-1-nm/2; i < nx; i++)
-				conc[j][i] = bc[1][1]; /* right half-wall */
-	}
-}
-
-__global__ void boundary_kernel(fp_t* d_conc,
-                                const int nx,
-                                const int ny,
-                                const int nm)
-{
-	int tx, ty, row, col;
+	int idx, col, row;
 	int ihi, ilo, jhi, jlo, offset;
 
 	/* determine indices on which to operate */
 
-	tx = threadIdx.x;
-	ty = threadIdx.y;
-
-	row = blockDim.y * blockIdx.y + ty;
-	col = blockDim.x * blockIdx.x + tx;
+	col = get_global_id(0);
+	row = get_global_id(1);
+	idx = row * nx + col;
 
 	/* apply fixed boundary values: sequence does not matter */
 
 	if (row >= 0 && row < ny/2 && col >= 0 && col < 1+nm/2) {
-		d_conc[row * nx + col] = d_bc[1][0]; /* left value */
+		d_conc[idx] = d_bc[1][0]; /* left value */
 	}
 
 	if (row >= ny/2 && row < ny && col >= nx-1-nm/2 && col < nx) {
-		d_conc[row * nx + col] = d_bc[1][1]; /* right value */
+		d_conc[idx] = d_bc[1][1]; /* right value */
 	}
 
 	/* wait for all threads to finish writing */
-	__syncthreads();
+	barrier(CLK_GLOBAL_MEM_FENCE);
 
 	/* apply no-flux boundary conditions: inside to out, sequence matters */
 
@@ -100,21 +56,21 @@ __global__ void boundary_kernel(fp_t* d_conc,
 		ilo = nm/2 - offset;
 		ihi = nx - 1 - nm/2 + offset;
 		if (col == ilo-1 && row >= 0 && row < ny) {
-			d_conc[row * nx + col] = d_conc[row * nx + ilo]; /* left condition */
+			d_conc[idx] = d_conc[row * nx + ilo]; /* left condition */
 		} else if (col == ihi+1 && row >= 0 && row < ny) {
-			d_conc[row * nx + col] = d_conc[row * nx + ihi]; /* right condition */
+			d_conc[idx] = d_conc[row * nx + ihi]; /* right condition */
 		}
-		__syncthreads();
+		barrier(CLK_GLOBAL_MEM_FENCE);
 	}
 
 	for (offset = 0; offset < nm/2; offset++) {
 		jlo = nm/2 - offset;
 		jhi = ny - 1 - nm/2 + offset;
 		if (row == jlo-1 && col >= 0 && col < nx) {
-			d_conc[row * nx + col] = d_conc[jlo * nx + col]; /* bottom condition */
+			d_conc[idx] = d_conc[jlo * nx + col]; /* bottom condition */
 		} else if (row == jhi+1 && col >= 0 && col < nx) {
-			d_conc[row * nx + col] = d_conc[jhi * nx + col]; /* top condition */
+			d_conc[idx] = d_conc[jhi * nx + col]; /* top condition */
 		}
-		__syncthreads();
+		barrier(CLK_GLOBAL_MEM_FENCE);
 	}
 }

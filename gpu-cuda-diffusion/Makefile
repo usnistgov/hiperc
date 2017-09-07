@@ -4,22 +4,27 @@
 NVCXX = nvcc
 NVCXXFLAGS = -gencode arch=compute_35,code=sm_35 -D_FORCE_INLINES \
              -Wno-deprecated-gpu-targets -std=c++11 \
-             --compiler-options="-O3 -Wall -I. -I../common-diffusion -fopenmp"
+             --compiler-options="-O3 -Wall -I../common-diffusion -fopenmp"
 LINKS = -lm -lpng -lcuda
 
-OBJS = boundaries.o discretization.o mesh.o numerics.o output.o timer.o
+OBJS = boundaries.o data.o discretization.o mesh.o numerics.o output.o timer.o
 
-all: diffusion
-.PHONY: all
-
-diffusion: ../common-diffusion/main.c $(OBJS)
+# Executable
+diffusion: cuda_main.c $(OBJS)
 	$(NVCXX) $(NVCXXFLAGS) $(OBJS) $< -o $@ $(LINKS)
+
+# CUDA objects
 
 boundaries.o: cuda_boundaries.cu
 	$(NVCXX) $(NVCXXFLAGS) -dc $< -o $@
 
+data.o: cuda_data.cu
+	$(NVCXX) $(NVCXXFLAGS) -dc $< -o $@
+
 discretization.o: cuda_discretization.cu
 	$(NVCXX) $(NVCXXFLAGS) -dc $< -o $@
+
+# Common objects
 
 mesh.o: ../common-diffusion/mesh.c
 	$(NVCXX) $(NVCXXFLAGS) -dc $< -o $@
@@ -32,6 +37,8 @@ output.o: ../common-diffusion/output.c
 
 timer.o: ../common-diffusion/timer.c
 	$(NVCXX) $(NVCXXFLAGS) -dc $< -o $@
+
+# Helper scripts
 
 .PHONY: run
 run: diffusion

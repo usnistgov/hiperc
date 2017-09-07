@@ -18,53 +18,29 @@
  **********************************************************************************/
 
 /**
- \file  analytic_main.c
- \brief Analytical solution to semi-infinite diffusion equation
+ \file  opencl_main.c
+ \brief OpenCL implementation of semi-infinite diffusion equation
 */
 
+/* system includes */
+#include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
+/* common includes */
+#include "boundaries.h"
+#include "discretization.h"
 #include "mesh.h"
 #include "numerics.h"
 #include "output.h"
 #include "timer.h"
 
-/**
- \brief Update the scalar composition field using analytical solution
-*/
-void solve_diffusion_equation(fp_t** conc, int nx, int ny, int nm, fp_t dx, fp_t dy, fp_t D, fp_t dt, fp_t elapsed)
-{
-	int i, j;
-	fp_t r, cal, car;
-	fp_t bc[2][2] = {{1., 1.}, {1., 1.}};
-
-	for (j = nm/2; j < ny-nm/2; j++) {
-		for (i = nm/2; i < nx-nm/2; i++) {
-			/* shortest distance to left-wall source */
-			r = distance_point_to_segment(dx * (nm/2), dy * (nm/2),
-			                              dx * (nm/2), dy * (ny/2),
-			                              dx * i, dy * j);
-			analytical_value(r, elapsed, D, bc, &cal);
-
-			/* shortest distance to right-wall source */
-			r = distance_point_to_segment(dx * (nx-1-nm/2), dy * (ny/2),
-			                              dx * (nx-1-nm/2), dy * (ny-1-nm/2),
-			                              dx * i, dy * j);
-			analytical_value(r, elapsed, D, bc, &car);
-
-			/* superposition of analytical solutions */
-			conc[j][i] = cal + car;
-		}
-	}
-}
+/* specific includes */
+#include "opencl_data.h"
 
 /**
- \brief Find analytical solution at intervals specified in the parameters file
-
- Program will write a series of PNG image files to visualize the scalar
- composition field, useful for qualitative verification of numerical results.
+ \brief Run simulation using input parameters specified on the command line
 */
 int main(int argc, char* argv[])
 {
@@ -74,11 +50,13 @@ int main(int argc, char* argv[])
 	fp_t **conc_old, **conc_new, **conc_lap, **mask_lap;
 	int nx=512, ny=512, nm=3, code=53;
 	fp_t dx=0.5, dy=0.5, h=0.5;
+	fp_t bc[2][2];
 
 	/* declare default materials and numerical parameters */
 	fp_t D=0.00625, linStab=0.1, dt=1., elapsed=0., rss=0.;
-	int step=0, steps=100000, checks=10000;
-	double conv_time=0., file_time=0., soln_time=0., start_time=0., step_time=0.;
+	int i=0, step=0, steps=100000, checks=10000;
+	double start_time=0.;
+	struct Stopwatch sw = {0., 0., 0., 0.};
 
 	StartTimer();
 
@@ -89,46 +67,73 @@ int main(int argc, char* argv[])
 
 	/* initialize memory */
 	make_arrays(&conc_old, &conc_new, &conc_lap, &mask_lap, nx, ny, nm);
+	set_mask(dx, dy, code, mask_lap, nm);
+	set_boundaries(bc);
 
 	start_time = GetTimer();
-	solve_diffusion_equation(conc_old, nx, ny, nm, dx, dy, D, dt, dt);
-	step_time = GetTimer() - start_time;
+	apply_initial_conditions(conc_old, nx, ny, nm, bc);
+	sw.step = GetTimer() - start_time;
+
+	/* initialize GPU */
+	struct OpenCLData dev;
+	init_opencl(conc_old, mask_lap, bc, nx, ny, nm, &dev);
 
 	/* write initial condition data */
 	start_time = GetTimer();
 	write_png(conc_old, nx, ny, 0);
-	file_time = GetTimer() - start_time;
 
 	/* prepare to log comparison to analytical solution */
 	output = fopen("runlog.csv", "w");
 	if (output == NULL) {
-		printf("Error: unable to %s for output. Check permissions.\n", "runlog.csv");
+		printf("Error: unable to open %s for output. Check permissions.\n", "runlog.csv");
 		exit(-1);
 	}
+	sw.file = GetTimer() - start_time;
 
 	fprintf(output, "iter,sim_time,wrss,conv_time,step_time,IO_time,soln_time,run_time\n");
-	fprintf(output, "%i,%f,%f,%f,%f,%f,%f,%f\n", step, elapsed, rss, conv_time, step_time, file_time, soln_time, GetTimer());
+	fprintf(output, "%i,%f,%f,%f,%f,%f,%f,%f\n", step, elapsed, rss, sw.conv, sw.step, sw.file, sw.soln, GetTimer());
+	fflush(output);
+
+	/* Note: block is equivalent to a typical
+	  for (int step=1; step < steps+1; step++),
+	  1-indexed so as not to overwrite the initial condition image,
+	  but the loop-internals are farmed out to a coprocessor.
+	  So we use a while loop instead. */
 
 	/* do the work */
-	for (step = 1; step < steps+1; step++) {
-		print_progress(step-1, steps);
+	step = 0;
+	print_progress(step, steps);
+	while (step < steps) {
+		if (checks > steps - step)
+			checks = steps - step;
 
-		if (step % checks == 0) {
-			start_time = GetTimer();
-			solve_diffusion_equation(conc_new, nx, ny, nm, dx, dy, D, dt, elapsed);
-			step_time += GetTimer() - start_time;
+		assert(step + checks <= steps);
 
-			start_time = GetTimer();
-			write_png(conc_new, nx, ny, step);
-			file_time += GetTimer() - start_time;
+		opencl_diffusion_solver(&dev, conc_new, nx, ny, nm, bc, D, dt, checks, &elapsed, &sw);
+
+		for (i = 0; i < checks; i++) {
+			step++;
+			print_progress(step, steps);
 		}
 
-		elapsed += dt;
+		start_time = GetTimer();
+		write_png(conc_new, nx, ny, step);
+		sw.file += GetTimer() - start_time;
+
+		start_time = GetTimer();
+		check_solution(conc_new, conc_lap, nx, ny, dx, dy, nm, elapsed, D, bc, &rss);
+		sw.soln += GetTimer() - start_time;
+
+		fprintf(output, "%i,%f,%f,%f,%f,%f,%f,%f\n", step, elapsed, rss, sw.conv, sw.step, sw.file, sw.soln, GetTimer());
+		fflush(output);
 	}
+
+	write_csv(conc_new, nx, ny, dx, dy, step);
 
 	/* clean up */
 	fclose(output);
 	free_arrays(conc_old, conc_new, conc_lap, mask_lap);
+	free_opencl(&dev);
 
 	return 0;
 }

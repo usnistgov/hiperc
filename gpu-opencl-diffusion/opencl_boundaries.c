@@ -18,20 +18,17 @@
  **********************************************************************************/
 
 /**
- \file  cuda_boundaries.cu
- \brief Implementation of boundary condition functions with OpenMP threading
+ \file  opencl_boundaries.c
+ \brief Implementation of boundary condition functions with OpenCL acceleration
 */
 
 #include <math.h>
 #include <omp.h>
+#include <CL/cl.h>
 
-extern "C" {
 #include "boundaries.h"
-}
 
-#include "cuda_kernels.cuh"
-
-__constant__ fp_t d_bc[2][2];
+#include "opencl_kernels.h"
 
 void set_boundaries(fp_t bc[2][2])
 {
@@ -62,59 +59,5 @@ void apply_initial_conditions(fp_t** conc, int nx, int ny, int nm, fp_t bc[2][2]
 		for (j = ny/2; j < ny; j++)
 			for (i = nx-1-nm/2; i < nx; i++)
 				conc[j][i] = bc[1][1]; /* right half-wall */
-	}
-}
-
-__global__ void boundary_kernel(fp_t* d_conc,
-                                const int nx,
-                                const int ny,
-                                const int nm)
-{
-	int tx, ty, row, col;
-	int ihi, ilo, jhi, jlo, offset;
-
-	/* determine indices on which to operate */
-
-	tx = threadIdx.x;
-	ty = threadIdx.y;
-
-	row = blockDim.y * blockIdx.y + ty;
-	col = blockDim.x * blockIdx.x + tx;
-
-	/* apply fixed boundary values: sequence does not matter */
-
-	if (row >= 0 && row < ny/2 && col >= 0 && col < 1+nm/2) {
-		d_conc[row * nx + col] = d_bc[1][0]; /* left value */
-	}
-
-	if (row >= ny/2 && row < ny && col >= nx-1-nm/2 && col < nx) {
-		d_conc[row * nx + col] = d_bc[1][1]; /* right value */
-	}
-
-	/* wait for all threads to finish writing */
-	__syncthreads();
-
-	/* apply no-flux boundary conditions: inside to out, sequence matters */
-
-	for (offset = 0; offset < nm/2; offset++) {
-		ilo = nm/2 - offset;
-		ihi = nx - 1 - nm/2 + offset;
-		if (col == ilo-1 && row >= 0 && row < ny) {
-			d_conc[row * nx + col] = d_conc[row * nx + ilo]; /* left condition */
-		} else if (col == ihi+1 && row >= 0 && row < ny) {
-			d_conc[row * nx + col] = d_conc[row * nx + ihi]; /* right condition */
-		}
-		__syncthreads();
-	}
-
-	for (offset = 0; offset < nm/2; offset++) {
-		jlo = nm/2 - offset;
-		jhi = ny - 1 - nm/2 + offset;
-		if (row == jlo-1 && col >= 0 && col < nx) {
-			d_conc[row * nx + col] = d_conc[jlo * nx + col]; /* bottom condition */
-		} else if (row == jhi+1 && col >= 0 && col < nx) {
-			d_conc[row * nx + col] = d_conc[jhi * nx + col]; /* top condition */
-		}
-		__syncthreads();
 	}
 }

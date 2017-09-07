@@ -3,6 +3,12 @@
 implementation of the diffusion equation with
 OpenMP threading and OpenCL acceleration
 
+This directory contains implementations of the diffusion equation for GPUs.
+The configuration of the OpenCL machinery in [opencl_data.c](opencl_data.c)
+closely follows the example set by
+> [OpenCLDiffusion][_ocld] from the repository
+[A 2d diffusion model in OpenCL C][_scrblnrd3].
+
 ## Usage
 
 This directory contains a makefile with three important invocations:
@@ -56,13 +62,15 @@ the [National Institute of Standards and Technology (NIST)](http://www.nist.gov)
 nor is it intended to imply that the entities, materials, or equipment are
 necessarily the best available for the purpose.
 
-[_amdcl]:  http://developer.amd.com/tools-and-sdks/opencl-zone/
-[_aws]:    https://aws.amazon.com/ec2/Elastic-GPUs/
-[_cuda]:   https://developer.nvidia.com/cuda-toolkit
-[_icl]:    https://software.intel.com/en-us/articles/opencl-drivers
-[_make]:   https://www.gnu.org/software/make/
-[_mcuda]:  http://impact.crhc.illinois.edu/mcuda.aspx
-[_nvcl]:   https://developer.nvidia.com/opencl
-[_opencl]: https://www.khronos.org/opencl/
-[_pgi]:    http://www.pgroup.com/products/community.htm
-[_png]:    http://www.libpng.org/pub/png/libpng.html
+[_amdcl]:     http://developer.amd.com/tools-and-sdks/opencl-zone/
+[_aws]:       https://aws.amazon.com/ec2/Elastic-GPUs/
+[_cuda]:      https://developer.nvidia.com/cuda-toolkit
+[_icl]:       https://software.intel.com/en-us/articles/opencl-drivers
+[_make]:      https://www.gnu.org/software/make/
+[_mcuda]:     http://impact.crhc.illinois.edu/mcuda.aspx
+[_nvcl]:      https://developer.nvidia.com/opencl
+[_ocld]:      https://github.com/scrblnrd3/GPGPU-Diffusion/tree/master/OpenCLDiffusion/main.c
+[_opencl]:    https://www.khronos.org/opencl/
+[_pgi]:       http://www.pgroup.com/products/community.htm
+[_png]:       http://www.libpng.org/pub/png/libpng.html
+[_scrblnrd3]: https://github.com/scrblnrd3/GPGPU-Diffusion

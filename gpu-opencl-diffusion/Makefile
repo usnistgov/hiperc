@@ -13,13 +13,13 @@ diffusion: opencl_main.c $(OBJS)
 
 # OpenCL objects
 boundaries.o: opencl_boundaries.c
-	$(CC) $(CFLAGS) -c $<
+	$(CC) $(CFLAGS) -c $< -o boundaries.o
 
 data.o: opencl_data.c
-	$(CC) $(CFLAGS) -c $<
+	$(CC) $(CFLAGS) -c $< -o data.o
 
 discretization.o: opencl_discretization.c
-	$(CC) $(CFLAGS) -c $<
+	$(CC) $(CFLAGS) -c $< -o discretization.o
 
 # Common objects
 mesh.o: ../common-diffusion/mesh.c
@@ -37,7 +37,7 @@ timer.o: ../common-diffusion/timer.c
 # Helper scripts
 .PHONY: run
 run: diffusion
-	/usr/bin/time -f' Time (%E wall, %U user, %S sys)' ./diffusion ../params.txt
+	/usr/bin/time -f' Time (%E wall, %U user, %S sys)' ./diffusion ../common-diffusion/params.txt
 
 .PHONY: cleanobjects
 cleanobjects:

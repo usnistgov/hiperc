@@ -9,7 +9,8 @@ cpu_diffusion_list := cpu-analytic-diffusion \
                       cpu-tbb-diffusion
 
 gpu_diffusion_list := gpu-cuda-diffusion \
-                      gpu-openacc-diffusion
+                      gpu-openacc-diffusion \
+                      gpu-opencl-diffusion
 
 .PHONY: run
 run: run_cpu_diffusion run_gpu_diffusion

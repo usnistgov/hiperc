@@ -85,7 +85,7 @@ int main(int argc, char* argv[])
 	/* prepare to log comparison to analytical solution */
 	output = fopen("runlog.csv", "w");
 	if (output == NULL) {
-		printf("Error: unable to %s for output. Check permissions.\n", "runlog.csv");
+		printf("Error: unable to open %s for output. Check permissions.\n", "runlog.csv");
 		exit(-1);
 	}
 	sw.file = GetTimer() - start_time;

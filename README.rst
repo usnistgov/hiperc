@@ -334,7 +334,7 @@ the best available for the purpose.
 .. _`hiperc_guide.pdf`: doc/hiperc_guide.pdf
 .. |`initial conc`| image:: common-diffusion/diffusion.00000.png
 .. |`final conc`| image:: common-diffusion/diffusion.10000.png
-.. |Documentation on readthedocs| image:: https://readthedocs.org/projects/hiperc/badge/?version=latest
+.. |Documentation on readthedocs| image:: http://readthedocs.org/projects/hiperc/badge/?version=latest
 .. _`Documentation on readthedocs`: http://hiperc.readthedocs.io/en/latest/?badge=latest
 .. |Conversation on Gitter| image:: https://badges.gitter.im/usnistgov/hiperc.svg
 .. _`Conversation on Gitter`: https://gitter.im/usnistgov/hiperc?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=body_badge

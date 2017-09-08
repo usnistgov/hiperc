@@ -336,8 +336,8 @@ the best available for the purpose.
 .. |`final conc`| image:: common-diffusion/diffusion.10000.png
 .. |Documentation on readthedocs| image:: https://readthedocs.org/projects/hiperc/badge/?version=latest
 .. _`Documentation on readthedocs`: http://hiperc.readthedocs.io/en/latest/?badge=latest
-.. |Conversation on Gitter| image:: https://badges.gitter.im/usnistgov/hiperc/Lobby.svg
-.. _`Conversation on Gitter`: https://gitter.im/usnistgov/hiperc/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge
+.. |Conversation on Gitter| image:: https://badges.gitter.im/usnistgov/hiperc.svg
+.. _`Conversation on Gitter`: https://gitter.im/usnistgov/hiperc?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=body_badge
 .. _`Contributing Guidelines`: CONTRIBUTING.md
 .. _`file an issue`: https://github.com/usnistgov/hiperc/issues
 .. _OpenACC: https://www.openacc.org/

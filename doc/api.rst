@@ -1,8 +1,8 @@
 .. _string-formatting-api:
 
-*******************
+*************
 API Reference
-*******************
+*************
 
 common-diffusion
 ================
@@ -11,43 +11,43 @@ boundaries.h
 ------------
 
 .. doxygenfile:: boundaries.h
-   :project: phasefield-accelerator-benchmarks
+   :project: hiperc
 
 discretization.h
 ----------------
 
 .. doxygenfile:: discretization.h
-   :project: phasefield-accelerator-benchmarks
+   :project: hiperc
 
 mesh.h
 ------
 
 .. doxygenfile:: mesh.h
-   :project: phasefield-accelerator-benchmarks
+   :project: hiperc
 
 numerics.h
 ----------
 
 .. doxygenfile:: numerics.h
-   :project: phasefield-accelerator-benchmarks
+   :project: hiperc
 
 output.h
 --------
 
 .. doxygenfile:: output.h
-   :project: phasefield-accelerator-benchmarks
+   :project: hiperc
 
 timer.h
 -------
 
 .. doxygenfile:: timer.h
-   :project: phasefield-accelerator-benchmarks
+   :project: hiperc
 
 type.h
 ------
 
 .. doxygenfile:: type.h
-   :project: phasefield-accelerator-benchmarks
+   :project: hiperc
 
 gpu-cuda-diffusion
 ==================
@@ -56,7 +56,7 @@ cuda_kernels.cuh
 ----------------
 
 .. doxygenfile:: cuda_kernels.cuh
-   :project: phasefield-accelerator-benchmarks
+   :project: hiperc
 
 gpu-opencl-diffusion
 ====================
@@ -65,13 +65,13 @@ opencl_data.h
 -------------
 
 .. doxygenfile:: opencl_data.h
-   :project: phasefield-accelerator-benchmarks
+   :project: hiperc
 
 opencl_kernels.h
 ----------------
 
 .. doxygenfile:: opencl_kernels.h
-   :project: phasefield-accelerator-benchmarks
+   :project: hiperc
 
 
 Looking for something specific?

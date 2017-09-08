@@ -1,6 +1,10 @@
 # Documentation
 
-This directory contains documentation for https://github.com/usnistgov/phasefield-accelerator-benchmarks.
+This directory contains documentation for https://github.com/usnistgov/hiperc.
+The output is written to [hiperc_guide.pdf],
+and built on [hiperc.readthedocs.io][_rtd]:
+
+[![Documentation Status](https://readthedocs.org/projects/hiperc/badge/?version=latest)](http://hiperc.readthedocs.io/en/latest/?badge=latest)
 
 ## Dependencies
 
@@ -27,7 +31,7 @@ A Python package, available through [PyPI][_pypi]. For example,
 
 This directory contains a makefile with two important invocations:
  1. ```make``` will build the PDF documentation, named
-    ```phasefield-accelerator-benchmarks_guide.pdf```, from the source code.
+    ```hiperc_guide.pdf```, from the source code.
  2. ```make sphinx``` will convert the XML output from Doxygen into HTML
     compatible with [readthedocs][_rtd].
  3. ```make clean``` will remove the [Doxygen][_doxygen] and [Sphinx][_sphinx]
@@ -37,5 +41,5 @@ This directory contains a makefile with two important invocations:
 [_doxygen]: http://www.stack.nl/~dimitri/doxygen
 [_make]:    https://www.gnu.org/software/make
 [_pypi]:    https://pypi.python.org/pypi
-[_rtd]:     https://readthedocs.org
+[_rtd]:     https://hiperc.readthedocs.io
 [_sphinx]:  http://www.sphinx-doc.org

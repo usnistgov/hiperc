@@ -1,6 +1,6 @@
 /**********************************************************************************
- This file is part of Phase-field Accelerator Benchmarks, written by Trevor Keller
- and available from https://github.com/usnistgov/phasefield-accelerator-benchmarks.
+ HIPERC: High Performance Computing Strategies for Boundary Value Problems
+ written by Trevor Keller and available from https://github.com/usnistgov/hiperc
 
  This software was developed at the National Institute of Standards and Technology
  by employees of the Federal Government in the course of their official duties.
@@ -45,6 +45,7 @@
 int main(int argc, char* argv[])
 {
 	FILE * output;
+	struct OpenCLData dev;
 
 	/* declare default mesh size and resolution */
 	fp_t **conc_old, **conc_new, **conc_lap, **mask_lap;
@@ -75,7 +76,6 @@ int main(int argc, char* argv[])
 	sw.step = GetTimer() - start_time;
 
 	/* initialize GPU */
-	struct OpenCLData dev;
 	init_opencl(conc_old, mask_lap, bc, nx, ny, nm, &dev);
 
 	/* write initial condition data */

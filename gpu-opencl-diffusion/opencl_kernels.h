@@ -1,6 +1,6 @@
 /**********************************************************************************
- This file is part of Phase-field Accelerator Benchmarks, written by Trevor Keller
- and available from https://github.com/usnistgov/phasefield-accelerator-benchmarks.
+ HIPERC: High Performance Computing Strategies for Boundary Value Problems
+ written by Trevor Keller and available from https://github.com/usnistgov/hiperc
 
  This software was developed at the National Institute of Standards and Technology
  by employees of the Federal Government in the course of their official duties.
@@ -59,8 +59,8 @@ __constant extern fp_t d_bc[2][2];
 */
 void build_program(const char* filename,
                   cl_context context,
-                  cl_device_id* gpu,
-                  cl_program* program,
+                  cl_device_id gpu,
+                  cl_program program,
                   cl_int* status);
 
 /**

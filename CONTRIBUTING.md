@@ -1,6 +1,8 @@
-# Contributing to the [Phase-field Accelerator Benchmarks][_PFAB]
+# Contributing to [HIPERC: High Performance Computing Strategies for Boundary Value Problems][_hiperc]
 
-Thank you for spending some time with the source code. I hope you'll contribute!
+Thank you for spending some time with the HIPERC project.
+I sincerely appreciate your interest, and hope you will consider contributing
+to the documentation, source code, and community at large.
 
 There are a lot of coprocessor architectures and threading models out there, and
 we strive for the highest possible performance to ensure valid benchmarking.
@@ -49,7 +51,7 @@ If you're brand new to open source, welcome! You might benefit from the
 We use [git][_git] version control with a [branching workflow][_branch], 
 summarized below. Please do not commit directly to the ```master``` branch.
 
-1. Create a fork of [phasefield-accelerator-benchmarks][_PFAB] on your personal
+1. Create a fork of [hiperc][_hiperc] on your personal
    GitHub account.
 2. For obvious changes, such as typos or edits to ```.gitignore```, you can edit
    your fork directly in the browser, then file a [pull request][_pr].
@@ -69,17 +71,17 @@ which we typically conduct using [reviewable][_review].
 
 ## Happy Coding!
 
-[_PFAB]:    https://github.com/usnistgov/phasefield-accelerator-benchmarks
+[_hiperc]:    https://github.com/usnistgov/hiperc
 [_branch]:  http://nvie.com/posts/a-successful-git-branching-model/
-[_conduct]: https://github.com/usnistgov/phasefield-accelerator-benchmarks/blob/master/CODE_OF_CONDUCT.md
+[_conduct]: https://github.com/usnistgov/hiperc/blob/master/CODE_OF_CONDUCT.md
 [_doxy]:    https://www.stack.nl/~dimitri/doxygen/manual/docblocks.html
 [_gcc]:     https://gcc.gnu.org/
 [_ghhelp]:  https://help.github.com/
 [_ghkey]:   https://help.github.com/articles/closing-issues-using-keywords/
 [_git]:     https://git-scm.com/
-[_gitter]:  https://gitter.im/phasefield-accelerator-benchmarks/Lobby
+[_gitter]:  https://gitter.im/hiperc/Lobby
 [_goog]:    https://google.github.io/styleguide/cppguide.html
-[_issue]:   https://github.com/usnistgov/phasefield-accelerator-benchmarks/issues
+[_issue]:   https://github.com/usnistgov/hiperc/issues
 [_pr]:      https://help.github.com/articles/about-pull-requests/
-[_review]:  https://reviewable.io/reviews/usnistgov/phasefield-accelerator-benchmarks
+[_review]:  https://reviewable.io/reviews/usnistgov/hiperc
 [_tut]:     https://egghead.io/courses/how-to-contribute-to-an-open-source-project-on-github

@@ -1,6 +1,6 @@
 /**********************************************************************************
- This file is part of Phase-field Accelerator Benchmarks, written by Trevor Keller
- and available from https://github.com/usnistgov/phasefield-accelerator-benchmarks.
+ HIPERC: High Performance Computing Strategies for Boundary Value Problems
+ written by Trevor Keller and available from https://github.com/usnistgov/hiperc
 
  This software was developed at the National Institute of Standards and Technology
  by employees of the Federal Government in the course of their official duties.
@@ -41,16 +41,16 @@ void opencl_diffusion_solver(struct OpenCLData* dev, fp_t** conc_new,
 	int check=0, i=0;
 	size_t bx = ceil((fp_t)(nx)/(TILE_W - nm/2))+1;
 	size_t by = ceil((fp_t)(ny)/(TILE_H - nm/2))+1;
+	int grid_size = nx * ny * sizeof(fp_t);
 
-	size_t grid_dim[2] = {nx, ny};
-	size_t block_dim[2] = {bx, by};
-	size_t grid_size = nx * ny * sizeof(fp_t);
+	const size_t grid_dim[2] = {nx, ny};
+	const size_t block_dim[2] = {bx, by};
 
 	cl_mem d_conc_old = dev->conc_old;
 	cl_mem d_conc_new = dev->conc_new;
 
 	cl_int status = CL_SUCCESS;
-	cl_int stat[6] = {status};
+	cl_int stat[6];
 
 	/* set immutable kernel arguments */
 	stat[0] = clSetKernelArg(dev->boundary_kernel, 1, 2 * 2 * sizeof(fp_t), (void *)&(dev->bc));
@@ -59,7 +59,7 @@ void opencl_diffusion_solver(struct OpenCLData* dev, fp_t** conc_new,
 	stat[3] = clSetKernelArg(dev->boundary_kernel, 4, sizeof(int), (void *)&nm);
 
 	for (i=0; i<4; i++)
-		report_error(stat[i]);
+		report_error(stat[i], NULL);
 
 	stat[0] = clSetKernelArg(dev->convolution_kernel, 1, sizeof(cl_mem), (void *)&(dev->conc_lap));
 	stat[1] = clSetKernelArg(dev->convolution_kernel, 2, nm * nm * sizeof(fp_t), (void *)&(dev->mask));
@@ -68,7 +68,7 @@ void opencl_diffusion_solver(struct OpenCLData* dev, fp_t** conc_new,
 	stat[4] = clSetKernelArg(dev->convolution_kernel, 5, sizeof(int), (void *)&nm);
 
 	for (i=0; i<5; i++)
-		report_error(stat[i]);
+		report_error(stat[i], NULL);
 
 	stat[0] = clSetKernelArg(dev->diffusion_kernel, 2, sizeof(cl_mem), (void *)&(dev->conc_lap));
 	stat[1] = clSetKernelArg(dev->convolution_kernel, 3, sizeof(int), (void *)&nx);
@@ -78,7 +78,7 @@ void opencl_diffusion_solver(struct OpenCLData* dev, fp_t** conc_new,
 	stat[5] = clSetKernelArg(dev->convolution_kernel, 7, sizeof(fp_t), (void *)&dt);
 
 	for (i=0; i<6; i++)
-		report_error(stat[i]);
+		report_error(stat[i], NULL);
 
 	/* OpenCL uses cl_mem, not fp_t*, so swap_pointers won't work.
      * We leave the pointers alone but call the kernel on the appropriate data location.
@@ -99,15 +99,15 @@ void opencl_diffusion_solver(struct OpenCLData* dev, fp_t** conc_new,
 		stat[3] = clSetKernelArg(dev->diffusion_kernel, 1, sizeof(cl_mem), (void *)&d_conc_new);
 
 		for (i=0; i<4; i++)
-			report_error(stat[i]);
+			report_error(stat[i], NULL);
 
 		/* enqueue kernels */
 		status = clEnqueueNDRangeKernel(dev->commandQueue, dev->boundary_kernel, 2, NULL, grid_dim, block_dim, 0, NULL, NULL);
-		report_error(status);
+		report_error(status, NULL);
 		status = clEnqueueNDRangeKernel(dev->commandQueue, dev->convolution_kernel, 2, NULL, grid_dim, block_dim, 0, NULL, NULL);
-		report_error(status);
+		report_error(status, NULL);
 		status = clEnqueueNDRangeKernel(dev->commandQueue, dev->diffusion_kernel, 2, NULL, grid_dim, block_dim, 0, NULL, NULL);
-		report_error(status);
+		report_error(status, NULL);
 	}
 
 	*elapsed += dt * checks;
@@ -115,7 +115,7 @@ void opencl_diffusion_solver(struct OpenCLData* dev, fp_t** conc_new,
 	/* transfer from device out to host */
 	start_time = GetTimer();
 	status = clEnqueueReadBuffer(dev->commandQueue, d_conc_new, CL_TRUE, 0, grid_size, conc_new[0], 0, NULL, NULL);
-	report_error(status);
+	report_error(status, NULL);
 	sw->file += GetTimer() - start_time;
 }
 

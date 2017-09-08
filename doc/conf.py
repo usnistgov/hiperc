@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# phasefield-accelerator-benchmarks documentation build configuration file, created by
+# hiperc documentation build configuration file, created by
 # sphinx-quickstart on Mon Aug 28 17:03:03 2017.
 #
 # This file is execfile()d with the current directory set to its
@@ -59,7 +59,7 @@ source_suffix = ['.rst', '.md']
 master_doc = 'contents'
 
 # General information about the project.
-project = u'phasefield-accelerator-benchmarks'
+project = u'hiperc'
 copyright = u'2017, Trevor Keller'
 author = u'Trevor Keller'
 
@@ -137,7 +137,7 @@ html_sidebars = {
 # -- Options for HTMLHelp output ------------------------------------------
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = 'phasefield-accelerator-benchmarksdoc'
+htmlhelp_basename = 'hipercdoc'
 
 
 # -- Options for LaTeX output ---------------------------------------------
@@ -164,7 +164,7 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-    (master_doc, 'phasefield-accelerator-benchmarks.tex', u'phasefield-accelerator-benchmarks Documentation',
+    (master_doc, 'hiperc.tex', u'hiperc Documentation',
      u'Trevor Keller', 'manual'),
 ]
 
@@ -174,7 +174,7 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    (master_doc, 'phasefield-accelerator-benchmarks', u'phasefield-accelerator-benchmarks Documentation',
+    (master_doc, 'hiperc', u'hiperc Documentation',
      [author], 1)
 ]
 
@@ -185,8 +185,8 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-    (master_doc, 'phasefield-accelerator-benchmarks', u'phasefield-accelerator-benchmarks Documentation',
-     author, 'phasefield-accelerator-benchmarks', 'Computer hardware benchmarks for materials scientists.',
+    (master_doc, 'hiperc', u'hiperc Documentation',
+     author, 'hiperc', 'Computer hardware benchmarks for materials scientists.',
      'Miscellaneous'),
 ]
 
@@ -234,9 +234,9 @@ for fpath in files_to_copy:
 
 # -- Options for Breathe output ---------------------------------------------
 
-breathe_projects = {"phasefield-accelerator-benchmarks": "xml"}
+breathe_projects = {"hiperc": "xml"}
 
-breathe_default_project = "phasefield-accelerator-benchmarks"
+breathe_default_project = "hiperc"
 
 #breathe_domain_by_extension = {
 #    "h" : "c",

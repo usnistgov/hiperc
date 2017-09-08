@@ -11,13 +11,13 @@ cuda_boundaries.cu
 ------------------
 
 .. doxygenfile:: cuda_boundaries.cu
-   :project: phasefield-accelerator-benchmarks
+   :project: hiperc
 
 cuda_discretization.cu
 ----------------------
 
 .. doxygenfile:: cuda_discretization.cu
-   :project: phasefield-accelerator-benchmarks
+   :project: hiperc
 
 gpu-openacc-diffusion
 =====================
@@ -26,13 +26,13 @@ openacc_boundaries.c
 --------------------
 
 .. doxygenfile:: openacc_boundaries.c
-   :project: phasefield-accelerator-benchmarks
+   :project: hiperc
 
 openacc_discretization.c
 ------------------------
 
 .. doxygenfile:: openacc_discretization.c
-   :project: phasefield-accelerator-benchmarks
+   :project: hiperc
 
 gpu-opencl-diffusion
 =====================
@@ -41,13 +41,13 @@ opencl_boundaries.c
 --------------------
 
 .. doxygenfile:: opencl_boundaries.c
-   :project: phasefield-accelerator-benchmarks
+   :project: hiperc
 
 opencl_discretization.c
 ------------------------
 
 .. doxygenfile:: opencl_discretization.c
-   :project: phasefield-accelerator-benchmarks
+   :project: hiperc
 
 
 Looking for something specific?

@@ -1,6 +1,6 @@
-**********************************
-Phase-field Accelerator Benchmarks
-**********************************
+*************************************************************************
+HIPERC: High Performance Computing Strategies for Boundary Value Problems
+*************************************************************************
 
 Ever wonder if a GPU or Xeon Phi accelerator card would make your code faster?
 Fast enough to justify the expense to your manager, adviser, or funding agency?
@@ -170,7 +170,7 @@ Source Code Documentation
 You are encouraged to browse the source for this project to see how it works.
 This project is documented using Doxygen_, which can help guide you
 through the source code layout and intent. This guide is included as
-`phasefield-accelerator-benchmarks_guide.pdf`_. To build the
+`hiperc_guide.pdf`_. To build the
 documentation yourself, with Doxygen_, LaTeX_, and
 Make_ installed, ``cd`` into ``doc`` and run ``make``. Then
 browse the source code to your heart's content.
@@ -274,32 +274,39 @@ Work in Progress
         - [ ] serial
             - [x] diffusion
             - [ ] spinodal
+            - [ ] dendrite
             - [ ] ripening
         - [ ] OpenMP
             - [x] diffusion
             - [ ] spinodal
+            - [ ] dendrite
             - [ ] ripening
         - [ ] Threading Building Blocks
             - [x] diffusion
             - [ ] spinodal
+            - [ ] dendrite
             - [ ] ripening
     - [ ] GPU
         - [ ] CUDA
             - [x] diffusion
             - [ ] spinodal
+            - [ ] dendrite
             - [ ] ripening
         - [ ] OpenACC
             - [x] diffusion
             - [ ] spinodal
+            - [ ] dendrite
             - [ ] ripening
         - [ ] OpenCL
-            - [ ] diffusion
+            - [x] diffusion
             - [ ] spinodal
+            - [ ] dendrite
             - [ ] ripening
     - [ ] KNL
         - [ ] OpenMP
             - [ ] diffusion
             - [ ] spinodal
+            - [ ] dendrite
             - [ ] ripening
 
 =========================
@@ -324,15 +331,15 @@ the best available for the purpose.
 
 .. _`Trevor Keller`: mailto::trevor.keller@nist.gov
 .. _`National Institute of Standards and Technology`: http://www.nist.gov
-.. _`phasefield-accelerator-benchmarks_guide.pdf`: doc/phasefield-accelerator-benchmarks_guide.pdf
+.. _`hiperc_guide.pdf`: doc/hiperc_guide.pdf
 .. |`initial conc`| image:: common-diffusion/diffusion.00000.png
 .. |`final conc`| image:: common-diffusion/diffusion.10000.png
-.. |Documentation on readthedocs| image:: https://readthedocs.org/projects/phasefield-accelerator-benchmarks/badge/?version=latest
-.. _`Documentation on readthedocs`: http://phasefield-accelerator-benchmarks.readthedocs.io/en/latest/?badge=latest
-.. |Conversation on Gitter| image:: https://badges.gitter.im/phasefield-accelerator-benchmarks/Lobby.svg
-.. _`Conversation on Gitter`: https://gitter.im/phasefield-accelerator-benchmarks/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge
+.. |Documentation on readthedocs| image:: https://readthedocs.org/projects/hiperc/badge/?version=latest
+.. _`Documentation on readthedocs`: http://hiperc.readthedocs.io/en/latest/?badge=latest
+.. |Conversation on Gitter| image:: https://badges.gitter.im/usnistgov/hiperc/Lobby.svg
+.. _`Conversation on Gitter`: https://gitter.im/usnistgov/hiperc/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge
 .. _`Contributing Guidelines`: CONTRIBUTING.md
-.. _`file an issue`: https://github.com/usnistgov/phasefield-accelerator-benchmarks/issues
+.. _`file an issue`: https://github.com/usnistgov/hiperc/issues
 .. _OpenACC: https://www.openacc.org/
 .. _radeontop: https://github.com/clbr/radeontop
 .. _ccNUMA: https://en.wikipedia.org/wiki/Non-uniform_memory_access#Cache_coherent_NUMA
@@ -341,7 +348,7 @@ the best available for the purpose.
 .. _CUDA: https://developer.nvidia.com/cuda-zone
 .. _Doxygen: http://www.stack.nl/~dimitri/doxygen/
 .. _EC2: https://aws.amazon.com/ec2/Elastic-GPUs/
-.. _Gitter: https://gitter.im/phasefield-accelerator-benchmarks/Lobby/
+.. _Gitter: https://gitter.im/hiperc/Lobby/
 .. _GNU: https://gcc.gnu.org/
 .. _htop: http://hisham.hm/htop/
 .. _`intel_gpu_top`: https://github.com/ChrisCummins/intel-gpu-tools

@@ -1,4 +1,4 @@
-# Makefile for phasefield-accelerator-benchmarks documentation
+# Makefile for hiperc documentation
 
 LATEX = pdflatex
 SPHINX = sphinx-build
@@ -17,7 +17,7 @@ tex: dox
 
 .PHONY: pdf
 pdf: tex
-	cp latex/refman.pdf phasefield-accelerator-benchmarks_guide.pdf
+	cp latex/refman.pdf hiperc_guide.pdf
 
 .PHONY: sphinx
 sphinx: dox

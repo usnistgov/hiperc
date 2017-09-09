@@ -1,5 +1,5 @@
 /**********************************************************************************
- HIPERC: High Performance Computing Strategies for Boundary Value Problems
+ HiPerC: High Performance Computing Strategies for Boundary Value Problems
  written by Trevor Keller and available from https://github.com/usnistgov/hiperc
 
  This software was developed at the National Institute of Standards and Technology

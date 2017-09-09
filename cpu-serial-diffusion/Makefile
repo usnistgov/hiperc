@@ -1,5 +1,5 @@
-# Makefile for CPU diffusion code
-# serial implementation (no parallel model)
+# Makefile for HiPerC diffusion code
+# serial implementation
 
 CC = gcc
 CFLAGS = -O3 -Wall -pedantic -I../common-diffusion

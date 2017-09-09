@@ -1,4 +1,4 @@
-# Makefile for CPU diffusion code
+# Makefile for HiPerC diffusion code
 # Analytical solution
 
 CC = gcc

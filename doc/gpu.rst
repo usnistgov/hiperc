@@ -11,13 +11,13 @@ cuda_boundaries.cu
 ------------------
 
 .. doxygenfile:: cuda_boundaries.cu
-   :project: hiperc
+   :project: HiPerC
 
 cuda_discretization.cu
 ----------------------
 
 .. doxygenfile:: cuda_discretization.cu
-   :project: hiperc
+   :project: HiPerC
 
 gpu-openacc-diffusion
 =====================
@@ -26,13 +26,13 @@ openacc_boundaries.c
 --------------------
 
 .. doxygenfile:: openacc_boundaries.c
-   :project: hiperc
+   :project: HiPerC
 
 openacc_discretization.c
 ------------------------
 
 .. doxygenfile:: openacc_discretization.c
-   :project: hiperc
+   :project: HiPerC
 
 gpu-opencl-diffusion
 =====================
@@ -41,13 +41,13 @@ opencl_boundaries.c
 --------------------
 
 .. doxygenfile:: opencl_boundaries.c
-   :project: hiperc
+   :project: HiPerC
 
 opencl_discretization.c
 ------------------------
 
 .. doxygenfile:: opencl_discretization.c
-   :project: hiperc
+   :project: HiPerC
 
 
 Looking for something specific?

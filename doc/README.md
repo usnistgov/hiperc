@@ -1,4 +1,4 @@
-# Documentation
+# HiPerC Documentation
 
 This directory contains documentation for https://github.com/usnistgov/hiperc.
 The output is written to [hiperc_guide.pdf],

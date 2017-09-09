@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# hiperc documentation build configuration file, created by
+# HiPerC documentation build configuration file, created by
 # sphinx-quickstart on Mon Aug 28 17:03:03 2017.
 #
 # This file is execfile()d with the current directory set to its
@@ -59,7 +59,7 @@ source_suffix = ['.rst', '.md']
 master_doc = 'contents'
 
 # General information about the project.
-project = u'hiperc'
+project = u'HiPerC'
 copyright = u'2017, Trevor Keller'
 author = u'Trevor Keller'
 
@@ -137,7 +137,7 @@ html_sidebars = {
 # -- Options for HTMLHelp output ------------------------------------------
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = 'hipercdoc'
+htmlhelp_basename = 'HiPerCdoc'
 
 
 # -- Options for LaTeX output ---------------------------------------------
@@ -164,7 +164,7 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-    (master_doc, 'hiperc.tex', u'hiperc Documentation',
+    (master_doc, 'HiPerC.tex', u'HiPerC Documentation',
      u'Trevor Keller', 'manual'),
 ]
 
@@ -174,7 +174,7 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    (master_doc, 'hiperc', u'hiperc Documentation',
+    (master_doc, 'HiPerC', u'HiPerC Documentation',
      [author], 1)
 ]
 
@@ -185,8 +185,8 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-    (master_doc, 'hiperc', u'hiperc Documentation',
-     author, 'hiperc', 'Computer hardware benchmarks for materials scientists.',
+    (master_doc, 'HiPerC', u'HiPerC Documentation',
+     author, 'HiPerC', 'Computer hardware benchmarks for materials scientists.',
      'Miscellaneous'),
 ]
 
@@ -223,7 +223,8 @@ for directory in [rst_directory, img_directory]:
 files_to_copy = (
     'README.rst',
     'LICENSE.md',
-    'common-diffusion/diffusion.*.png'
+    'common-diffusion/diffusion.*.png',
+    'HiPerC.png'
 )
 
 for fpath in files_to_copy:
@@ -234,14 +235,16 @@ for fpath in files_to_copy:
 
 # -- Options for Breathe output ---------------------------------------------
 
-breathe_projects = {"hiperc": "xml"}
+breathe_projects = {"HiPerC": "xml"}
 
-breathe_default_project = "hiperc"
+breathe_default_project = "HiPerC"
 
 #breathe_domain_by_extension = {
 #    "h" : "c",
 #    "c" : "c",
+#    "cl" : "c",
 #    "cu" : "cpp",
+#    "cuh" : "cpp",
 #    "cpp" : "cpp",
 #}
 

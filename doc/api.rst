@@ -11,43 +11,43 @@ boundaries.h
 ------------
 
 .. doxygenfile:: boundaries.h
-   :project: hiperc
+   :project: HiPerC
 
 discretization.h
 ----------------
 
 .. doxygenfile:: discretization.h
-   :project: hiperc
+   :project: HiPerC
 
 mesh.h
 ------
 
 .. doxygenfile:: mesh.h
-   :project: hiperc
+   :project: HiPerC
 
 numerics.h
 ----------
 
 .. doxygenfile:: numerics.h
-   :project: hiperc
+   :project: HiPerC
 
 output.h
 --------
 
 .. doxygenfile:: output.h
-   :project: hiperc
+   :project: HiPerC
 
 timer.h
 -------
 
 .. doxygenfile:: timer.h
-   :project: hiperc
+   :project: HiPerC
 
 type.h
 ------
 
 .. doxygenfile:: type.h
-   :project: hiperc
+   :project: HiPerC
 
 gpu-cuda-diffusion
 ==================
@@ -56,7 +56,7 @@ cuda_kernels.cuh
 ----------------
 
 .. doxygenfile:: cuda_kernels.cuh
-   :project: hiperc
+   :project: HiPerC
 
 gpu-opencl-diffusion
 ====================
@@ -65,13 +65,13 @@ opencl_data.h
 -------------
 
 .. doxygenfile:: opencl_data.h
-   :project: hiperc
+   :project: HiPerC
 
 opencl_kernels.h
 ----------------
 
 .. doxygenfile:: opencl_kernels.h
-   :project: hiperc
+   :project: HiPerC
 
 
 Looking for something specific?

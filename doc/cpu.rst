@@ -11,7 +11,7 @@ analytic_main.c
 ---------------
 
 .. doxygenfile:: analytic_main.c
-   :project: hiperc
+   :project: HiPerC
 
 cpu-serial-diffusion
 ====================
@@ -20,13 +20,13 @@ serial_boundaries.c
 -------------------
 
 .. doxygenfile:: serial_boundaries.c
-   :project: hiperc
+   :project: HiPerC
    
 serial_discretization.c
 -----------------------
 
 .. doxygenfile:: serial_discretization.c
-   :project: hiperc
+   :project: HiPerC
    
 cpu-openmp-diffusion
 ====================
@@ -35,13 +35,13 @@ openmp_boundaries.c
 -------------------
 
 .. doxygenfile:: openmp_boundaries.c
-   :project: hiperc
+   :project: HiPerC
    
 openmp_discretization.c
 -----------------------
 
 .. doxygenfile:: openmp_discretization.c
-   :project: hiperc
+   :project: HiPerC
    
 cpu-tbb-diffusion
 =================
@@ -50,13 +50,13 @@ tbb_boundaries.cpp
 ------------------
 
 .. doxygenfile:: tbb_boundaries.cpp
-   :project: hiperc
+   :project: HiPerC
 
 tbb_discretization.cpp
 ----------------------
 
 .. doxygenfile:: tbb_discretization.cpp
-   :project: hiperc
+   :project: HiPerC
 
 
 Looking for something specific?

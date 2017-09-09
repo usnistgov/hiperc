@@ -1,6 +1,13 @@
-*************************************************************************
-HIPERC: High Performance Computing Strategies for Boundary Value Problems
-*************************************************************************
+.. image:: HiPerC.png
+   :height: 200px
+   :width: 200px
+   :scale: 100 %
+   :alt: HiPerC
+   :align: center
+
+*****************************************************************
+High Performance Computing Strategies for Boundary Value Problems
+*****************************************************************
 
 Ever wonder if a GPU or Xeon Phi accelerator card would make your code faster?
 Fast enough to justify the expense to your manager, adviser, or funding agency?
@@ -170,7 +177,7 @@ Source Code Documentation
 You are encouraged to browse the source for this project to see how it works.
 This project is documented using Doxygen_, which can help guide you
 through the source code layout and intent. This guide is included as
-`hiperc_guide.pdf`_. To build the
+`HiPerC_guide.pdf`_. To build the
 documentation yourself, with Doxygen_, LaTeX_, and
 Make_ installed, ``cd`` into ``doc`` and run ``make``. Then
 browse the source code to your heart's content.
@@ -268,46 +275,46 @@ you need to remix and get started in the new folder.
 Work in Progress
 ================
 
-    - [ ] CPU
-        - [x] analytical
-            - [x] diffusion
-        - [ ] serial
-            - [x] diffusion
-            - [ ] spinodal
-            - [ ] dendrite
-            - [ ] ripening
-        - [ ] OpenMP
-            - [x] diffusion
-            - [ ] spinodal
-            - [ ] dendrite
-            - [ ] ripening
-        - [ ] Threading Building Blocks
-            - [x] diffusion
-            - [ ] spinodal
-            - [ ] dendrite
-            - [ ] ripening
-    - [ ] GPU
-        - [ ] CUDA
-            - [x] diffusion
-            - [ ] spinodal
-            - [ ] dendrite
-            - [ ] ripening
-        - [ ] OpenACC
-            - [x] diffusion
-            - [ ] spinodal
-            - [ ] dendrite
-            - [ ] ripening
-        - [ ] OpenCL
-            - [x] diffusion
-            - [ ] spinodal
-            - [ ] dendrite
-            - [ ] ripening
-    - [ ] KNL
-        - [ ] OpenMP
-            - [ ] diffusion
-            - [ ] spinodal
-            - [ ] dendrite
-            - [ ] ripening
+- [ ] CPU
+    - [x] analytical
+        - [x] diffusion
+    - [ ] serial
+        - [x] diffusion
+        - [ ] spinodal
+        - [ ] dendrite
+        - [ ] ripening
+    - [ ] OpenMP
+        - [x] diffusion
+        - [ ] spinodal
+        - [ ] dendrite
+        - [ ] ripening
+    - [ ] Threading Building Blocks
+        - [x] diffusion
+        - [ ] spinodal
+        - [ ] dendrite
+        - [ ] ripening
+- [ ] GPU
+    - [ ] CUDA
+        - [x] diffusion
+        - [ ] spinodal
+        - [ ] dendrite
+        - [ ] ripening
+    - [ ] OpenACC
+        - [x] diffusion
+        - [ ] spinodal
+        - [ ] dendrite
+        - [ ] ripening
+    - [ ] OpenCL
+        - [x] diffusion
+        - [ ] spinodal
+        - [ ] dendrite
+        - [ ] ripening
+- [ ] KNL
+    - [ ] OpenMP
+        - [ ] diffusion
+        - [ ] spinodal
+        - [ ] dendrite
+        - [ ] ripening
 
 =========================
 Contributions and Contact
@@ -331,11 +338,11 @@ the best available for the purpose.
 
 .. _`Trevor Keller`: mailto::trevor.keller@nist.gov
 .. _`National Institute of Standards and Technology`: http://www.nist.gov
-.. _`hiperc_guide.pdf`: doc/hiperc_guide.pdf
+.. _`HiPerC_guide.pdf`: doc/HiPerC_guide.pdf
 .. |`initial conc`| image:: common-diffusion/diffusion.00000.png
 .. |`final conc`| image:: common-diffusion/diffusion.10000.png
-.. |Documentation on readthedocs| image:: http://readthedocs.org/projects/hiperc/badge/?version=latest
-.. _`Documentation on readthedocs`: http://hiperc.readthedocs.io/en/latest/?badge=latest
+.. |Documentation on readthedocs| image:: http://readthedocs.org/projects/HiPerC/badge/?version=latest
+.. _`Documentation on readthedocs`: http://HiPerC.readthedocs.io/en/latest/?badge=latest
 .. |Conversation on Gitter| image:: https://badges.gitter.im/usnistgov/hiperc.svg
 .. _`Conversation on Gitter`: https://gitter.im/usnistgov/hiperc?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=body_badge
 .. _`Contributing Guidelines`: CONTRIBUTING.md
@@ -348,7 +355,7 @@ the best available for the purpose.
 .. _CUDA: https://developer.nvidia.com/cuda-zone
 .. _Doxygen: http://www.stack.nl/~dimitri/doxygen/
 .. _EC2: https://aws.amazon.com/ec2/Elastic-GPUs/
-.. _Gitter: https://gitter.im/hiperc/Lobby/
+.. _Gitter: https://gitter.im/HiPerC/Lobby/
 .. _GNU: https://gcc.gnu.org/
 .. _htop: http://hisham.hm/htop/
 .. _`intel_gpu_top`: https://github.com/ChrisCummins/intel-gpu-tools

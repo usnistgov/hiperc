@@ -1,4 +1,4 @@
-# Makefile for hiperc documentation
+# Makefile for HiPerC documentation
 
 LATEX = pdflatex
 SPHINX = sphinx-build

@@ -1,6 +1,7 @@
 # Doxygen configuration file, after http://www.stack.nl/~dimitri/doxygen/manual/config.html
 
-PROJECT_NAME          = phasefield-accelerator-benchmarks
+PROJECT_NAME          = HiPerC
+PROJECT_BRIEF         = High Performance Computing Strategies for Boundary Value Problems
 OUTPUT_DIRECTORY      = .
 PROJECT_NUMBER        = pre-alpha
 FULL_PATH_NAMES       = NO

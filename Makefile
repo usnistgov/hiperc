@@ -1,4 +1,4 @@
-# Makefile for phasefield-accelerator-benchmark code
+# Makefile for HiPerC code
 
 all: cpu_diffusion gpu_diffusion
 .PHONY: all

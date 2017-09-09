@@ -1,6 +1,6 @@
-# Contributing to [HIPERC: High Performance Computing Strategies for Boundary Value Problems][_hiperc]
+# Contributing to [HiPerC: High Performance Computing Strategies for Boundary Value Problems][_hiperc]
 
-Thank you for spending some time with the HIPERC project.
+Thank you for spending some time with the HiPerC project.
 I sincerely appreciate your interest, and hope you will consider contributing
 to the documentation, source code, and community at large.
 
@@ -48,10 +48,10 @@ If you're brand new to open source, welcome! You might benefit from the
 
 ## Pull Requests
 
-We use [git][_git] version control with a [branching workflow][_branch], 
+We use [git][_git] version control with a [branching workflow][_branch],
 summarized below. Please do not commit directly to the ```master``` branch.
 
-1. Create a fork of [hiperc][_hiperc] on your personal
+1. Create a fork of [HiPerC][_hiperc] on your personal
    GitHub account.
 2. For obvious changes, such as typos or edits to ```.gitignore```, you can edit
    your fork directly in the browser, then file a [pull request][_pr].
@@ -79,7 +79,7 @@ which we typically conduct using [reviewable][_review].
 [_ghhelp]:  https://help.github.com/
 [_ghkey]:   https://help.github.com/articles/closing-issues-using-keywords/
 [_git]:     https://git-scm.com/
-[_gitter]:  https://gitter.im/hiperc/Lobby
+[_gitter]:  https://gitter.im/usnistgov/hiperc
 [_goog]:    https://google.github.io/styleguide/cppguide.html
 [_issue]:   https://github.com/usnistgov/hiperc/issues
 [_pr]:      https://help.github.com/articles/about-pull-requests/

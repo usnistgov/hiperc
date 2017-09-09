@@ -1,4 +1,4 @@
-# Makefile for GPU diffusion code
+# Makefile for HiPerC diffusion code
 # CUDA implementation
 
 NVCXX = nvcc

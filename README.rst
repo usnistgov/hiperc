@@ -177,7 +177,7 @@ Source Code Documentation
 You are encouraged to browse the source for this project to see how it works.
 This project is documented using Doxygen_, which can help guide you
 through the source code layout and intent. This guide is included as
-`HiPerC_guide.pdf`_. To build the
+`hiperc_guide.pdf`_. To build the
 documentation yourself, with Doxygen_, LaTeX_, and
 Make_ installed, ``cd`` into ``doc`` and run ``make``. Then
 browse the source code to your heart's content.
@@ -338,11 +338,11 @@ the best available for the purpose.
 
 .. _`Trevor Keller`: mailto::trevor.keller@nist.gov
 .. _`National Institute of Standards and Technology`: http://www.nist.gov
-.. _`HiPerC_guide.pdf`: doc/HiPerC_guide.pdf
+.. _`hiperc_guide.pdf`: doc/hiperc_guide.pdf
 .. |`initial conc`| image:: common-diffusion/diffusion.00000.png
 .. |`final conc`| image:: common-diffusion/diffusion.10000.png
-.. |Documentation on readthedocs| image:: http://readthedocs.org/projects/HiPerC/badge/?version=latest
-.. _`Documentation on readthedocs`: http://HiPerC.readthedocs.io/en/latest/?badge=latest
+.. |Documentation on readthedocs| image:: http://readthedocs.org/projects/hiperc/badge/?version=latest
+.. _`Documentation on readthedocs`: http://hiperc.readthedocs.io/en/latest/?badge=latest
 .. |Conversation on Gitter| image:: https://badges.gitter.im/usnistgov/hiperc.svg
 .. _`Conversation on Gitter`: https://gitter.im/usnistgov/hiperc?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=body_badge
 .. _`Contributing Guidelines`: CONTRIBUTING.md
@@ -355,7 +355,7 @@ the best available for the purpose.
 .. _CUDA: https://developer.nvidia.com/cuda-zone
 .. _Doxygen: http://www.stack.nl/~dimitri/doxygen/
 .. _EC2: https://aws.amazon.com/ec2/Elastic-GPUs/
-.. _Gitter: https://gitter.im/HiPerC/Lobby/
+.. _Gitter: https://gitter.im/usnistgov/hiperc
 .. _GNU: https://gcc.gnu.org/
 .. _htop: http://hisham.hm/htop/
 .. _`intel_gpu_top`: https://github.com/ChrisCummins/intel-gpu-tools

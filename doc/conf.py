@@ -242,7 +242,9 @@ breathe_default_project = "HiPerC"
 #breathe_domain_by_extension = {
 #    "h" : "c",
 #    "c" : "c",
+#    "cl" : "c",
 #    "cu" : "cpp",
+#    "cuh" : "cpp",
 #    "cpp" : "cpp",
 #}
 

@@ -1,7 +1,7 @@
 .. image:: HiPerC.png
-   :height: 300px
-   :width: 300px
-   :scale: 67 %
+   :height: 200px
+   :width: 200px
+   :scale: 100 %
    :alt: HiPerC
    :align: center
 

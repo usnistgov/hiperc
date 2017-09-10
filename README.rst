@@ -13,7 +13,7 @@ Ever wonder if a GPU or Xeon Phi accelerator card would make your code faster?
 Fast enough to justify the expense to your manager, adviser, or funding agency?
 This project can help answer your questions!
 
-|Documentation on readthedocs|_ |Conversation on Gitter|_
+|Source on GitHub|_ |Documentation on readthedocs|_ |Conversation on Gitter|_
 
 The example codes in this repository implement the same basic algorithm using
 whichever of the mainstream accelerator programming methods apply. Running the
@@ -338,9 +338,12 @@ the best available for the purpose.
 
 .. _`Trevor Keller`: mailto::trevor.keller@nist.gov
 .. _`National Institute of Standards and Technology`: http://www.nist.gov
+.. _`Source on GitHub`: https://github.com/usnistgov/hiperc
 .. _`hiperc_guide.pdf`: doc/hiperc_guide.pdf
 .. |`initial conc`| image:: common-diffusion/diffusion.00000.png
 .. |`final conc`| image:: common-diffusion/diffusion.10000.png
+.. |Source on GitHub| image:: https://assets-cdn.github.com/favicon.ico
+.. _`Source on GitHub`: https://github.com/usnistgov/hiperc
 .. |Documentation on readthedocs| image:: http://readthedocs.org/projects/hiperc/badge/?version=latest
 .. _`Documentation on readthedocs`: http://hiperc.readthedocs.io/en/latest/?badge=latest
 .. |Conversation on Gitter| image:: https://badges.gitter.im/usnistgov/hiperc.svg

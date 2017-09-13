@@ -27,6 +27,8 @@
 #define _OPENCL_KERNELS_H_
 /** \endcond */
 
+#pragma OPENCL EXTENSION cl_khr_fp64 : enable
+
 #include <CL/cl.h>
 
 #include "numerics.h"

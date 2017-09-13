@@ -17,6 +17,8 @@
  Questions/comments to Trevor Keller (trevor.keller@nist.gov)
  **********************************************************************************/
 
+#include "opencl_kernels.h"
+
 /**
  \brief Tiled convolution algorithm for execution on the GPU
 

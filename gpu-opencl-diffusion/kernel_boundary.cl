@@ -17,6 +17,8 @@
  Questions/comments to Trevor Keller (trevor.keller@nist.gov)
  **********************************************************************************/
 
+#include "opencl_kernels.h"
+
 /**
  \brief Boundary condition kernel for execution on the GPU
  \fn void boundary_kernel(fp_t* d_conc, fp_t d_bc[2][2], int nx, int ny, int nm)

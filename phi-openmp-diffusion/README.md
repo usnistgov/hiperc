@@ -26,9 +26,12 @@ To build this code, you must have installed
 These are usually available through the package manager. For example,
 ```apt-get install make libpng12-dev```. The Intel compiler is proprietary,
 but available to open-source developers at no cost. Hardware capable of AVX-512
-instructions, whether a primary Xeon CPU or a Xeon Phi, is also required.
-Proof-of-concept KNL code can be run on [Rescale's ScaleX][_scalex]
-and equivalent HPC cloud computing platforms.
+instructions, whether a primary Xeon CPU or a [Xeon Phi][_knl], is also required.
+Proof-of-concept KNL code can be run on [Rescale's ScaleX][_scalex] and
+equivalent HPC cloud computing platforms. [KNL][_knl] nodes are available on
+advanced research computing platforms, including Argonne National Labs'
+[Bebop][_bebop], NERSC [Cori][_cori], TACC [Stampede2][_tacc], and
+[XSEDE][_xsede].
 
 ## Customization
 
@@ -49,8 +52,13 @@ the [National Institute of Standards and Technology (NIST)](http://www.nist.gov)
 nor is it intended to imply that the entities, materials, or equipment are
 necessarily the best available for the purpose.
 
-[_make]:   https://www.gnu.org/software/make/
+[_bebop]:  http://www.lcrc.anl.gov/systems/resources/bebop/
+[_cori]:   http://www.nersc.gov/users/computational-systems/cori/
 [_gcc]:    https://gcc.gnu.org
 [_intel]:  https://software.intel.com/en-us/intel-compilers
+[_knl]:    https://www.intel.com/content/www/us/en/products/processors/xeon-phi/xeon-phi-processors.html
+[_make]:   https://www.gnu.org/software/make/
 [_png]:    http://www.libpng.org/pub/png/libpng.html
 [_scalex]: http://www.rescale.com/products/
+[_tacc]:   https://www.tacc.utexas.edu/systems/stampede2
+[_xsede]:  https://www.xsede.org/ecosystem/resources

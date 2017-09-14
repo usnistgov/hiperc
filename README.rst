@@ -84,6 +84,9 @@ performance and optimization of a specific application. CUDA hardware can be
 emulated on the CPU using the MCUDA_ framework. Proof-of-concept
 trials on GPU and KNL hardware can be run on Amazon's EC2_,
 Rescale's ScaleX_, and equivalent HPC cloud computing platforms.
+Most of the current generation of research supercomputers contain GPU or KNL
+accelerator hardware, including Argonne National Labs'
+Bebop_, NERSC Cori_, TACC Stampede2_, and XSEDE_.
 
 ===============
 Basic Algorithm
@@ -311,7 +314,7 @@ Work in Progress
         - [ ] ripening
 - [ ] KNL
     - [ ] OpenMP
-        - [ ] diffusion
+        - [x] diffusion
         - [ ] spinodal
         - [ ] dendrite
         - [ ] ripening
@@ -337,30 +340,26 @@ intended to imply that the entities, materials, or equipment are necessarily
 the best available for the purpose.
 
 .. _`Trevor Keller`: mailto::trevor.keller@nist.gov
-.. _`National Institute of Standards and Technology`: http://www.nist.gov
-.. _`Source on GitHub`: https://github.com/usnistgov/hiperc
-.. _`hiperc_guide.pdf`: doc/hiperc_guide.pdf
-.. |`initial conc`| image:: common-diffusion/diffusion.00000.png
-.. |`final conc`| image:: common-diffusion/diffusion.10000.png
-.. |Source on GitHub| image:: https://assets-cdn.github.com/favicon.ico
-.. _`Source on GitHub`: https://github.com/usnistgov/hiperc
-.. |Documentation on readthedocs| image:: http://readthedocs.org/projects/hiperc/badge/?version=latest
-.. _`Documentation on readthedocs`: http://hiperc.readthedocs.io/en/latest/?badge=latest
-.. |Conversation on Gitter| image:: https://badges.gitter.im/usnistgov/hiperc.svg
-.. _`Conversation on Gitter`: https://gitter.im/usnistgov/hiperc?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=body_badge
-.. _`Contributing Guidelines`: CONTRIBUTING.md
-.. _`file an issue`: https://github.com/usnistgov/hiperc/issues
-.. _OpenACC: https://www.openacc.org/
-.. _radeontop: https://github.com/clbr/radeontop
+.. _Bebop: http://www.lcrc.anl.gov/systems/resources/bebop/
 .. _ccNUMA: https://en.wikipedia.org/wiki/Non-uniform_memory_access#Cache_coherent_NUMA
+.. _`Conversation on Gitter`: https://gitter.im/usnistgov/hiperc?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=body_badge
+.. |Conversation on Gitter| image:: https://badges.gitter.im/usnistgov/hiperc.svg
+.. _`Contributing Guidelines`: CONTRIBUTING.md
 .. _convolution: https://en.wikipedia.org/wiki/Discrete_Laplace_operator#Image_Processing
+.. _Cori: http://www.nersc.gov/users/computational-systems/cori/
 .. _Cray: http://www.cray.com/
 .. _CUDA: https://developer.nvidia.com/cuda-zone
+.. |Documentation on readthedocs| image:: http://readthedocs.org/projects/hiperc/badge/?version=latest
+.. _`Documentation on readthedocs`: http://hiperc.readthedocs.io/en/latest/?badge=latest
 .. _Doxygen: http://www.stack.nl/~dimitri/doxygen/
 .. _EC2: https://aws.amazon.com/ec2/Elastic-GPUs/
+.. _`file an issue`: https://github.com/usnistgov/hiperc/issues
+.. |`final conc`| image:: common-diffusion/diffusion.10000.png
 .. _Gitter: https://gitter.im/usnistgov/hiperc
 .. _GNU: https://gcc.gnu.org/
+.. _`hiperc_guide.pdf`: doc/hiperc_guide.pdf
 .. _htop: http://hisham.hm/htop/
+.. |`initial conc`| image:: common-diffusion/diffusion.00000.png
 .. _`intel_gpu_top`: https://github.com/ChrisCummins/intel-gpu-tools
 .. _KNC: https://ark.intel.com/products/codename/57721/Knights-Corner
 .. _KNL: https://ark.intel.com/products/codename/48999/Knights-Landing
@@ -368,12 +367,20 @@ the best available for the purpose.
 .. _Make: https://www.gnu.org/software/make/
 .. _MCUDA: http://impact.crhc.illinois.edu/mcuda.aspx
 .. _MIMD: https://en.wikipedia.org/wiki/MIMD
+.. _`National Institute of Standards and Technology`: http://www.nist.gov
 .. _nvidia-smi: https://developer.nvidia.com/nvidia-system-management-interface
+.. _OpenACC: https://www.openacc.org/
 .. _OpenCL: https://www.khronos.org/opencl/
 .. _OpenMP: http://www.openmp.org/
 .. _PGI: http://www.pgroup.com/
 .. _POSIX: http://www.opengroup.org/austin/papers/posix_faq.html
+.. _radeontop: https://github.com/clbr/radeontop
 .. _ScaleX: http://www.rescale.com/products/
 .. _SIMD: https://en.wikipedia.org/wiki/SIMD
+.. |Source on GitHub| image:: https://assets-cdn.github.com/favicon.ico
+.. _`Source on GitHub`: https://github.com/usnistgov/hiperc
+.. _Stampede2: https://www.tacc.utexas.edu/systems/stampede2
 .. _`Threading Building Blocks`: https://www.threadingbuildingblocks.org/
 .. _`Xeon Phi`: https://www.intel.com/content/www/us/en/products/processors/xeon-phi/xeon-phi-processors.html
+.. _XSEDE: https://www.xsede.org/ecosystem/resources
+

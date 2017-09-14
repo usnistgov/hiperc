@@ -27,24 +27,9 @@
 #define _OPENCL_DATA_H_
 /** \endcond */
 
-/*
- \brief Enable double-precision floats
-*/
-/* #pragma OPENCL EXTENSION cl_khr_fp64 : enable */
-
 #include <CL/cl.h>
 
 #include "type.h"
-
-/**
- \brief Greatest number of expected platforms
-*/
-#define MAX_PLATFORMS 4
-
-/**
- \brief Greatest number of expected devices
-*/
-#define MAX_DEVICES 32
 
 /**
  \brief Container for GPU array pointers and parameters

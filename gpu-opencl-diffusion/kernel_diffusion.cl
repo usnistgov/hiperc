@@ -18,11 +18,6 @@
  **********************************************************************************/
 
 /**
- \brief Enable double-precision floats
-*/
-#pragma OPENCL EXTENSION cl_khr_fp64 : enable
-
-/**
  \brief OpenCL version 1.0 does not support the 'static' storage class specifier
 */
 #pragma OPENCL EXTENSION cl_clang_storage_class_specifiers : enable

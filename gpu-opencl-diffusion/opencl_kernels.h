@@ -27,11 +27,6 @@
 #define _OPENCL_KERNELS_H_
 /** \endcond */
 
-/*
-#if __OPENCL_VERSION__ <= CL_VERSION_1_1
-	#pragma OPENCL EXTENSION cl_khr_fp64 : enable
-#endif
-*/
 #include "numerics.h"
 
 /**

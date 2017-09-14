@@ -17,16 +17,6 @@
  Questions/comments to Trevor Keller (trevor.keller@nist.gov)
  **********************************************************************************/
 
-/**
- \brief Enable double-precision floats
-*/
-#pragma OPENCL EXTENSION cl_khr_fp64 : enable
-
-/**
- \brief OpenCL version 1.0 does not support the 'static' storage class specifier
-*/
-#pragma OPENCL EXTENSION cl_clang_storage_class_specifiers : enable
-
 #include "opencl_kernels.h"
 
 /**
@@ -54,11 +44,11 @@ __kernel void boundary_kernel(__global fp_t* d_conc,
 	/* apply fixed boundary values: sequence does not matter */
 
 	if (row >= 0 && row < ny/2 && col >= 0 && col < 1+nm/2) {
-		d_conc[idx] = d_bc[2]; /* left value, bc[1][0] */
+		d_conc[idx] = d_bc[2]; /* left value, bc[1][0] = bc[2*1 + 0] */
 	}
 
 	if (row >= ny/2 && row < ny && col >= nx-1-nm/2 && col < nx) {
-		d_conc[idx] = d_bc[3]; /* right value, bc[1][1] */
+		d_conc[idx] = d_bc[3]; /* right value, bc[1][1] = bc[2*1 + 1] */
 	}
 
 	/* wait for all threads to finish writing */

@@ -52,6 +52,8 @@ void report_error(cl_int status, const char* message)
 void init_opencl(fp_t** conc_old, fp_t** mask_lap, fp_t bc[2][2],
                int nx, int ny, int nm, struct OpenCLData* dev)
 {
+	/* Here's a lot of source code required to prepare your accelerator to do work. */
+
 	int gridSize = nx * ny * sizeof(fp_t);
 	int maskSize = nm * nm * sizeof(fp_t);
 	int bcSize = 2 * 2 * sizeof(fp_t);
@@ -60,35 +62,72 @@ void init_opencl(fp_t** conc_old, fp_t** mask_lap, fp_t bc[2][2],
 	cl_device_id gpu;
 	cl_uint numPlatforms;
 	size_t numDevices;
-	cl_platform_id platforms[MAX_PLATFORMS];
-	cl_device_id devices[MAX_DEVICES];
+	cl_platform_id* platforms;
+	cl_device_id* devices;
 
+	/* Platform: The host plus a collection of devices managed by a specific
+	   OpenCL implementation that allow an application to share resources and
+	   execute kernels on devices in the platform. There will typically be one
+	   platform, e.g. nvidia-opencl or amd-opencl. It is not uncommon to have
+	   two or three cards from different manufacturers installed, with one
+	   platform per vendor, so "typical" is not "only."
+	 */
 	status = clGetPlatformIDs(0, NULL, &numPlatforms);
-	if (numPlatforms > MAX_PLATFORMS) {
-		printf("Error: increase MAX_PLATFORMS beyond %i\n", numPlatforms);
+	report_error(status, "clGetPlatformIDs");
+	if (numPlatforms == 0) {
+		printf("Error: No OpenCL framework found.\n");
 		exit(-1);
 	}
-
+	platforms = (cl_platform_id*)malloc(numPlatforms);
 	status = clGetPlatformIDs(numPlatforms, platforms, NULL);
 	report_error(status, "clGetPlatformIDs");
 
-	cl_context_properties properties[] = {CL_CONTEXT_PLATFORM, (cl_context_properties)platforms[0], 0};
+	/* Context: shared memory space, allowing threads to collaborate.
+	   Specific to one platform.
+	 */
+	cl_context_properties properties[] = {CL_CONTEXT_PLATFORM,
+	                                      (cl_context_properties)platforms[0],
+	                                      0};
 	dev->context = clCreateContextFromType(properties, CL_DEVICE_TYPE_ALL, 0, NULL, &status);
 	report_error(status, "clCreateContextFromType");
 
+	/* Device: CPU, GPU, FPGA, or other threaded hardware available to do work.
+	   Specific to one context. If you have more than one device, the following
+	   definition of "gpu" may fail. Contact the developers if you'd like to
+	   help us generalize the code to properly handle your setup.
+	 */
 	status = clGetContextInfo(dev->context, CL_CONTEXT_DEVICES, 0, NULL, &numDevices);
 	report_error(status, "clGetContextInfo");
+	devices = (cl_device_id*)malloc(numDevices);
 	status = clGetContextInfo(dev->context, CL_CONTEXT_DEVICES, numDevices, devices, NULL);
 	report_error(status, "clGetContextInfo");
-	if (numDevices > MAX_DEVICES) {
-		printf("Error: increase MAX_DEVICES beyond %zu\n", numDevices);
+	if (numDevices == 0) {
+		printf("Error: No OpenCL-compatible devices found.\n");
 		exit(-1);
 	}
-
 	gpu = devices[0];
-	/* dev->commandQueue = clCreateCommandQueueWithProperties(dev->context, gpu, 0, &status); */
+
+	/* CommandQueue: coordinator of kernels to run in a given context */
 	dev->commandQueue = clCreateCommandQueue(dev->context, gpu, 0, &status);
 	report_error(status, "clCreateCommandQueue");
+
+	/* Program: set of one or more kernels to run in a given context,
+	   read from kernel files *.cl
+	 */
+	build_program("kernel_boundary.cl", dev->context, gpu, dev->boundary_program, &status);
+	build_program("kernel_convolution.cl", dev->context, gpu, dev->convolution_program, &status);
+	build_program("kernel_diffusion.cl", dev->context, gpu, dev->diffusion_program, &status);
+
+	/* Kernel: code compatible with the just-in-time (JIT) compiler
+	   Names (strings) must match the name of a function defined in the
+	   cl_program produced by build_program().
+	 */
+	dev->boundary_kernel = clCreateKernel(dev->boundary_program, "boundary_kernel", &status);
+	report_error(status, "dev->boundary_kernel");
+	dev->convolution_kernel = clCreateKernel(dev->convolution_program, "convolution_kernel", &status);
+	report_error(status, "dev->convolution_kernel");
+	dev->diffusion_kernel = clCreateKernel(dev->diffusion_program, "diffusion_kernel", &status);
+	report_error(status, "dev->diffusion_kernel");
 
 	/* allocate memory on device */
 	dev->conc_old = clCreateBuffer(dev->context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, gridSize, conc_old[0], &status);
@@ -103,23 +142,9 @@ void init_opencl(fp_t** conc_old, fp_t** mask_lap, fp_t bc[2][2],
 	dev->bc = clCreateBuffer(dev->context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, bcSize, bc[0], &status);
 	report_error(status, "create dev->bc");
 
-	/* read programs from kernel files */
-	build_program("kernel_boundary.cl", dev->context, gpu, dev->boundary_program, &status);
-	report_error(status, "kernel_boundary.cl");
-	build_program("kernel_convolution.cl", dev->context, gpu, dev->convolution_program, &status);
-	report_error(status, "kernel_convolution.cl");
-	build_program("kernel_diffusion.cl", dev->context, gpu, dev->diffusion_program, &status);
-	report_error(status, "kernel_diffusion.cl");
-
-	/* prepare kernels compatible with the just-in-time (JIT) compiler */
-	dev->boundary_kernel = clCreateKernel(dev->boundary_program, "boundary_kernel", &status);
-	report_error(status, "dev->boundary_kernel");
-	dev->convolution_kernel = clCreateKernel(dev->convolution_program, "convolution_kernel", &status);
-	report_error(status, "dev->convolution_kernel");
-	dev->diffusion_kernel = clCreateKernel(dev->diffusion_program, "diffusion_kernel", &status);
-	report_error(status, "dev->diffusion_kernel");
-
-	/* That's a lot of source code required to simply prepare your accelerator to do work. */
+	/* clean up */
+	free(platforms);
+	free(devices);
 }
 
 void build_program(const char* filename,
@@ -132,7 +157,7 @@ void build_program(const char* filename,
 	char* source_str;
 	char msg[1024];
 	size_t source_len, program_size, read_size;
-	char options[] = "-I. -I../common-diffusion";
+	char options[] = "-I../common-diffusion";
 
 	fp = fopen(filename, "rb");
 	if (!fp) {
@@ -159,9 +184,9 @@ void build_program(const char* filename,
 
 	strcpy(msg, filename);
 	strcat(msg, ": clBuildProgram");
-	/* *status = clBuildProgram(program, 0, NULL, (const char*)options, NULL, NULL); */
-	*status = clBuildProgram(program, 1, &gpu, (const char*)options, NULL, NULL);
+	*status = clBuildProgram(program, 0, NULL, (const char*)options, NULL, NULL);
 
+	/* report_error is too granular: report specific build errors */
 	if(*status != CL_SUCCESS) {
 		/* Thanks to https://stackoverflow.com/a/29813956 */
 		char *buff_erro;
@@ -185,19 +210,20 @@ void build_program(const char* filename,
 			exit(-3);
 		}
 
-		fprintf(stderr,"Build log: \n%s\n", buff_erro); //Be careful with the fprint
+		fprintf(stderr,"Build log: \n%s\n", buff_erro);
 		free(buff_erro);
 		fprintf(stderr,"clBuildProgram failed\n");
 	}
 
 	report_error(*status, msg);
 
+	/* clean up */
 	free(source_str);
 }
 
 void free_opencl(struct OpenCLData* dev)
 {
-	/* free memory on device */
+	/* clean up */
 	clReleaseContext(dev->context);
 
 	clReleaseKernel(dev->boundary_kernel);

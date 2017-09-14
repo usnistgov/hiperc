@@ -97,6 +97,7 @@ void init_opencl(fp_t** conc_old, fp_t** mask_lap, fp_t bc[2][2],
 	report_error(status, "create dev->conc_new");
 	dev->conc_lap = clCreateBuffer(dev->context, CL_MEM_READ_WRITE, gridSize, NULL, &status);
 	report_error(status, "create dev->conc_lap");
+
 	dev->mask = clCreateBuffer(dev->context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, maskSize, mask_lap[0], &status);
 	report_error(status, "create dev->mask");
 	dev->bc = clCreateBuffer(dev->context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, bcSize, bc[0], &status);
@@ -128,8 +129,10 @@ void build_program(const char* filename,
                   cl_int* status)
 {
 	FILE *fp;
-	char *source_str;
+	char* source_str;
+	char msg[1024];
 	size_t source_len, program_size, read_size;
+	char options[] = "-I. -I../common-diffusion";
 
 	fp = fopen(filename, "rb");
 	if (!fp) {
@@ -148,12 +151,46 @@ void build_program(const char* filename,
 	assert(read_size == program_size);
 	fclose(fp);
 
+	strcpy(msg, filename);
+	strcat(msg, ": clCreateProgramWithSource");
 	source_len = strlen(source_str);
 	program = clCreateProgramWithSource(context, 1, (const char **)&source_str, &source_len, status);
-	report_error(*status, filename);
+	report_error(*status, msg);
 
-	*status = clBuildProgram(program, 0, NULL, NULL, NULL, NULL);
-	report_error(*status, filename);
+	strcpy(msg, filename);
+	strcat(msg, ": clBuildProgram");
+	/* *status = clBuildProgram(program, 0, NULL, (const char*)options, NULL, NULL); */
+	*status = clBuildProgram(program, 1, &gpu, (const char*)options, NULL, NULL);
+
+	if(*status != CL_SUCCESS) {
+		/* Thanks to https://stackoverflow.com/a/29813956 */
+		char *buff_erro;
+		cl_int errcode;
+		size_t build_log_len;
+		errcode = clGetProgramBuildInfo(program, gpu, CL_PROGRAM_BUILD_LOG, 0, NULL, &build_log_len);
+		if (errcode) {
+			printf("clGetProgramBuildInfo failed at line %d\n", __LINE__);
+			exit(-1);
+		}
+
+		buff_erro = (char*)malloc(build_log_len);
+		if (!buff_erro) {
+			printf("malloc failed at line %d\n", __LINE__);
+			exit(-2);
+		}
+
+		errcode = clGetProgramBuildInfo(program, gpu, CL_PROGRAM_BUILD_LOG, build_log_len, buff_erro, NULL);
+		if (errcode) {
+			printf("clGetProgramBuildInfo failed at line %d\n", __LINE__);
+			exit(-3);
+		}
+
+		fprintf(stderr,"Build log: \n%s\n", buff_erro); //Be careful with the fprint
+		free(buff_erro);
+		fprintf(stderr,"clBuildProgram failed\n");
+	}
+
+	report_error(*status, msg);
 
 	free(source_str);
 }

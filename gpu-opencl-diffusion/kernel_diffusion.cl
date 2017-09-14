@@ -35,9 +35,9 @@
  This function accesses 1D data rather than the 2D array representation of the
  scalar composition field
 */
-__kernel void diffusion_kernel(fp_t* d_conc_old,
-                               fp_t* d_conc_new,
-                               fp_t* d_conc_lap,
+__kernel void diffusion_kernel(__global fp_t* d_conc_old,
+                               __global fp_t* d_conc_new,
+                               __global fp_t* d_conc_lap,
                                int nx,
                                int ny,
                                int nm,

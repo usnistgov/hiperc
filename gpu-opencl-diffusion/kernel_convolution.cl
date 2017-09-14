@@ -49,9 +49,9 @@
  - The \a __local specifier allocates the small \a d_conc_tile array in cache
  - The \a __constant specifier allocates the small \a d_mask array in cache
 */
-__kernel void convolution_kernel(fp_t* d_conc_old,
-                                 fp_t* d_conc_lap,
-                                 fp_t* d_mask,
+__kernel void convolution_kernel(__global fp_t* d_conc_old,
+                                 __global fp_t* d_conc_lap,
+                                 __constant fp_t* d_mask,
                                  int nx,
                                  int ny,
                                  int nm)

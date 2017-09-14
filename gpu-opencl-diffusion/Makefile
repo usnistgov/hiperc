@@ -2,7 +2,7 @@
 # OpenCL implementation
 
 CC = gcc
-CFLAGS = -O3 -Wall -pedantic -std=c99 -I../common-diffusion -fopenmp
+CFLAGS = -g -Wall -pedantic -std=c99 -I../common-diffusion -fopenmp
 LINKS = -lm -lpng -lOpenCL
 
 LLVM = clang

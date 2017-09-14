@@ -82,6 +82,18 @@ struct OpenCLData {
 void report_error(cl_int error, const char* message);
 
 /**
+ \brief Build kernel program from text input
+
+ Source follows the OpenCL Programming Book,
+ https://www.fixstars.com/en/opencl/book/OpenCLProgrammingBook/calling-the-kernel/
+*/
+void build_program(const char* filename,
+                  cl_context context,
+                  cl_device_id gpu,
+                  cl_program program,
+                  cl_int* status);
+
+/**
  \brief Initialize OpenCL device memory before marching
 */
 void init_opencl(fp_t** conc_old, fp_t** mask_lap, fp_t bc[2][2],

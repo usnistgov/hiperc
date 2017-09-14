@@ -43,7 +43,7 @@ void opencl_diffusion_solver(struct OpenCLData* dev, fp_t** conc_new,
 	size_t by = ceil((fp_t)(ny)/(TILE_H - nm/2))+1;
 	int grid_size = nx * ny * sizeof(fp_t);
 
-	const size_t grid_dim[2] = {nx, ny};
+	const size_t grid_dim[2] = {(size_t)nx, (size_t)ny};
 	const size_t block_dim[2] = {bx, by};
 
 	cl_mem d_conc_old = dev->conc_old;
@@ -59,7 +59,7 @@ void opencl_diffusion_solver(struct OpenCLData* dev, fp_t** conc_new,
 	stat[3] = clSetKernelArg(dev->boundary_kernel, 4, sizeof(int), (void *)&nm);
 
 	for (i=0; i<4; i++)
-		report_error(stat[i], NULL);
+		report_error(stat[i], "const boundary args");
 
 	stat[0] = clSetKernelArg(dev->convolution_kernel, 1, sizeof(cl_mem), (void *)&(dev->conc_lap));
 	stat[1] = clSetKernelArg(dev->convolution_kernel, 2, nm * nm * sizeof(fp_t), (void *)&(dev->mask));
@@ -68,7 +68,7 @@ void opencl_diffusion_solver(struct OpenCLData* dev, fp_t** conc_new,
 	stat[4] = clSetKernelArg(dev->convolution_kernel, 5, sizeof(int), (void *)&nm);
 
 	for (i=0; i<5; i++)
-		report_error(stat[i], NULL);
+		report_error(stat[i], "const convolution args");
 
 	stat[0] = clSetKernelArg(dev->diffusion_kernel, 2, sizeof(cl_mem), (void *)&(dev->conc_lap));
 	stat[1] = clSetKernelArg(dev->convolution_kernel, 3, sizeof(int), (void *)&nx);
@@ -78,7 +78,7 @@ void opencl_diffusion_solver(struct OpenCLData* dev, fp_t** conc_new,
 	stat[5] = clSetKernelArg(dev->convolution_kernel, 7, sizeof(fp_t), (void *)&dt);
 
 	for (i=0; i<6; i++)
-		report_error(stat[i], NULL);
+		report_error(stat[i], "const diffusion args");
 
 	/* OpenCL uses cl_mem, not fp_t*, so swap_pointers won't work.
      * We leave the pointers alone but call the kernel on the appropriate data location.

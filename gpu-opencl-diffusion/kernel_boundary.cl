@@ -36,8 +36,8 @@
  This function accesses 1D data rather than the 2D array representation of the
  scalar composition field
 */
-__kernel void boundary_kernel(fp_t* d_conc,
-                              fp_t* d_bc,
+__kernel void boundary_kernel(__global fp_t* d_conc,
+                              __constant fp_t* d_bc,
                               int nx,
                               int ny,
                               int nm)
@@ -54,11 +54,11 @@ __kernel void boundary_kernel(fp_t* d_conc,
 	/* apply fixed boundary values: sequence does not matter */
 
 	if (row >= 0 && row < ny/2 && col >= 0 && col < 1+nm/2) {
-		d_conc[idx] = d_bc[1][0]; /* left value */
+		d_conc[idx] = d_bc[2]; /* left value, bc[1][0] */
 	}
 
 	if (row >= ny/2 && row < ny && col >= nx-1-nm/2 && col < nx) {
-		d_conc[idx] = d_bc[1][1]; /* right value */
+		d_conc[idx] = d_bc[3]; /* right value, bc[1][1] */
 	}
 
 	/* wait for all threads to finish writing */

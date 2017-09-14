@@ -2,11 +2,11 @@
 # OpenCL implementation
 
 CC = gcc
-CFLAGS = -O3 -Wall -pedantic -I../common-diffusion -fopenmp
+CFLAGS = -O3 -Wall -pedantic -std=c99 -I../common-diffusion -fopenmp
 LINKS = -lm -lpng -lOpenCL
 
 LLVM = clang
-LFLAGS = -S -emit-llvm -x cl
+LFLAGS = -S -emit-llvm -x cl -I../common-diffusion
 
 OBJS = boundaries.o data.o discretization.o mesh.o numerics.o output.o timer.o
 

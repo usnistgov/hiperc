@@ -86,7 +86,8 @@ void init_opencl(fp_t** conc_old, fp_t** mask_lap, fp_t bc[2][2],
 	}
 
 	gpu = devices[0];
-	dev->commandQueue = clCreateCommandQueueWithProperties(dev->context, gpu, 0, &status);
+	/* dev->commandQueue = clCreateCommandQueueWithProperties(dev->context, gpu, 0, &status); */
+	dev->commandQueue = clCreateCommandQueue(dev->context, gpu, 0, &status);
 	report_error(status, "clCreateCommandQueue");
 
 	/* allocate memory on device */

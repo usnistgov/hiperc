@@ -17,6 +17,16 @@
  Questions/comments to Trevor Keller (trevor.keller@nist.gov)
  **********************************************************************************/
 
+/**
+ \brief Enable double-precision floats
+*/
+#pragma OPENCL EXTENSION cl_khr_fp64 : enable
+
+/**
+ \brief OpenCL version 1.0 does not support the 'static' storage class specifier
+*/
+#pragma OPENCL EXTENSION cl_clang_storage_class_specifiers : enable
+
 #include "opencl_kernels.h"
 
 /**
@@ -39,12 +49,14 @@
  - The \a __local specifier allocates the small \a d_conc_tile array in cache
  - The \a __constant specifier allocates the small \a d_mask array in cache
 */
-__kernel void convolution_kernel(__global fp_t* d_conc_old,
-                                 __global fp_t* d_conc_lap,
-                                 __constant fp_t** d_mask,
-                                 int nx, int ny, int nm)
+__kernel void convolution_kernel(fp_t* d_conc_old,
+                                 fp_t* d_conc_lap,
+                                 fp_t* d_mask,
+                                 int nx,
+                                 int ny,
+                                 int nm)
 {
-	int bx, by, i, j, tx, ty,
+	int bx, by, i, j, tx, ty;
 	int dst_row, dst_col, dst_tile_w, dst_tile_h;
 	int src_row, src_col, src_tile_w, src_tile_h;
 	fp_t value=0.;

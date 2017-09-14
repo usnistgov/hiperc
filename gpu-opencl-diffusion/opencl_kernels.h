@@ -27,7 +27,9 @@
 #define _OPENCL_KERNELS_H_
 /** \endcond */
 
-#pragma OPENCL EXTENSION cl_khr_fp64 : enable
+#if __OPENCL_VERSION__ <= CL_VERSION_1_1
+	#pragma OPENCL EXTENSION cl_khr_fp64 : enable
+#endif
 
 #include <CL/cl.h>
 
@@ -45,12 +47,12 @@
 
 /* OpenCL requires initializers for __constant arrays
  \brief Convolution mask array on the GPU, allocated in protected memory
-__constant extern fp_t d_mask[MAX_MASK_W * MAX_MASK_H];
+fp_t d_mask[MAX_MASK_W * MAX_MASK_H];
 */
 
 /*
  \brief Boundary condition array on the GPU, allocated in protected memory
-__constant extern fp_t d_bc[2][2];
+fp_t d_bc[2][2];
 */
 
 /**
@@ -71,8 +73,11 @@ void build_program(const char* filename,
  This function accesses 1D data rather than the 2D array representation of the
  scalar composition field
 */
-void boundary_kernel(fp_t* d_conc, fp_t d_bc[2][2],
-                     int nx, int ny, int nm);
+void boundary_kernel(fp_t* d_conc,
+                     fp_t* d_bc,
+                     int nx,
+                     int ny,
+                     int nm);
 
 /**
  \brief Tiled convolution algorithm for execution on the GPU
@@ -94,8 +99,12 @@ void boundary_kernel(fp_t* d_conc, fp_t d_bc[2][2],
  - The \a __local specifier allocates the small \a d_conc_tile array in cache
  - The \a __constant specifier allocates the small \a d_mask array in cache
 */
-void convolution_kernel(fp_t* d_conc_old, fp_t* d_conc_lap, fp_t** d_mask,
-                        int nx, int ny, int nm);
+void convolution_kernel(fp_t* d_conc_old,
+                        fp_t* d_conc_lap,
+                        fp_t* d_mask,
+                        int nx,
+                        int ny,
+                        int nm);
 
 /**
  \brief Diffusion equation kernel for execution on the GPU
@@ -103,9 +112,14 @@ void convolution_kernel(fp_t* d_conc_old, fp_t* d_conc_lap, fp_t** d_mask,
  This function accesses 1D data rather than the 2D array representation of the
  scalar composition field
 */
-void diffusion_kernel(fp_t* d_conc_old, fp_t* d_conc_new, fp_t* d_conc_lap,
-                      int nx, int ny, int nm,
-                      fp_t D, fp_t dt);
+void diffusion_kernel(fp_t* d_conc_old,
+                      fp_t* d_conc_new,
+                      fp_t* d_conc_lap,
+                      int nx,
+                      int ny,
+                      int nm,
+                      fp_t D,
+                      fp_t dt);
 
 
 /** \cond SuppressGuard */

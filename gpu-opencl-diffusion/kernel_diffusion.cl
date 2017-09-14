@@ -17,6 +17,16 @@
  Questions/comments to Trevor Keller (trevor.keller@nist.gov)
  **********************************************************************************/
 
+/**
+ \brief Enable double-precision floats
+*/
+#pragma OPENCL EXTENSION cl_khr_fp64 : enable
+
+/**
+ \brief OpenCL version 1.0 does not support the 'static' storage class specifier
+*/
+#pragma OPENCL EXTENSION cl_clang_storage_class_specifiers : enable
+
 #include "opencl_kernels.h"
 
 /**
@@ -25,11 +35,14 @@
  This function accesses 1D data rather than the 2D array representation of the
  scalar composition field
 */
-__kernel void diffusion_kernel(__global fp_t* d_conc_old,
-                               __global fp_t* d_conc_new,
-                               __global fp_t* d_conc_lap,
-                               int nx, int ny, int nm,
-                               fp_t D, fp_t dt)
+__kernel void diffusion_kernel(fp_t* d_conc_old,
+                               fp_t* d_conc_new,
+                               fp_t* d_conc_lap,
+                               int nx,
+                               int ny,
+                               int nm,
+                               fp_t D,
+                               fp_t dt)
 {
 	int col, idx, row;
 

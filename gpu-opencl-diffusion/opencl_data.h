@@ -27,6 +27,11 @@
 #define _OPENCL_DATA_H_
 /** \endcond */
 
+/*
+ \brief Enable double-precision floats
+*/
+/* #pragma OPENCL EXTENSION cl_khr_fp64 : enable */
+
 #include <CL/cl.h>
 
 #include "type.h"

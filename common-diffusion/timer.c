@@ -23,16 +23,20 @@
 /* Modified by Trevor Keller as follows:
  * 12 August 2017: report time in seconds, not milliseconds
  * 24 August 2017: include header file defining functions
+ * 13 September 2017: define __USE_BSD to provide timersub, which is non-POSIX
  */
 
 #include <stdlib.h>
 #include "timer.h"
 
 #ifdef WIN32
-#define WIN32_LEAN_AND_MEAN
-#include <windows.h>
+	#define WIN32_LEAN_AND_MEAN
+	#include <windows.h>
 #else
-#include <sys/time.h>
+	#ifndef __USE_BSD
+		#define __USE_BSD
+	#endif
+	#include <sys/time.h>
 #endif
 
 /**

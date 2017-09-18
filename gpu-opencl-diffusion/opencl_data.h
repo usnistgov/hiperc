@@ -33,28 +33,52 @@
 
 /**
  \brief Container for GPU array pointers and parameters
+
+ From the <a href="https://www.khronos.org/registry/OpenCL/specs/opencl-1.2.pdf">OpenCL v1.2</a> spec:
+ - A \a Context is the environment within which the kernels execute and the domain in which
+   synchronization and memory management is defined. The context includes a set of devices, the
+   memory accessible to those devices, the corresponding memory properties and one or more
+   command-queues used to schedule execution of a kernel(s) or operations on memory objects.
+ - A \a Program \a Object encapsulates the following information:
+   - A reference to an associated context.
+   - A program source or binary.
+   - The latest successfully built program executable, the list of devices for which the program
+     executable is built, the build options used and a build log.
+   - The number of kernel objects currently attached.
+ - A \a Kernel \a Object encapsulates a specific \c __kernel function declared in a
+   program and the argument values to be used when executing this \c __kernel function.
 */
 struct OpenCLData {
-	/* data arrays on GPU */
+	/** OpenCL interface to the GPU, hardware and software */
+	cl_context context;
+
+	/** Copy of old composition field on the GPU */
 	cl_mem conc_old;
+	/** Copy of new composition field on the GPU */
 	cl_mem conc_new;
+	/** Copy of Laplacian field on the GPU */
 	cl_mem conc_lap;
 
+	/** Copy of Laplacian mask on the GPU */
 	cl_mem mask;
+	/** Copy of boundary values on the GPU */
 	cl_mem bc;
 
-	/* kernel source code */
+	/** Boundary program source for JIT compilation on the GPU */
 	cl_program boundary_program;
+	/** Convolution program source for JIT compilation on the GPU */
 	cl_program convolution_program;
+	/** Timestepping program source for JIT compilation on the GPU */
 	cl_program diffusion_program;
 
-	/* execution kernels */
+	/** Boundary program executable for the GPU */
 	cl_kernel boundary_kernel;
+	/** Convolution program executable for the GPU */
 	cl_kernel convolution_kernel;
+	/** Timestepping program executable for the GPU */
 	cl_kernel diffusion_kernel;
 
-	/* OpenCL machinery */
-	cl_context context;
+	/** Queue for submitting OpenCL jobs to the GPU */
 	cl_command_queue commandQueue;
 };
 
@@ -73,9 +97,9 @@ void report_error(cl_int error, const char* message);
  https://www.fixstars.com/en/opencl/book/OpenCLProgrammingBook/calling-the-kernel/
 */
 void build_program(const char* filename,
-                  cl_context context,
-                  cl_device_id gpu,
-                  cl_program program,
+                  cl_context* context,
+                  cl_device_id* gpu,
+                  cl_program* program,
                   cl_int* status);
 
 /**

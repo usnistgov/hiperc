@@ -17,6 +17,11 @@
  Questions/comments to Trevor Keller (trevor.keller@nist.gov)
  **********************************************************************************/
 
+/**
+ \brief Enable double-precision floats
+*/
+#pragma OPENCL EXTENSION cl_khr_fp64: enable
+
 #include "opencl_kernels.h"
 
 /**

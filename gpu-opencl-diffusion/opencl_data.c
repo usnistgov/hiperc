@@ -114,9 +114,9 @@ void init_opencl(fp_t** conc_old, fp_t** mask_lap, fp_t bc[2][2],
 	/* Program: set of one or more kernels to run in a given context,
 	   read from kernel files *.cl
 	 */
-	build_program("kernel_boundary.cl", dev->context, gpu, dev->boundary_program, &status);
-	build_program("kernel_convolution.cl", dev->context, gpu, dev->convolution_program, &status);
-	build_program("kernel_diffusion.cl", dev->context, gpu, dev->diffusion_program, &status);
+	build_program("kernel_boundary.cl", &(dev->context), &gpu, &(dev->boundary_program), &status);
+	build_program("kernel_convolution.cl", &(dev->context), &gpu, &(dev->convolution_program), &status);
+	build_program("kernel_diffusion.cl", &(dev->context), &gpu, &(dev->diffusion_program), &status);
 
 	/* Kernel: code compatible with the just-in-time (JIT) compiler
 	   Names (strings) must match the name of a function defined in the
@@ -148,9 +148,9 @@ void init_opencl(fp_t** conc_old, fp_t** mask_lap, fp_t bc[2][2],
 }
 
 void build_program(const char* filename,
-                  cl_context context,
-                  cl_device_id gpu,
-                  cl_program program,
+                  cl_context* context,
+                  cl_device_id* gpu,
+                  cl_program* program,
                   cl_int* status)
 {
 	FILE *fp;
@@ -169,7 +169,7 @@ void build_program(const char* filename,
 	program_size = ftell(fp);
 	rewind(fp);
 
-	source_str = (char*)malloc(program_size + 1);
+	source_str = (char*)malloc(program_size + sizeof(char));
 	source_str[program_size] = '\0';
 
 	read_size = fread(source_str, sizeof(char), program_size, fp);
@@ -179,12 +179,12 @@ void build_program(const char* filename,
 	strcpy(msg, filename);
 	strcat(msg, ": clCreateProgramWithSource");
 	source_len = strlen(source_str);
-	program = clCreateProgramWithSource(context, 1, (const char **)&source_str, &source_len, status);
+	*program = clCreateProgramWithSource(*context, 1, (const char **)&source_str, &source_len, status);
 	report_error(*status, msg);
 
 	strcpy(msg, filename);
 	strcat(msg, ": clBuildProgram");
-	*status = clBuildProgram(program, 0, NULL, (const char*)options, NULL, NULL);
+	*status = clBuildProgram(*program, 0, NULL, (const char*)options, NULL, NULL);
 
 	/* report_error is too granular: report specific build errors */
 	if(*status != CL_SUCCESS) {
@@ -192,7 +192,7 @@ void build_program(const char* filename,
 		char *buff_erro;
 		cl_int errcode;
 		size_t build_log_len;
-		errcode = clGetProgramBuildInfo(program, gpu, CL_PROGRAM_BUILD_LOG, 0, NULL, &build_log_len);
+		errcode = clGetProgramBuildInfo(*program, *gpu, CL_PROGRAM_BUILD_LOG, 0, NULL, &build_log_len);
 		if (errcode) {
 			printf("clGetProgramBuildInfo failed at line %d\n", __LINE__);
 			exit(-1);
@@ -204,7 +204,7 @@ void build_program(const char* filename,
 			exit(-2);
 		}
 
-		errcode = clGetProgramBuildInfo(program, gpu, CL_PROGRAM_BUILD_LOG, build_log_len, buff_erro, NULL);
+		errcode = clGetProgramBuildInfo(*program, *gpu, CL_PROGRAM_BUILD_LOG, build_log_len, buff_erro, NULL);
 		if (errcode) {
 			printf("clGetProgramBuildInfo failed at line %d\n", __LINE__);
 			exit(-3);

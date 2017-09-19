@@ -32,7 +32,7 @@
  scalar composition field
 */
 __kernel void boundary_kernel(__global fp_t* d_conc,
-                              __global fp_t* d_bc,
+                              __constant fp_t* d_bc,
                               int nx,
                               int ny,
                               int nm)

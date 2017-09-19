@@ -33,15 +33,21 @@
 #include "opencl_kernels.h"
 
 void opencl_diffusion_solver(struct OpenCLData* dev, fp_t** conc_new,
-                             int nx, int ny, int nm, fp_t bc[2][2],
+                             int nx, int ny, int nm,
                              fp_t D, fp_t dt, int checks,
                              fp_t *elapsed, struct Stopwatch* sw)
 {
 	double start_time;
 	int check=0;
 	int grid_size = nx * ny * sizeof(fp_t);
-	size_t bx = TILE_W; /* Block size, in mesh points, must be an even power of two: */
-	size_t by = TILE_H; /* 1, 2, 4, 8, 16, 32. There is an optimal block for each kernel: experiment! */
+	/** Per <a href="https://software.intel.com/sites/landingpage/opencl/optimization-guide/Work-Group_Size_Considerations.htm">
+	 Intel's OpenCL advice</a>, the ideal block size \f$ (bx \times by)\f$ is
+	 within the range from 64 to 128 mesh points. The block size must be an even
+	 power of two: 4, 8, 16, 32, etc. OpenCL will make a best-guess optimal
+	 block size if you set size_t* block_dim = NULL.
+	*/
+	size_t bx = TILE_W;
+	size_t by = TILE_H;
 	size_t grid_dim[2] = {(size_t)nx, (size_t)ny};
 	size_t block_dim[2] = {bx, by};
 

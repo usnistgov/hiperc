@@ -112,7 +112,7 @@ void init_opencl(fp_t** conc_old, fp_t** mask_lap, fp_t bc[2][2],
  \brief Specialization of solve_diffusion_equation() using OpenCL
 */
 void opencl_diffusion_solver(struct OpenCLData* dev, fp_t** conc_new,
-                             int nx, int ny, int nm, fp_t bc[2][2],
+                             int nx, int ny, int nm,
                              fp_t D, fp_t dt, int checks,
                              fp_t *elapsed, struct Stopwatch* sw);
 

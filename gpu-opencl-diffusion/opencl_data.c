@@ -108,8 +108,12 @@ void init_opencl(fp_t** conc_old, fp_t** mask_lap, fp_t bc[2][2],
 	gpu = devices[0];
 
 	/* CommandQueue: coordinator of kernels to run in a given context */
+	/* OpenCL v1 */
 	dev->commandQueue = clCreateCommandQueue(dev->context, gpu, 0, &status);
 	report_error(status, "clCreateCommandQueue");
+	/* OpenCL v2 */
+	/* dev->commandQueue = clCreateCommandQueueWithProperties(dev->context, gpu, (cl_queue_properties*)NULL, &status); */
+	/* report_error(status, "clCreateCommandQueue"); */
 
 	/* Program: set of one or more kernels to run in a given context,
 	   read from kernel files *.cl

@@ -221,11 +221,10 @@ for directory in [rst_directory, img_directory]:
         os.makedirs(directory)
 
 files_to_copy = (
-    'CONTRIBUTING.md',
-    'HiPerC.png',
-    'LICENSE.md',
     'README.rst',
+    'LICENSE.md',
     'common-diffusion/diffusion.*.png',
+    'HiPerC.png'
 )
 
 for fpath in files_to_copy:

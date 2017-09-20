@@ -46,10 +46,8 @@ void opencl_diffusion_solver(struct OpenCLData* dev, fp_t** conc_new,
 	 power of two: 4, 8, 16, 32, etc. OpenCL will make a best-guess optimal
 	 block size if you set size_t* block_dim = NULL.
 	*/
-	size_t bx = TILE_W;
-	size_t by = TILE_H;
 	size_t grid_dim[2] = {(size_t)nx, (size_t)ny};
-	size_t block_dim[2] = {bx, by};
+	size_t block_dim[2] = {TILE_W, TILE_H};
 
 	cl_mem d_conc_old = dev->conc_old;
 	cl_mem d_conc_new = dev->conc_new;
@@ -94,6 +92,15 @@ void opencl_diffusion_solver(struct OpenCLData* dev, fp_t** conc_new,
      * We leave the pointers alone but call the kernel on the appropriate data location.
      */
 	for (check = 0; check < checks; check++) {
+		/* swap pointers on the device */
+		if (check % 2 == 0) {
+			d_conc_old = dev->conc_old;
+			d_conc_new = dev->conc_new;
+		} else {
+			d_conc_old = dev->conc_new;
+			d_conc_new = dev->conc_old;
+		}
+
 		/* set time-dependent kernel arguments */
 		status = clSetKernelArg(dev->boundary_kernel,    0, sizeof(cl_mem), (void *)&d_conc_old);
 		report_error(status, "mutable boundary args[0]");
@@ -116,17 +123,13 @@ void opencl_diffusion_solver(struct OpenCLData* dev, fp_t** conc_new,
 
 		status = clEnqueueNDRangeKernel(dev->commandQueue, dev->diffusion_kernel,   2, NULL, grid_dim, block_dim, 0, NULL, NULL);
 		report_error(status, "enqueue diffusion kernel");
-
-		/* swap pointers on the device */
-		d_conc_old = dev->conc_new;
-		d_conc_new = dev->conc_old;
 	}
 
 	*elapsed += dt * checks;
 
 	/* transfer from device out to host */
 	start_time = GetTimer();
-	status = clEnqueueReadBuffer(dev->commandQueue, d_conc_old, CL_TRUE, 0, grid_size, conc_new[0], 0, NULL, NULL);
+	status = clEnqueueReadBuffer(dev->commandQueue, d_conc_new, CL_TRUE, 0, grid_size, conc_new[0], 0, NULL, NULL);
 	report_error(status, "retrieve result from GPU");
 	sw->file += GetTimer() - start_time;
 }

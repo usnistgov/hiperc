@@ -51,38 +51,35 @@ __kernel void convolution_kernel(__global fp_t* d_conc_old,
                                  int ny,
                                  int nm)
 {
-	int i, j, til_col, til_row;
-	int dst_col, dst_idx, dst_row, dst_cols, dst_rows;
-	int src_col, src_idx, src_row;
-	fp_t value=0.;
+	int i, j;
+	int dst_col, dst_cols, dst_row, dst_rows;
+	int src_col, src_cols, src_row, src_rows;
+	int til_col, til_row;
+	fp_t value = 0.;
 
 	/* source tile includes the halo cells, destination tile does not */
-	dst_cols = get_local_size(0) - nm + 1;
-	dst_rows = get_local_size(1) - nm + 1;
+	src_cols = get_local_size(0);
+	src_rows = get_local_size(1);
+
+	dst_cols = src_cols - nm + 1;
+	dst_rows = src_rows - nm + 1;
 
 	/* determine indices on which to operate */
 	til_col = get_local_id(0);
 	til_row = get_local_id(1);
 
-	dst_col = get_group_id(0) * dst_cols + til_col; /* not get_global_id(0); */
-	dst_row = get_group_id(1) * dst_rows + til_row; /* not get_global_id(1); */
+	dst_col = get_group_id(0) * dst_cols + til_col;
+	dst_row = get_group_id(1) * dst_rows + til_row;
 
 	src_col = dst_col - nm/2;
 	src_row = dst_row - nm/2;
 
-	dst_idx = dst_row * nx + dst_col;
-	src_idx = src_row * nx + src_col;
-
 	/* shared memory tile: __local gives access to all threads in the group */
 	__local fp_t d_conc_tile[TILE_H + MAX_MASK_H - 1][TILE_W + MAX_MASK_W - 1];
 
-	if ((src_row >= 0) && (src_row < ny) &&
-	    (src_col >= 0) && (src_col < nx)) {
-		/* if src_row==0, then dst_row==nm/2: this is a halo row */
-		d_conc_tile[til_row][til_col] = d_conc_old[src_idx];
-	} else {
-		/* points outside the halo should be switched off */
-		d_conc_tile[til_row][til_col] = 0.;
+	if (src_row >= 0 && src_row < ny &&
+	    src_col >= 0 && src_col < nx) {
+		d_conc_tile[til_row][til_col] = d_conc_old[src_row * nx + src_col];
 	}
 
 	/* tile data is shared: wait for all threads to finish copying */
@@ -97,7 +94,7 @@ __kernel void convolution_kernel(__global fp_t* d_conc_old,
 		}
 		/* record value */
 		if (dst_row < ny && dst_col < nx) {
-			d_conc_lap[dst_idx] = value;
+			d_conc_lap[dst_row * nx + dst_col] = value;
 		}
 	}
 

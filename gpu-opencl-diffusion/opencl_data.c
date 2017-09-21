@@ -228,6 +228,12 @@ void build_program(const char* filename,
 void free_opencl(struct OpenCLData* dev)
 {
 	/* clean up */
+	free(dev->conc_old);
+	free(dev->conc_new);
+	free(dev->conc_lap);
+	free(dev->bc);
+	free(dev->mask);
+
 	clReleaseContext(dev->context);
 
 	clReleaseKernel(dev->boundary_kernel);

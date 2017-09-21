@@ -2,16 +2,17 @@
 # OpenCL implementation
 
 CC = gcc
-CFLAGS = -g -Wall -pedantic -std=c11 -I../common-diffusion -fopenmp
+CFLAGS = -O3 -Wall -pedantic -std=c11 -I../common-diffusion -fopenmp
 LINKS = -lm -lpng -lOpenCL
 
 LLVM = clang
 LFLAGS = -S -emit-llvm -x cl -I../common-diffusion
 
+KERNELS = kernel_boundary.cl kernel_convolution.cl kernel_diffusion.cl
 OBJS = boundaries.o data.o discretization.o mesh.o numerics.o output.o timer.o
 
 # Executable
-diffusion: opencl_main.c $(OBJS)
+diffusion: opencl_main.c $(KERNELS) $(OBJS)
 	$(CC) $(CFLAGS) $(OBJS) $< -o $@ $(LINKS)
 
 # OpenCL objects

@@ -37,23 +37,22 @@ __kernel void boundary_kernel(__global fp_t* d_conc,
                               int ny,
                               int nm)
 {
-	int idx, col, row;
+	int col, row;
 	int ihi, ilo, jhi, jlo, offset;
 
 	/* determine indices on which to operate */
 
 	col = get_global_id(0);
 	row = get_global_id(1);
-	idx = row * nx + col;
 
 	/* apply fixed boundary values: sequence does not matter */
 
-	if (row >= 0 && row < ny/2 && col >= 0 && col < 1+nm/2) {
-		d_conc[idx] = d_bc[2]; /* left value, bc[1][0] = bc[2*1 + 0] */
+	if (row < ny/2 && col < 1+nm/2) {
+		d_conc[row * nx + col] = d_bc[2]; /* left value, bc[1][0] = bc[2*1 + 0] */
 	}
 
 	if (row >= ny/2 && row < ny && col >= nx-1-nm/2 && col < nx) {
-		d_conc[idx] = d_bc[3]; /* right value, bc[1][1] = bc[2*1 + 1] */
+		d_conc[row * nx + col] = d_bc[3]; /* right value, bc[1][1] = bc[2*1 + 1] */
 	}
 
 	/* wait for all threads to finish writing */
@@ -64,22 +63,22 @@ __kernel void boundary_kernel(__global fp_t* d_conc,
 	for (offset = 0; offset < nm/2; offset++) {
 		ilo = nm/2 - offset;
 		ihi = nx - 1 - nm/2 + offset;
-		if (col == ilo-1 && row >= 0 && row < ny) {
-			d_conc[idx] = d_conc[row * nx + ilo]; /* left condition */
-		} else if (col == ihi+1 && row >= 0 && row < ny) {
-			d_conc[idx] = d_conc[row * nx + ihi]; /* right condition */
-		}
-		barrier(CLK_GLOBAL_MEM_FENCE);
-	}
-
-	for (offset = 0; offset < nm/2; offset++) {
 		jlo = nm/2 - offset;
 		jhi = ny - 1 - nm/2 + offset;
-		if (row == jlo-1 && col >= 0 && col < nx) {
-			d_conc[idx] = d_conc[jlo * nx + col]; /* bottom condition */
-		} else if (row == jhi+1 && col >= 0 && col < nx) {
-			d_conc[idx] = d_conc[jhi * nx + col]; /* top condition */
+
+		if (ilo-1 == col && row < ny) {
+			d_conc[row * nx + ilo-1] = d_conc[row * nx + ilo]; /* left condition */
 		}
+		if (ihi+1 == col && row < ny) {
+			d_conc[row * nx + ihi+1] = d_conc[row * nx + ihi]; /* right condition */
+		}
+		if (jlo-1 == row && col < nx) {
+			d_conc[(jlo-1) * nx + col] = d_conc[jlo * nx + col]; /* bottom condition */
+		}
+		if (jhi+1 == row && col < nx) {
+			d_conc[(jhi+1) * nx + col] = d_conc[jhi * nx + col]; /* top condition */
+		}
+
 		barrier(CLK_GLOBAL_MEM_FENCE);
 	}
 }

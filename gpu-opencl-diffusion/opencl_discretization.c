@@ -55,38 +55,26 @@ void opencl_diffusion_solver(struct OpenCLData* dev, fp_t** conc_new,
 	cl_int status = CL_SUCCESS;
 
 	/* set immutable kernel arguments */
-	status = clSetKernelArg(dev->boundary_kernel, 1, sizeof(cl_mem), (void *)&(dev->bc));
-	report_error(status, "const boundary args[1]");
-	status = clSetKernelArg(dev->boundary_kernel, 2, sizeof(int), (void *)&nx);
-	report_error(status, "const boundary args[2]");
-	status = clSetKernelArg(dev->boundary_kernel, 3, sizeof(int), (void *)&ny);
-	report_error(status, "const boundary args[3]");
-	status = clSetKernelArg(dev->boundary_kernel, 4, sizeof(int), (void *)&nm);
-	report_error(status, "const boundary args[4]");
+	status |= clSetKernelArg(dev->boundary_kernel, 1, sizeof(cl_mem), (void *)&(dev->bc));
+	status |= clSetKernelArg(dev->boundary_kernel, 2, sizeof(int), (void *)&nx);
+	status |= clSetKernelArg(dev->boundary_kernel, 3, sizeof(int), (void *)&ny);
+	status |= clSetKernelArg(dev->boundary_kernel, 4, sizeof(int), (void *)&nm);
+	report_error(status, "constant boundary kernal args");
 
-	status = clSetKernelArg(dev->convolution_kernel, 1, sizeof(cl_mem), (void *)&(dev->conc_lap));
-	report_error(status, "const convolution args[1]");
-	status = clSetKernelArg(dev->convolution_kernel, 2, sizeof(cl_mem), (void *)&(dev->mask));
-	report_error(status, "const convolution args[2]");
-	status = clSetKernelArg(dev->convolution_kernel, 3, sizeof(int), (void *)&nx);
-	report_error(status, "const convolution args[3]");
-	status = clSetKernelArg(dev->convolution_kernel, 4, sizeof(int), (void *)&ny);
-	report_error(status, "const convolution args[4]");
-	status = clSetKernelArg(dev->convolution_kernel, 5, sizeof(int), (void *)&nm);
-	report_error(status, "const convolution args[5]");
+	status |= clSetKernelArg(dev->convolution_kernel, 1, sizeof(cl_mem), (void *)&(dev->conc_lap));
+	status |= clSetKernelArg(dev->convolution_kernel, 2, sizeof(cl_mem), (void *)&(dev->mask));
+	status |= clSetKernelArg(dev->convolution_kernel, 3, sizeof(int), (void *)&nx);
+	status |= clSetKernelArg(dev->convolution_kernel, 4, sizeof(int), (void *)&ny);
+	status |= clSetKernelArg(dev->convolution_kernel, 5, sizeof(int), (void *)&nm);
+	report_error(status, "constant convolution kernel args");
 
-	status = clSetKernelArg(dev->diffusion_kernel, 2, sizeof(cl_mem), (void *)&(dev->conc_lap));
-	report_error(status, "const diffusion args[2]");
-	status = clSetKernelArg(dev->diffusion_kernel, 3, sizeof(int), (void *)&nx);
-	report_error(status, "const diffusion args[3]");
-	status = clSetKernelArg(dev->diffusion_kernel, 4, sizeof(int), (void *)&ny);
-	report_error(status, "const diffusion args[4]");
-	status = clSetKernelArg(dev->diffusion_kernel, 5, sizeof(int), (void *)&nm);
-	report_error(status, "const diffusion args[5]");
-	status = clSetKernelArg(dev->diffusion_kernel, 6, sizeof(fp_t), (void *)&D);
-	report_error(status, "const diffusion args[6]");
-	status = clSetKernelArg(dev->diffusion_kernel, 7, sizeof(fp_t), (void *)&dt);
-	report_error(status, "const diffusion args[7]");
+	status |= clSetKernelArg(dev->diffusion_kernel, 2, sizeof(cl_mem), (void *)&(dev->conc_lap));
+	status |= clSetKernelArg(dev->diffusion_kernel, 3, sizeof(int), (void *)&nx);
+	status |= clSetKernelArg(dev->diffusion_kernel, 4, sizeof(int), (void *)&ny);
+	status |= clSetKernelArg(dev->diffusion_kernel, 5, sizeof(int), (void *)&nm);
+	status |= clSetKernelArg(dev->diffusion_kernel, 6, sizeof(fp_t), (void *)&D);
+	status |= clSetKernelArg(dev->diffusion_kernel, 7, sizeof(fp_t), (void *)&dt);
+	report_error(status, "constant diffusion kernel args");
 
 	/* OpenCL uses cl_mem, not fp_t*, so swap_pointers won't work.
      * We leave the pointers alone but call the kernel on the appropriate data location.
@@ -103,26 +91,20 @@ void opencl_diffusion_solver(struct OpenCLData* dev, fp_t** conc_new,
 
 		/* set time-dependent kernel arguments */
 		status = clSetKernelArg(dev->boundary_kernel,    0, sizeof(cl_mem), (void *)&d_conc_old);
-		report_error(status, "mutable boundary args[0]");
+		report_error(status, "mutable boundary kernel args");
 
 		status = clSetKernelArg(dev->convolution_kernel, 0, sizeof(cl_mem), (void *)&d_conc_old);
-		report_error(status, "mutable convolution args[0]");
+		report_error(status, "mutable convolution kernel args");
 
-		status = clSetKernelArg(dev->diffusion_kernel,   0, sizeof(cl_mem), (void *)&d_conc_old);
-		report_error(status, "mutable diffusion args[0]");
-
-		status = clSetKernelArg(dev->diffusion_kernel,   1, sizeof(cl_mem), (void *)&d_conc_new);
-		report_error(status, "mutable diffusion args[1]");
+		status |= clSetKernelArg(dev->diffusion_kernel,   0, sizeof(cl_mem), (void *)&d_conc_old);
+		status |= clSetKernelArg(dev->diffusion_kernel,   1, sizeof(cl_mem), (void *)&d_conc_new);
+		report_error(status, "mutable diffusion kernel args");
 
 		/* enqueue kernels */
-		status = clEnqueueNDRangeKernel(dev->commandQueue, dev->boundary_kernel,    2, NULL, grid_dim, block_dim, 0, NULL, NULL);
-		report_error(status, "enqueue boundary kernel");
-
-		status = clEnqueueNDRangeKernel(dev->commandQueue, dev->convolution_kernel, 2, NULL, grid_dim, block_dim, 0, NULL, NULL);
-		report_error(status, "enqueue convolution kernel");
-
-		status = clEnqueueNDRangeKernel(dev->commandQueue, dev->diffusion_kernel,   2, NULL, grid_dim, block_dim, 0, NULL, NULL);
-		report_error(status, "enqueue diffusion kernel");
+		status |= clEnqueueNDRangeKernel(dev->commandQueue, dev->boundary_kernel,    2, NULL, grid_dim, block_dim, 0, NULL, NULL);
+		status |= clEnqueueNDRangeKernel(dev->commandQueue, dev->convolution_kernel, 2, NULL, grid_dim, block_dim, 0, NULL, NULL);
+		status |= clEnqueueNDRangeKernel(dev->commandQueue, dev->diffusion_kernel,   2, NULL, grid_dim, block_dim, 0, NULL, NULL);
+		report_error(status, "enqueue kernels");
 	}
 
 	*elapsed += dt * checks;

@@ -53,6 +53,27 @@ place and ```make run```, or create your own copy of ```params.txt``` and
 execute ```./diffusion <your_params.txt>```. The file name and extension make
 no difference, so long as it contains plain text.
 
+## Data Structures
+
+OpenCL interacts with your machine's hardware through the following data structures:
+
+ * Platform: OpenCL environment supporting a specific vendor's hardware, *e.g.*
+             AMD OpenCL SDK, Intel OpenCL SDK, or Nvidia OpenCL SDK.
+             Represented by ```cl_platform_id```.
+ * Device: the CPU, GPU, FPGA, or other hardware managed by the Platform.
+           Represented by ```cl_device_id```.
+ * Context: a shared environment allowing threads and devices within the same
+            Context to exchange data and perform collective operations.
+            Represented by ```cl_context```.
+ * Kernel: the fundamental tasks to be executed in the Context.
+           Represented by ```cl_kernel```.
+ * Program: the set of Kernels that can be run in the Context. Built from
+            source files with ```.cl``` suffix, or from C strings written in
+            the init_opencl() program.
+            Represented by ```cl_program```.
+ * Queue: the sequence of Programs to run on each Platform.
+          Represented by ```cl_command_queue```.
+
 ### Disclaimer
 
 Certain commercial entities, equipment, or materials may be identified in this

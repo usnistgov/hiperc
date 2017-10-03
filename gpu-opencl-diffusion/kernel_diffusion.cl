@@ -18,6 +18,13 @@
  **********************************************************************************/
 
 /**
+ \brief Enable double-precision floats
+*/
+#pragma OPENCL EXTENSION cl_khr_fp64: enable
+
+#include "opencl_kernels.h"
+
+/**
  \brief Diffusion equation kernel for execution on the GPU
 
  This function accesses 1D data rather than the 2D array representation of the
@@ -26,8 +33,11 @@
 __kernel void diffusion_kernel(__global fp_t* d_conc_old,
                                __global fp_t* d_conc_new,
                                __global fp_t* d_conc_lap,
-                               int nx, int ny, int nm,
-                               fp_t D, fp_t dt)
+                               int nx,
+                               int ny,
+                               int nm,
+                               fp_t D,
+                               fp_t dt)
 {
 	int col, idx, row;
 

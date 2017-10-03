@@ -47,37 +47,36 @@ __global__ void convolution_kernel(fp_t* d_conc_old,
                                    const int nm)
 {
 	int i, j, tx, ty;
-	int dst_row, dst_col, dst_tile_w, dst_tile_h;
-	int src_row, src_col, src_tile_w, src_tile_h;
+	int dst_row, dst_col, dst_cols, dst_rows;
+	int src_row, src_col, src_cols, src_rows;
 	fp_t value=0.;
 
 	/* source tile width includes the halo cells */
-	src_tile_w = blockDim.x;
-	src_tile_h = blockDim.y;
+	src_cols = blockDim.x;
+	src_rows = blockDim.y;
 
 	/* destination tile width excludes the halo cells */
-	dst_tile_w = src_tile_w - nm + 1;
-	dst_tile_h = src_tile_h - nm + 1;
+	dst_cols = src_cols - nm + 1;
+	dst_rows = src_rows - nm + 1;
 
 	/* determine indices on which to operate */
 	tx = threadIdx.x;
 	ty = threadIdx.y;
 
-	dst_row = blockIdx.y * dst_tile_h + ty;
-	dst_col = blockIdx.x * dst_tile_w + tx;
+	dst_col = blockIdx.x * dst_cols + tx;
+	dst_row = blockIdx.y * dst_rows + ty;
 
-	src_row = dst_row - nm/2;
 	src_col = dst_col - nm/2;
+	src_row = dst_row - nm/2;
 
-	/* copy tile: __shared__ gives access to all threads working on this tile	*/
+	/* copy tile: __shared__ gives access to all threads working on this tile */
 	__shared__ fp_t d_conc_tile[TILE_H + MAX_MASK_H - 1][TILE_W + MAX_MASK_W - 1];
 
-	if ((src_row >= 0) && (src_row < ny) &&
-	    (src_col >= 0) && (src_col < nx)) {
+	if (src_row >= 0 && src_row < ny &&
+	    src_col >= 0 && src_col < nx) {
 		/* if src_row==0, then dst_row==nm/2: this is a halo row */
 		d_conc_tile[ty][tx] = d_conc_old[src_row * nx + src_col];
 	} else {
-		/* points outside the halo should be switched off */
 		d_conc_tile[ty][tx] = 0.;
 	}
 
@@ -85,7 +84,7 @@ __global__ void convolution_kernel(fp_t* d_conc_old,
 	__syncthreads();
 
 	/* compute the convolution */
-	if (tx < dst_tile_w && ty < dst_tile_h) {
+	if (tx < dst_cols && ty < dst_rows) {
 		for (j = 0; j < nm; j++) {
 			for (i = 0; i < nm; i++) {
 				value += d_mask[j * nm + i] * d_conc_tile[j+ty][i+tx];
@@ -116,13 +115,13 @@ __global__ void diffusion_kernel(fp_t* d_conc_old,
 	tx = threadIdx.x;
 	ty = threadIdx.y;
 
-	row = blockDim.y * blockIdx.y + ty;
 	col = blockDim.x * blockIdx.x + tx;
+	row = blockDim.y * blockIdx.y + ty;
 
 	/* explicit Euler solution to the equation of motion */
 	if (row < ny && col < nx) {
 		d_conc_new[row * nx + col] = d_conc_old[row * nx + col]
-		                           + dt * D * d_conc_lap[row * nx + col];
+		                  + dt * D * d_conc_lap[row * nx + col];
 	}
 
 	/* wait for all threads to finish writing */
@@ -138,25 +137,27 @@ void cuda_diffusion_solver(struct CudaData* dev, fp_t** conc_new,
 	int check=0;
 
 	/* divide matrices into blocks of (TILE_W x TILE_H) threads */
-	dim3 threads(TILE_W - nm/2, TILE_H - nm/2, 1);
-	dim3 blocks(ceil(fp_t(nx)/threads.x)+1, ceil(fp_t(ny)/threads.y)+1, 1);
+
+	/* extremely precarious */
+	dim3 tile_dim(TILE_W - nm + 1, TILE_H - nm + 1, 1);
+	dim3 bloc_dim(nm - 1 + floor(float(nx)/tile_dim.x), nm - 1 + floor(float(ny)/tile_dim.y), 1);
 
 	for (check = 0; check < checks; check++) {
 		/* apply boundary conditions */
-		boundary_kernel<<<blocks,threads>>> (
+		boundary_kernel<<<bloc_dim,tile_dim>>> (
 			dev->conc_old, nx, ny, nm
 		);
 
 		/* compute Laplacian */
 		start_time = GetTimer();
-		convolution_kernel<<<blocks,threads>>> (
+		convolution_kernel<<<bloc_dim,tile_dim>>> (
 			dev->conc_old, dev->conc_lap, nx, ny, nm
 		);
 		sw->conv += GetTimer() - start_time;
 
 		/* compute result */
 		start_time = GetTimer();
-		diffusion_kernel<<<blocks,threads>>> (
+		diffusion_kernel<<<bloc_dim,tile_dim>>> (
 			dev->conc_old, dev->conc_new, dev->conc_lap, nx, ny, nm, D, dt
 		);
 		sw->step += GetTimer() - start_time;
@@ -237,8 +238,10 @@ void compute_convolution(fp_t** conc_old, fp_t** conc_lap, fp_t** mask_lap,
 	cudaMalloc((void **) &d_conc_lap, nx * ny * sizeof(fp_t));
 
 	/* divide matrices into blocks of (TILE_W x TILE_W) threads */
-	dim3 threads(TILE_W - nm/2, TILE_H - nm/2, 1);
-	dim3 blocks(ceil(fp_t(nx)/threads.x)+1, ceil(fp_t(ny)/threads.y)+1, 1);
+	/* dim3 tile_dim(TILE_W - nm/2, TILE_H - nm/2, 1); */
+	/* dim3 bloc_dim(ceil(fp_t(nx)/tile_dim.x)+1, ceil(fp_t(ny)/tile_dim.y)+1, 1); */
+	dim3 tile_dim(TILE_W - nm +1, TILE_H - nm + 1, 1);
+	dim3 bloc_dim(nm - 1 + floor(float(nx)/tile_dim.x), nm - 1 + floor(float(ny)/tile_dim.y), 1);
 
 	/* transfer mask in to constant device memory */
 	cudaMemcpyToSymbol(d_mask, mask_lap[0], nm * nm * sizeof(fp_t));
@@ -248,7 +251,7 @@ void compute_convolution(fp_t** conc_old, fp_t** conc_lap, fp_t** mask_lap,
 	           cudaMemcpyHostToDevice);
 
 	/* compute Laplacian */
-	convolution_kernel<<<blocks,threads>>> (
+	convolution_kernel<<<bloc_dim,tile_dim>>> (
 		d_conc_old, d_conc_lap, nx, ny, nm
 	);
 

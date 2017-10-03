@@ -18,6 +18,13 @@
  **********************************************************************************/
 
 /**
+ \brief Enable double-precision floats
+*/
+#pragma OPENCL EXTENSION cl_khr_fp64: enable
+
+#include "opencl_kernels.h"
+
+/**
  \brief Tiled convolution algorithm for execution on the GPU
 
  This function accesses 1D data rather than the 2D array representation of the
@@ -39,56 +46,50 @@
 */
 __kernel void convolution_kernel(__global fp_t* d_conc_old,
                                  __global fp_t* d_conc_lap,
-                                 __constant fp_t** d_mask,
-                                 int nx, int ny, int nm)
+                                 __constant fp_t* d_mask,
+                                 int nx,
+                                 int ny,
+                                 int nm)
 {
-	int bx, by, i, j, tx, ty,
-	int dst_row, dst_col, dst_tile_w, dst_tile_h;
-	int src_row, src_col, src_tile_w, src_tile_h;
-	fp_t value=0.;
+	int i, j;
+	int dst_col, dst_cols, dst_row, dst_rows;
+	int src_col, src_cols, src_row, src_rows;
+	int til_col, til_row;
+	fp_t value = 0.;
 
-	/* source tile width includes the halo cells */
-	src_tile_w = get_local_size(0);
-	src_tile_h = get_local_size(1);
+	/* source tile includes the halo cells, destination tile does not */
+	src_cols = get_local_size(0);
+	src_rows = get_local_size(1);
 
-	/* destination tile width excludes the halo cells */
-	dst_tile_w = src_tile_w - nm + 1;
-	dst_tile_h = src_tile_h - nm + 1;
-
-	/* source block (working group) */
-	bx = get_group_id(0);
-	by = get_group_id(1);
+	dst_cols = src_cols - nm + 1;
+	dst_rows = src_rows - nm + 1;
 
 	/* determine indices on which to operate */
-	tx = get_local_id(0);
-	ty = get_local_id(1);
+	til_col = get_local_id(0);
+	til_row = get_local_id(1);
 
-	dst_col = bx * dst_tile_w + tx;
-	dst_row = by * dst_tile_h + ty;
+	dst_col = get_group_id(0) * dst_cols + til_col;
+	dst_row = get_group_id(1) * dst_rows + til_row;
 
 	src_col = dst_col - nm/2;
 	src_row = dst_row - nm/2;
 
-	/* copy tile: __local gives access to all threads working on this tile */
+	/* shared memory tile: __local gives access to all threads in the group */
 	__local fp_t d_conc_tile[TILE_H + MAX_MASK_H - 1][TILE_W + MAX_MASK_W - 1];
 
-	if ((src_row >= 0) && (src_row < ny) &&
-	    (src_col >= 0) && (src_col < nx)) {
-		/* if src_row==0, then dst_row==nm/2: this is a halo row */
-		d_conc_tile[ty][tx] = d_conc_old[src_row * nx + src_col];
-	} else {
-		/* points outside the halo should be switched off */
-		d_conc_tile[ty][tx] = 0.;
+	if (src_row >= 0 && src_row < ny &&
+	    src_col >= 0 && src_col < nx) {
+		d_conc_tile[til_row][til_col] = d_conc_old[src_row * nx + src_col];
 	}
 
 	/* tile data is shared: wait for all threads to finish copying */
 	barrier(CLK_LOCAL_MEM_FENCE);
 
 	/* compute the convolution */
-	if (tx < dst_tile_w && ty < dst_tile_h) {
+	if (til_col < dst_cols && til_row < dst_rows) {
 		for (j = 0; j < nm; j++) {
 			for (i = 0; i < nm; i++) {
-				value += d_mask[j * nm + i] * d_conc_tile[j+ty][i+tx];
+				value += d_mask[j * nm + i] * d_conc_tile[j+til_row][i+til_col];
 			}
 		}
 		/* record value */

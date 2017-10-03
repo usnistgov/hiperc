@@ -83,7 +83,7 @@ __global__ void boundary_kernel(fp_t* d_conc,
 
 	/* apply fixed boundary values: sequence does not matter */
 
-	if (row >= 0 && row < ny/2 && col >= 0 && col < 1+nm/2) {
+	if (row < ny/2 && col < 1+nm/2) {
 		d_conc[row * nx + col] = d_bc[1][0]; /* left value */
 	}
 
@@ -99,22 +99,22 @@ __global__ void boundary_kernel(fp_t* d_conc,
 	for (offset = 0; offset < nm/2; offset++) {
 		ilo = nm/2 - offset;
 		ihi = nx - 1 - nm/2 + offset;
-		if (col == ilo-1 && row >= 0 && row < ny) {
-			d_conc[row * nx + col] = d_conc[row * nx + ilo]; /* left condition */
-		} else if (col == ihi+1 && row >= 0 && row < ny) {
-			d_conc[row * nx + col] = d_conc[row * nx + ihi]; /* right condition */
-		}
-		__syncthreads();
-	}
-
-	for (offset = 0; offset < nm/2; offset++) {
 		jlo = nm/2 - offset;
 		jhi = ny - 1 - nm/2 + offset;
-		if (row == jlo-1 && col >= 0 && col < nx) {
-			d_conc[row * nx + col] = d_conc[jlo * nx + col]; /* bottom condition */
-		} else if (row == jhi+1 && col >= 0 && col < nx) {
-			d_conc[row * nx + col] = d_conc[jhi * nx + col]; /* top condition */
+
+		if (ilo-1 == col && row < ny) {
+			d_conc[row * nx + ilo-1] = d_conc[row * nx + ilo]; /* left condition */
 		}
+		if (ihi+1 == col && row < ny) {
+			d_conc[row * nx + ihi+1] = d_conc[row * nx + ihi]; /* right condition */
+		}
+		if (jlo-1 == row && col < nx) {
+			d_conc[(jlo-1) * nx + col] = d_conc[jlo * nx + col]; /* bottom condition */
+		}
+		if (jhi+1 == row && col < nx) {
+			d_conc[(jhi+1) * nx + col] = d_conc[jhi * nx + col]; /* top condition */
+		}
+
 		__syncthreads();
 	}
 }

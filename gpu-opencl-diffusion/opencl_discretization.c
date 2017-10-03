@@ -33,58 +33,61 @@
 #include "opencl_kernels.h"
 
 void opencl_diffusion_solver(struct OpenCLData* dev, fp_t** conc_new,
-                             int nx, int ny, int nm, fp_t bc[2][2],
+                             int nx, int ny, int nm,
                              fp_t D, fp_t dt, int checks,
                              fp_t *elapsed, struct Stopwatch* sw)
 {
 	double start_time;
-	int check=0, i=0;
-	size_t bx = ceil((fp_t)(nx)/(TILE_W - nm/2))+1;
-	size_t by = ceil((fp_t)(ny)/(TILE_H - nm/2))+1;
+	int check=0;
 	int grid_size = nx * ny * sizeof(fp_t);
+	/** Per <a href="https://software.intel.com/sites/landingpage/opencl/optimization-guide/Work-Group_Size_Considerations.htm">
+	 Intel's OpenCL advice</a>, the ideal block size \f$ (bx \times by)\f$ is
+	 within the range from 64 to 128 mesh points. The block size must be an even
+	 power of two: 4, 8, 16, 32, etc. OpenCL will make a best-guess optimal
+	 block size if you set size_t* tile_dim = NULL.
+	*/
+	/*
+	size_t grid_dim[2] = {(size_t)nx, (size_t)ny};
+	size_t tile_dim[2] = {TILE_W, TILE_H};
+	*/
 
-	const size_t grid_dim[2] = {nx, ny};
-	const size_t block_dim[2] = {bx, by};
+	/* extremely precarious */
+	size_t tile_dim[2] = {TILE_W - nm + 1, TILE_H - nm + 1};
+	size_t bloc_dim[2] = {nm - 1 + floor((float)(nx)/tile_dim[0]), nm - 1 + floor((float)(ny)/tile_dim[1])};
+	size_t grid_dim[2] = {bloc_dim[0]*tile_dim[0], bloc_dim[1]*tile_dim[1]};
 
 	cl_mem d_conc_old = dev->conc_old;
 	cl_mem d_conc_new = dev->conc_new;
 
 	cl_int status = CL_SUCCESS;
-	cl_int stat[6];
 
 	/* set immutable kernel arguments */
-	stat[0] = clSetKernelArg(dev->boundary_kernel, 1, 2 * 2 * sizeof(fp_t), (void *)&(dev->bc));
-	stat[1] = clSetKernelArg(dev->boundary_kernel, 2, sizeof(int), (void *)&nx);
-	stat[2] = clSetKernelArg(dev->boundary_kernel, 3, sizeof(int), (void *)&ny);
-	stat[3] = clSetKernelArg(dev->boundary_kernel, 4, sizeof(int), (void *)&nm);
+	status |= clSetKernelArg(dev->boundary_kernel, 1, sizeof(cl_mem), (void *)&(dev->bc));
+	status |= clSetKernelArg(dev->boundary_kernel, 2, sizeof(int), (void *)&nx);
+	status |= clSetKernelArg(dev->boundary_kernel, 3, sizeof(int), (void *)&ny);
+	status |= clSetKernelArg(dev->boundary_kernel, 4, sizeof(int), (void *)&nm);
+	report_error(status, "constant boundary kernal args");
 
-	for (i=0; i<4; i++)
-		report_error(stat[i], NULL);
+	status |= clSetKernelArg(dev->convolution_kernel, 1, sizeof(cl_mem), (void *)&(dev->conc_lap));
+	status |= clSetKernelArg(dev->convolution_kernel, 2, sizeof(cl_mem), (void *)&(dev->mask));
+	status |= clSetKernelArg(dev->convolution_kernel, 3, sizeof(int), (void *)&nx);
+	status |= clSetKernelArg(dev->convolution_kernel, 4, sizeof(int), (void *)&ny);
+	status |= clSetKernelArg(dev->convolution_kernel, 5, sizeof(int), (void *)&nm);
+	report_error(status, "constant convolution kernel args");
 
-	stat[0] = clSetKernelArg(dev->convolution_kernel, 1, sizeof(cl_mem), (void *)&(dev->conc_lap));
-	stat[1] = clSetKernelArg(dev->convolution_kernel, 2, nm * nm * sizeof(fp_t), (void *)&(dev->mask));
-	stat[2] = clSetKernelArg(dev->convolution_kernel, 3, sizeof(int), (void *)&nx);
-	stat[3] = clSetKernelArg(dev->convolution_kernel, 4, sizeof(int), (void *)&ny);
-	stat[4] = clSetKernelArg(dev->convolution_kernel, 5, sizeof(int), (void *)&nm);
-
-	for (i=0; i<5; i++)
-		report_error(stat[i], NULL);
-
-	stat[0] = clSetKernelArg(dev->diffusion_kernel, 2, sizeof(cl_mem), (void *)&(dev->conc_lap));
-	stat[1] = clSetKernelArg(dev->convolution_kernel, 3, sizeof(int), (void *)&nx);
-	stat[2] = clSetKernelArg(dev->convolution_kernel, 4, sizeof(int), (void *)&ny);
-	stat[3] = clSetKernelArg(dev->convolution_kernel, 5, sizeof(int), (void *)&nm);
-	stat[4] = clSetKernelArg(dev->convolution_kernel, 6, sizeof(fp_t), (void *)&D);
-	stat[5] = clSetKernelArg(dev->convolution_kernel, 7, sizeof(fp_t), (void *)&dt);
-
-	for (i=0; i<6; i++)
-		report_error(stat[i], NULL);
+	status |= clSetKernelArg(dev->diffusion_kernel, 2, sizeof(cl_mem), (void *)&(dev->conc_lap));
+	status |= clSetKernelArg(dev->diffusion_kernel, 3, sizeof(int), (void *)&nx);
+	status |= clSetKernelArg(dev->diffusion_kernel, 4, sizeof(int), (void *)&ny);
+	status |= clSetKernelArg(dev->diffusion_kernel, 5, sizeof(int), (void *)&nm);
+	status |= clSetKernelArg(dev->diffusion_kernel, 6, sizeof(fp_t), (void *)&D);
+	status |= clSetKernelArg(dev->diffusion_kernel, 7, sizeof(fp_t), (void *)&dt);
+	report_error(status, "constant diffusion kernel args");
 
 	/* OpenCL uses cl_mem, not fp_t*, so swap_pointers won't work.
      * We leave the pointers alone but call the kernel on the appropriate data location.
      */
 	for (check = 0; check < checks; check++) {
-		/* set time-dependent kernel arguments */
+		/* swap pointers on the device */
 		if (check % 2 == 0) {
 			d_conc_old = dev->conc_old;
 			d_conc_new = dev->conc_new;
@@ -93,21 +96,22 @@ void opencl_diffusion_solver(struct OpenCLData* dev, fp_t** conc_new,
 			d_conc_new = dev->conc_old;
 		}
 
-		stat[0] = clSetKernelArg(dev->boundary_kernel, 0, sizeof(cl_mem), (void *)&d_conc_old);
-		stat[1] = clSetKernelArg(dev->convolution_kernel, 0, sizeof(cl_mem), (void *)&d_conc_old);
-		stat[2] = clSetKernelArg(dev->diffusion_kernel, 0, sizeof(cl_mem), (void *)&d_conc_old);
-		stat[3] = clSetKernelArg(dev->diffusion_kernel, 1, sizeof(cl_mem), (void *)&d_conc_new);
+		/* set time-dependent kernel arguments */
+		status = clSetKernelArg(dev->boundary_kernel,    0, sizeof(cl_mem), (void *)&d_conc_old);
+		report_error(status, "mutable boundary kernel args");
 
-		for (i=0; i<4; i++)
-			report_error(stat[i], NULL);
+		status = clSetKernelArg(dev->convolution_kernel, 0, sizeof(cl_mem), (void *)&d_conc_old);
+		report_error(status, "mutable convolution kernel args");
+
+		status |= clSetKernelArg(dev->diffusion_kernel,   0, sizeof(cl_mem), (void *)&d_conc_old);
+		status |= clSetKernelArg(dev->diffusion_kernel,   1, sizeof(cl_mem), (void *)&d_conc_new);
+		report_error(status, "mutable diffusion kernel args");
 
 		/* enqueue kernels */
-		status = clEnqueueNDRangeKernel(dev->commandQueue, dev->boundary_kernel, 2, NULL, grid_dim, block_dim, 0, NULL, NULL);
-		report_error(status, NULL);
-		status = clEnqueueNDRangeKernel(dev->commandQueue, dev->convolution_kernel, 2, NULL, grid_dim, block_dim, 0, NULL, NULL);
-		report_error(status, NULL);
-		status = clEnqueueNDRangeKernel(dev->commandQueue, dev->diffusion_kernel, 2, NULL, grid_dim, block_dim, 0, NULL, NULL);
-		report_error(status, NULL);
+		status |= clEnqueueNDRangeKernel(dev->commandQueue, dev->boundary_kernel,    2, NULL, grid_dim, tile_dim, 0, NULL, NULL);
+		status |= clEnqueueNDRangeKernel(dev->commandQueue, dev->convolution_kernel, 2, NULL, grid_dim, tile_dim, 0, NULL, NULL);
+		status |= clEnqueueNDRangeKernel(dev->commandQueue, dev->diffusion_kernel,   2, NULL, grid_dim, tile_dim, 0, NULL, NULL);
+		report_error(status, "enqueue kernels");
 	}
 
 	*elapsed += dt * checks;
@@ -115,7 +119,7 @@ void opencl_diffusion_solver(struct OpenCLData* dev, fp_t** conc_new,
 	/* transfer from device out to host */
 	start_time = GetTimer();
 	status = clEnqueueReadBuffer(dev->commandQueue, d_conc_new, CL_TRUE, 0, grid_size, conc_new[0], 0, NULL, NULL);
-	report_error(status, NULL);
+	report_error(status, "retrieve result from GPU");
 	sw->file += GetTimer() - start_time;
 }
 

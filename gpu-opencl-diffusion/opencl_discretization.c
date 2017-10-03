@@ -44,10 +44,17 @@ void opencl_diffusion_solver(struct OpenCLData* dev, fp_t** conc_new,
 	 Intel's OpenCL advice</a>, the ideal block size \f$ (bx \times by)\f$ is
 	 within the range from 64 to 128 mesh points. The block size must be an even
 	 power of two: 4, 8, 16, 32, etc. OpenCL will make a best-guess optimal
-	 block size if you set size_t* block_dim = NULL.
+	 block size if you set size_t* tile_dim = NULL.
 	*/
+	/*
 	size_t grid_dim[2] = {(size_t)nx, (size_t)ny};
-	size_t block_dim[2] = {TILE_W, TILE_H};
+	size_t tile_dim[2] = {TILE_W, TILE_H};
+	*/
+
+	/* extremely precarious */
+	size_t tile_dim[2] = {TILE_W - nm + 1, TILE_H - nm + 1};
+	size_t bloc_dim[2] = {nm - 1 + floor((float)(nx)/tile_dim[0]), nm - 1 + floor((float)(ny)/tile_dim[1])};
+	size_t grid_dim[2] = {bloc_dim[0]*tile_dim[0], bloc_dim[1]*tile_dim[1]};
 
 	cl_mem d_conc_old = dev->conc_old;
 	cl_mem d_conc_new = dev->conc_new;
@@ -101,9 +108,9 @@ void opencl_diffusion_solver(struct OpenCLData* dev, fp_t** conc_new,
 		report_error(status, "mutable diffusion kernel args");
 
 		/* enqueue kernels */
-		status |= clEnqueueNDRangeKernel(dev->commandQueue, dev->boundary_kernel,    2, NULL, grid_dim, block_dim, 0, NULL, NULL);
-		status |= clEnqueueNDRangeKernel(dev->commandQueue, dev->convolution_kernel, 2, NULL, grid_dim, block_dim, 0, NULL, NULL);
-		status |= clEnqueueNDRangeKernel(dev->commandQueue, dev->diffusion_kernel,   2, NULL, grid_dim, block_dim, 0, NULL, NULL);
+		status |= clEnqueueNDRangeKernel(dev->commandQueue, dev->boundary_kernel,    2, NULL, grid_dim, tile_dim, 0, NULL, NULL);
+		status |= clEnqueueNDRangeKernel(dev->commandQueue, dev->convolution_kernel, 2, NULL, grid_dim, tile_dim, 0, NULL, NULL);
+		status |= clEnqueueNDRangeKernel(dev->commandQueue, dev->diffusion_kernel,   2, NULL, grid_dim, tile_dim, 0, NULL, NULL);
 		report_error(status, "enqueue kernels");
 	}
 

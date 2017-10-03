@@ -2,8 +2,7 @@
 # CUDA implementation
 
 NVCXX = nvcc
-NVCXXFLAGS = -gencode arch=compute_35,code=sm_35 -D_FORCE_INLINES \
-             -Wno-deprecated-gpu-targets -std=c++11 \
+NVCXXFLAGS = -D_FORCE_INLINES -Wno-deprecated-gpu-targets -std=c++11 \
              --compiler-options="-O3 -Wall -I../common-diffusion -fopenmp"
 LINKS = -lm -lpng -lcuda
 

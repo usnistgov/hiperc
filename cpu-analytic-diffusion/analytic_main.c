@@ -72,7 +72,7 @@ int main(int argc, char* argv[])
 
 	/* declare default mesh size and resolution */
 	fp_t **conc_old, **conc_new, **conc_lap, **mask_lap;
-	int nx=512, ny=512, nm=3, code=53;
+	int bx=32, by=32, nx=512, ny=512, nm=3, code=53;
 	fp_t dx=0.5, dy=0.5, h=0.5;
 
 	/* declare default materials and numerical parameters */
@@ -82,7 +82,7 @@ int main(int argc, char* argv[])
 
 	StartTimer();
 
-	param_parser(argc, argv, &nx, &ny, &nm, &code, &dx, &dy, &D, &linStab, &steps, &checks);
+	param_parser(argc, argv, &bx, &by, &checks, &code, &D, &dx, &dy, &linStab, &nm, &nx, &ny, &steps);
 
 	h = (dx > dy) ? dy : dx;
 	dt = (linStab * h * h) / (4.0 * D);

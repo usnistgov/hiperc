@@ -46,53 +46,56 @@ __global__ void convolution_kernel(fp_t* d_conc_old,
                                    const int ny,
                                    const int nm)
 {
-	int i, j, tx, ty;
-	int dst_row, dst_col, dst_cols, dst_rows;
-	int src_row, src_col, src_cols, src_rows;
+	int i, j, y;
+	int dst_til_y, dst_til_x, dst_til_nx, dst_til_ny;
+	int src_til_y, src_til_x, src_til_nx, src_til_ny;
+	int sha_til_x, sha_til_y, sha_til_nx;
 	fp_t value=0.;
 
-	/* source tile width includes the halo cells */
-	src_cols = blockDim.x;
-	src_rows = blockDim.y;
+	/* source and shared tile width include the halo cells */
+	src_til_nx = blockDim.x;
+	src_til_ny = blockDim.y;
+	sha_til_nx = src_til_nx;
 
 	/* destination tile width excludes the halo cells */
-	dst_cols = src_cols - nm + 1;
-	dst_rows = src_rows - nm + 1;
+	dst_til_nx = src_til_nx - nm + 1;
+	dst_til_ny = src_til_ny - nm + 1;
 
 	/* determine indices on which to operate */
-	tx = threadIdx.x;
-	ty = threadIdx.y;
+	sha_til_x = threadIdx.x;
+	sha_til_y = threadIdx.y;
 
-	dst_col = blockIdx.x * dst_cols + tx;
-	dst_row = blockIdx.y * dst_rows + ty;
+	dst_til_x = blockIdx.x * dst_til_nx + sha_til_x;
+	dst_til_y = blockIdx.y * dst_til_ny + sha_til_y;
 
-	src_col = dst_col - nm/2;
-	src_row = dst_row - nm/2;
+	src_til_x = dst_til_x - nm/2;
+	src_til_y = dst_til_y - nm/2;
 
 	/* copy tile: __shared__ gives access to all threads working on this tile */
-	__shared__ fp_t d_conc_tile[TILE_H + MAX_MASK_H - 1][TILE_W + MAX_MASK_W - 1];
+	extern __shared__ fp_t d_conc_tile[];
 
-	if (src_row >= 0 && src_row < ny &&
-	    src_col >= 0 && src_col < nx) {
-		/* if src_row==0, then dst_row==nm/2: this is a halo row */
-		d_conc_tile[ty][tx] = d_conc_old[src_row * nx + src_col];
+	if (src_til_y >= 0 && src_til_y < ny &&
+	    src_til_x >= 0 && src_til_x < nx) {
+		/* if src_til_y==0, then dst_til_y==nm/2: this is a halo row */
+		d_conc_tile[sha_til_y * sha_til_nx + sha_til_x] = d_conc_old[src_til_y * nx + src_til_x];
 	} else {
-		d_conc_tile[ty][tx] = 0.;
+		d_conc_tile[sha_til_y * sha_til_nx + sha_til_x] = 0.;
 	}
 
 	/* tile data is shared: wait for all threads to finish copying */
 	__syncthreads();
 
 	/* compute the convolution */
-	if (tx < dst_cols && ty < dst_rows) {
+	if (sha_til_x < dst_til_nx && sha_til_y < dst_til_ny) {
 		for (j = 0; j < nm; j++) {
+			y = (j+sha_til_y) * sha_til_nx;
 			for (i = 0; i < nm; i++) {
-				value += d_mask[j * nm + i] * d_conc_tile[j+ty][i+tx];
+				value += d_mask[j * nm + i] * d_conc_tile[y + i + sha_til_x];
 			}
 		}
 		/* record value */
-		if (dst_row < ny && dst_col < nx) {
-			d_conc_lap[dst_row * nx + dst_col] = value;
+		if (dst_til_y < ny && dst_til_x < nx) {
+			d_conc_lap[dst_til_y * nx + dst_til_x] = value;
 		}
 	}
 
@@ -109,19 +112,19 @@ __global__ void diffusion_kernel(fp_t* d_conc_old,
                                  const fp_t D,
                                  const fp_t dt)
 {
-	int tx, ty, row, col;
+	int thr_x, thr_y, x, y;
 
 	/* determine indices on which to operate */
-	tx = threadIdx.x;
-	ty = threadIdx.y;
+	thr_x = threadIdx.x;
+	thr_y = threadIdx.y;
 
-	col = blockDim.x * blockIdx.x + tx;
-	row = blockDim.y * blockIdx.y + ty;
+	x = blockDim.x * blockIdx.x + thr_x;
+	y = blockDim.y * blockIdx.y + thr_y;
 
 	/* explicit Euler solution to the equation of motion */
-	if (row < ny && col < nx) {
-		d_conc_new[row * nx + col] = d_conc_old[row * nx + col]
-		                  + dt * D * d_conc_lap[row * nx + col];
+	if (x < nx && y < ny) {
+		d_conc_new[y * nx + x] = d_conc_old[y * nx + x]
+		                  + dt * D * d_conc_lap[y * nx + x];
 	}
 
 	/* wait for all threads to finish writing */
@@ -129,7 +132,8 @@ __global__ void diffusion_kernel(fp_t* d_conc_old,
 }
 
 void cuda_diffusion_solver(struct CudaData* dev, fp_t** conc_new,
-                           int nx, int ny, int nm, fp_t bc[2][2],
+                           fp_t bc[2][2], int bx, int by,
+                           int nm, int nx, int ny,
                            fp_t D, fp_t dt, int checks,
                            fp_t* elapsed, struct Stopwatch* sw)
 {
@@ -169,7 +173,6 @@ void cuda_diffusion_solver(struct CudaData* dev, fp_t** conc_new,
 		*elapsed += dt;
 	}
 	/* after swap, new data is in dev->conc_old */
-
 
 	/* transfer from device out to host (conc_new) */
 	start_time = GetTimer();
@@ -227,7 +230,9 @@ void check_solution(fp_t** conc_new, fp_t** conc_lap, int nx, int ny,
 }
 
 void compute_convolution(fp_t** conc_old, fp_t** conc_lap, fp_t** mask_lap,
-                         int nx, int ny, int nm)
+                         int bx, int by,
+                         int nm,
+                         int nx, int ny)
 {
 	/* If you must compute the convolution separately, do so here.
 	 * It is strongly recommended that you roll CUDA tasks into one function:
@@ -235,7 +240,6 @@ void compute_convolution(fp_t** conc_old, fp_t** conc_lap, fp_t** mask_lap,
 	 */
 
 	fp_t* d_conc_old, *d_conc_lap;
-	const int margin = 0; /* nm - 1; */
 
 	/* allocate memory on device */
 	cudaMalloc((void **) &d_conc_old, nx * ny * sizeof(fp_t));

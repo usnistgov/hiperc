@@ -32,16 +32,6 @@ extern "C" {
 }
 
 /**
- \brief Width of an input tile, including halo cells, for GPU memory allocation
-*/
-#define TILE_W 32
-
-/**
- \brief Height of an input tile, including halo cells, for GPU memory allocation
-*/
-#define TILE_H 32
-
-/**
  \brief Convolution mask array on the GPU, allocated in protected memory
 */
 __constant__ extern fp_t d_mask[MAX_MASK_W * MAX_MASK_H];

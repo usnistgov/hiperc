@@ -136,37 +136,40 @@ void cuda_diffusion_solver(struct CudaData* dev, fp_t** conc_new,
 	double start_time;
 	int check=0;
 
-	/* divide matrices into blocks of (TILE_W x TILE_H) threads */
-
-	/* extremely precarious */
-	dim3 tile_dim(TILE_W - nm + 1, TILE_H - nm + 1, 1);
-	dim3 bloc_dim(nm - 1 + floor(float(nx)/tile_dim.x), nm - 1 + floor(float(ny)/tile_dim.y), 1);
+	/* divide matrices into blocks of TILE_W *TILE_H threads */
+	dim3 tile_size(TILE_W,
+	               TILE_H,
+	               1);
+	dim3 num_tiles(ceil(float(nx) / (tile_size.x - nm + 1)),
+	               ceil(float(ny) / (tile_size.y - nm + 1)),
+	               1);
 
 	for (check = 0; check < checks; check++) {
 		/* apply boundary conditions */
-		boundary_kernel<<<bloc_dim,tile_dim>>> (
+		boundary_kernel<<<num_tiles,tile_size>>> (
 			dev->conc_old, nx, ny, nm
 		);
 
 		/* compute Laplacian */
 		start_time = GetTimer();
-		convolution_kernel<<<bloc_dim,tile_dim>>> (
+		convolution_kernel<<<num_tiles,tile_size>>> (
 			dev->conc_old, dev->conc_lap, nx, ny, nm
 		);
 		sw->conv += GetTimer() - start_time;
 
 		/* compute result */
 		start_time = GetTimer();
-		diffusion_kernel<<<bloc_dim,tile_dim>>> (
+		diffusion_kernel<<<num_tiles,tile_size>>> (
 			dev->conc_old, dev->conc_new, dev->conc_lap, nx, ny, nm, D, dt
 		);
 		sw->step += GetTimer() - start_time;
 
 		swap_pointers_1D(&(dev->conc_old), &(dev->conc_new));
+
+		*elapsed += dt;
 	}
 	/* after swap, new data is in dev->conc_old */
 
-	*elapsed += dt * checks;
 
 	/* transfer from device out to host (conc_new) */
 	start_time = GetTimer();
@@ -232,16 +235,19 @@ void compute_convolution(fp_t** conc_old, fp_t** conc_lap, fp_t** mask_lap,
 	 */
 
 	fp_t* d_conc_old, *d_conc_lap;
+	const int margin = 0; /* nm - 1; */
 
 	/* allocate memory on device */
 	cudaMalloc((void **) &d_conc_old, nx * ny * sizeof(fp_t));
 	cudaMalloc((void **) &d_conc_lap, nx * ny * sizeof(fp_t));
 
-	/* divide matrices into blocks of (TILE_W x TILE_W) threads */
-	/* dim3 tile_dim(TILE_W - nm/2, TILE_H - nm/2, 1); */
-	/* dim3 bloc_dim(ceil(fp_t(nx)/tile_dim.x)+1, ceil(fp_t(ny)/tile_dim.y)+1, 1); */
-	dim3 tile_dim(TILE_W - nm +1, TILE_H - nm + 1, 1);
-	dim3 bloc_dim(nm - 1 + floor(float(nx)/tile_dim.x), nm - 1 + floor(float(ny)/tile_dim.y), 1);
+	/* divide matrices into blocks of TILE_W * TILE_H threads */
+	dim3 tile_size(TILE_W,
+	               TILE_H,
+	               1);
+	dim3 num_tiles(ceil(float(nx) / (tile_size.x - nm + 1)),
+	               ceil(float(ny) / (tile_size.y - nm + 1)),
+	               1);
 
 	/* transfer mask in to constant device memory */
 	cudaMemcpyToSymbol(d_mask, mask_lap[0], nm * nm * sizeof(fp_t));
@@ -251,7 +257,7 @@ void compute_convolution(fp_t** conc_old, fp_t** conc_lap, fp_t** mask_lap,
 	           cudaMemcpyHostToDevice);
 
 	/* compute Laplacian */
-	convolution_kernel<<<bloc_dim,tile_dim>>> (
+	convolution_kernel<<<num_tiles,tile_size>>> (
 		d_conc_old, d_conc_lap, nx, ny, nm
 	);
 

@@ -31,13 +31,14 @@
 
 void convolution_kernel(fp_t** conc_old, fp_t** conc_lap, fp_t** mask_lap, int nx, int ny, int nm)
 {
+	#pragma acc declare present(conc_old[0:ny][0:nx], conc_lap[0:ny][0:nx], mask_lap[0:nm][0:nm])
 	#pragma acc parallel
 	{
-		#pragma acc loop
+		#pragma acc loop collapse(2)
 		for (int j = nm/2; j < ny-nm/2; j++) {
-			#pragma acc loop
 			for (int i = nm/2; i < nx-nm/2; i++) {
 				fp_t value = 0.;
+				#pragma acc loop seq collapse(2)
 				for (int mj = -nm/2; mj < 1+nm/2; mj++) {
 					for (int mi = -nm/2; mi < 1+nm/2; mi++) {
 						value += mask_lap[mj+nm/2][mi+nm/2] * conc_old[j+mj][i+mi];
@@ -52,26 +53,15 @@ void convolution_kernel(fp_t** conc_old, fp_t** conc_lap, fp_t** mask_lap, int n
 void diffusion_kernel(fp_t** conc_old, fp_t** conc_new, fp_t** conc_lap,
                       int nx, int ny, int nm, fp_t D, fp_t dt)
 {
+	#pragma acc declare present(conc_old[0:ny][0:nx], conc_new[0:ny][0:nx], conc_lap[0:ny][0:nx])
 	#pragma acc parallel
 	{
-		#pragma acc loop
+		#pragma acc loop collapse(2)
 		for (int j = nm/2; j < ny-nm/2; j++) {
-			#pragma acc loop
 			for (int i = nm/2; i < nx-nm/2; i++) {
 				conc_new[j][i] = conc_old[j][i] + dt * D * conc_lap[j][i];
 			}
 		}
-	}
-}
-
-
-void compute_convolution(fp_t** conc_old, fp_t** conc_lap, fp_t** mask_lap,
-                         int nx, int ny, int nm)
-{
-	/* If you must compute the convolution separately, do so here. */
-	#pragma acc data copyin(conc_old[0:ny][0:nx], mask_lap[0:nm][0:nm]) create(conc_lap[0:ny][0:nx]) copyout(conc_lap[0:ny][0:nx])
-	{
-		convolution_kernel(conc_old, conc_lap, mask_lap, nx, ny, nm);
 	}
 }
 
@@ -80,7 +70,9 @@ void solve_diffusion_equation(fp_t** conc_old, fp_t** conc_new, fp_t** conc_lap,
                               fp_t bc[2][2], fp_t D, fp_t dt, int checks,
                               fp_t* elapsed, struct Stopwatch* sw)
 {
-	#pragma acc data copy(conc_old[0:ny][0:nx], mask_lap[0:nm][0:nm], bc[0:2][0:2]) create(conc_lap[0:ny][0:nx], conc_new[0:ny][0:nx])
+	#pragma acc data present_or_copy(conc_old[0:ny][0:nx]) \
+	                 present_or_copyin(mask_lap[0:nm][0:nm], bc[0:2][0:2]) \
+	                 present_or_create(conc_lap[0:ny][0:nx], conc_new[0:ny][0:nx])
 	{
 		double start_time=0.;
 		int check=0;

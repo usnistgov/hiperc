@@ -109,7 +109,7 @@ int main(int argc, char* argv[])
 
 		assert(step + checks <= steps);
 
-		opencl_diffusion_solver(&dev, conc_new, nx, ny, nm, D, dt, checks, &elapsed, &sw);
+		opencl_diffusion_solver(&dev, conc_new, bx, by, nx, ny, nm, D, dt, checks, &elapsed, &sw);
 
 		for (i = 0; i < checks; i++) {
 			step++;

@@ -29,7 +29,6 @@
 #include <png.h>
 #include "output.h"
 
-/* void param_parser(int argc, char* argv[], int* nx, int* ny, int* nm, int* code, fp_t* dx, fp_t* dy, fp_t* D, fp_t* linStab, int* steps, int* checks) */
 void param_parser(int argc, char* argv[], int* bx, int* by, int* checks, int* code, fp_t* D, fp_t* dx, fp_t* dy, fp_t* linStab, int* nm, int* nx, int* ny, int* steps)
 {
 	FILE * input;

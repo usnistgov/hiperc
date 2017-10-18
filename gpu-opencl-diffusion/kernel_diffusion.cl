@@ -22,7 +22,7 @@
 */
 #pragma OPENCL EXTENSION cl_khr_fp64: enable
 
-#include "opencl_kernels.h"
+#include "numerics.h"
 
 /**
  \brief Diffusion equation kernel for execution on the GPU

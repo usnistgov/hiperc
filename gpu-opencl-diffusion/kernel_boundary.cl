@@ -22,7 +22,7 @@
 */
 #pragma OPENCL EXTENSION cl_khr_fp64: enable
 
-#include "opencl_kernels.h"
+#include "numerics.h"
 
 /**
  \brief Boundary condition kernel for execution on the GPU
@@ -37,22 +37,22 @@ __kernel void boundary_kernel(__global fp_t* d_conc,
                               int ny,
                               int nm)
 {
-	int col, row;
+	int x, y;
 	int ihi, ilo, jhi, jlo, offset;
 
 	/* determine indices on which to operate */
 
-	col = get_global_id(0);
-	row = get_global_id(1);
+	x = get_global_id(0);
+	y = get_global_id(1);
 
 	/* apply fixed boundary values: sequence does not matter */
 
-	if (row < ny/2 && col < 1+nm/2) {
-		d_conc[row * nx + col] = d_bc[2]; /* left value, bc[1][0] = bc[2*1 + 0] */
+	if (x < 1+nm/2 && y < ny/2) {
+		d_conc[nx * y + x] = d_bc[2]; /* left value, bc[1][0] = bc[2*1 + 0] */
 	}
 
-	if (row >= ny/2 && row < ny && col >= nx-1-nm/2 && col < nx) {
-		d_conc[row * nx + col] = d_bc[3]; /* right value, bc[1][1] = bc[2*1 + 1] */
+	if (x >= nx-1-nm/2 && x < nx && y >= ny/2 && y < ny) {
+		d_conc[nx * y + x] = d_bc[3]; /* right value, bc[1][1] = bc[2*1 + 1] */
 	}
 
 	/* wait for all threads to finish writing */
@@ -66,17 +66,17 @@ __kernel void boundary_kernel(__global fp_t* d_conc,
 		jlo = nm/2 - offset;
 		jhi = ny - 1 - nm/2 + offset;
 
-		if (ilo-1 == col && row < ny) {
-			d_conc[row * nx + ilo-1] = d_conc[row * nx + ilo]; /* left condition */
+		if (ilo-1 == x && y < ny) {
+			d_conc[nx * y + ilo-1] = d_conc[nx * y + ilo]; /* left condition */
 		}
-		if (ihi+1 == col && row < ny) {
-			d_conc[row * nx + ihi+1] = d_conc[row * nx + ihi]; /* right condition */
+		if (ihi+1 == x && y < ny) {
+			d_conc[nx * y + ihi+1] = d_conc[nx * y + ihi]; /* right condition */
 		}
-		if (jlo-1 == row && col < nx) {
-			d_conc[(jlo-1) * nx + col] = d_conc[jlo * nx + col]; /* bottom condition */
+		if (jlo-1 == y && x < nx) {
+			d_conc[nx * (jlo-1) + x] = d_conc[nx * jlo + x]; /* bottom condition */
 		}
-		if (jhi+1 == row && col < nx) {
-			d_conc[(jhi+1) * nx + col] = d_conc[jhi * nx + col]; /* top condition */
+		if (jhi+1 == y && x < nx) {
+			d_conc[nx * (jhi+1) + x] = d_conc[nx * jhi + x]; /* top condition */
 		}
 
 		barrier(CLK_GLOBAL_MEM_FENCE);

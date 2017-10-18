@@ -28,11 +28,12 @@
 #include "boundaries.h"
 #include "discretization.h"
 #include "mesh.h"
+#include "numerics.h"
 #include "timer.h"
 #include "opencl_data.h"
-#include "opencl_kernels.h"
 
 void opencl_diffusion_solver(struct OpenCLData* dev, fp_t** conc_new,
+                             int bx, int by,
                              int nx, int ny, int nm,
                              fp_t D, fp_t dt, int checks,
                              fp_t *elapsed, struct Stopwatch* sw)
@@ -46,15 +47,12 @@ void opencl_diffusion_solver(struct OpenCLData* dev, fp_t** conc_new,
 	 power of two: 4, 8, 16, 32, etc. OpenCL will make a best-guess optimal
 	 block size if you set size_t* tile_dim = NULL.
 	*/
-	/*
-	size_t grid_dim[2] = {(size_t)nx, (size_t)ny};
-	size_t tile_dim[2] = {TILE_W, TILE_H};
-	*/
-
-	/* extremely precarious */
-	size_t tile_dim[2] = {TILE_W - nm + 1, TILE_H - nm + 1};
-	size_t bloc_dim[2] = {nm - 1 + floor((float)(nx)/tile_dim[0]), nm - 1 + floor((float)(ny)/tile_dim[1])};
-	size_t grid_dim[2] = {bloc_dim[0]*tile_dim[0], bloc_dim[1]*tile_dim[1]};
+	size_t tile_dim[2] = {bx, by};
+	size_t bloc_dim[2] = {ceil((float)(nx) / (tile_dim[0] - nm + 1)),
+	                      ceil((float)(ny) / (tile_dim[1] - nm + 1))};
+	size_t grid_dim[2] = {bloc_dim[0] * tile_dim[0],
+	                      bloc_dim[1] * tile_dim[1]};
+	size_t buf_size = (tile_dim[0] + nm) * (tile_dim[1] + nm) * sizeof(fp_t);
 
 	cl_mem d_conc_old = dev->conc_old;
 	cl_mem d_conc_new = dev->conc_new;
@@ -70,9 +68,10 @@ void opencl_diffusion_solver(struct OpenCLData* dev, fp_t** conc_new,
 
 	status |= clSetKernelArg(dev->convolution_kernel, 1, sizeof(cl_mem), (void *)&(dev->conc_lap));
 	status |= clSetKernelArg(dev->convolution_kernel, 2, sizeof(cl_mem), (void *)&(dev->mask));
-	status |= clSetKernelArg(dev->convolution_kernel, 3, sizeof(int), (void *)&nx);
-	status |= clSetKernelArg(dev->convolution_kernel, 4, sizeof(int), (void *)&ny);
-	status |= clSetKernelArg(dev->convolution_kernel, 5, sizeof(int), (void *)&nm);
+	status |= clSetKernelArg(dev->convolution_kernel, 3, buf_size, NULL);
+	status |= clSetKernelArg(dev->convolution_kernel, 4, sizeof(int), (void *)&nx);
+	status |= clSetKernelArg(dev->convolution_kernel, 5, sizeof(int), (void *)&ny);
+	status |= clSetKernelArg(dev->convolution_kernel, 6, sizeof(int), (void *)&nm);
 	report_error(status, "constant convolution kernel args");
 
 	status |= clSetKernelArg(dev->diffusion_kernel, 2, sizeof(cl_mem), (void *)&(dev->conc_lap));
@@ -97,20 +96,29 @@ void opencl_diffusion_solver(struct OpenCLData* dev, fp_t** conc_new,
 		}
 
 		/* set time-dependent kernel arguments */
-		status = clSetKernelArg(dev->boundary_kernel,    0, sizeof(cl_mem), (void *)&d_conc_old);
+		status = clSetKernelArg(dev->boundary_kernel, 0, sizeof(cl_mem), (void *)&d_conc_old);
 		report_error(status, "mutable boundary kernel args");
 
 		status = clSetKernelArg(dev->convolution_kernel, 0, sizeof(cl_mem), (void *)&d_conc_old);
 		report_error(status, "mutable convolution kernel args");
 
-		status |= clSetKernelArg(dev->diffusion_kernel,   0, sizeof(cl_mem), (void *)&d_conc_old);
-		status |= clSetKernelArg(dev->diffusion_kernel,   1, sizeof(cl_mem), (void *)&d_conc_new);
+		status |= clSetKernelArg(dev->diffusion_kernel, 0, sizeof(cl_mem), (void *)&d_conc_old);
+		status |= clSetKernelArg(dev->diffusion_kernel, 1, sizeof(cl_mem), (void *)&d_conc_new);
 		report_error(status, "mutable diffusion kernel args");
 
-		/* enqueue kernels */
+		/* apply boundary conditions */
 		status |= clEnqueueNDRangeKernel(dev->commandQueue, dev->boundary_kernel,    2, NULL, grid_dim, tile_dim, 0, NULL, NULL);
+
+		/* compute Laplacian */
+		start_time = GetTimer();
 		status |= clEnqueueNDRangeKernel(dev->commandQueue, dev->convolution_kernel, 2, NULL, grid_dim, tile_dim, 0, NULL, NULL);
+		sw->conv += GetTimer() - start_time;
+
+		/* compute result */
+		start_time = GetTimer();
 		status |= clEnqueueNDRangeKernel(dev->commandQueue, dev->diffusion_kernel,   2, NULL, grid_dim, tile_dim, 0, NULL, NULL);
+		sw->step += GetTimer() - start_time;
+
 		report_error(status, "enqueue kernels");
 	}
 

@@ -2,7 +2,7 @@
 # OpenACC implementation
 
 CXX = pgcc
-CXXFLAGS = -O3 -I../common-diffusion -acc -ta=tesla -Minfo=accel -mp
+CXXFLAGS = -O3 -I../common-diffusion -acc -ta=tesla -ta=tesla:cc30 -ta=tesla:cc50 -ta=tesla:cc60 -Minfo=accel -mp
 LINKS = -lm -lpng
 
 OBJS = boundaries.o discretization.o mesh.o numerics.o output.o timer.o

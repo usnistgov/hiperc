@@ -26,9 +26,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
+#include "numerics.h"
 #include "opencl_data.h"
-#include "opencl_kernels.h"
 
 void report_error(cl_int status, const char* message)
 {

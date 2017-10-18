@@ -25,10 +25,8 @@
 #include <math.h>
 #include <omp.h>
 #include <CL/cl.h>
-
 #include "boundaries.h"
-
-#include "opencl_kernels.h"
+#include "numerics.h"
 
 void set_boundaries(fp_t bc[2][2])
 {

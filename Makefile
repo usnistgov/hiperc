@@ -12,6 +12,8 @@ gpu_diffusion_list := gpu-cuda-diffusion \
                       gpu-openacc-diffusion \
                       gpu-opencl-diffusion
 
+phi_diffusion_list := phi-openmp-diffusion
+
 .PHONY: run
 run: run_cpu_diffusion run_gpu_diffusion
 

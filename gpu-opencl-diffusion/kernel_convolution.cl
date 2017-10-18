@@ -22,7 +22,7 @@
 */
 #pragma OPENCL EXTENSION cl_khr_fp64: enable
 
-#include "opencl_kernels.h"
+#include "numerics.h"
 
 /**
  \brief Tiled convolution algorithm for execution on the GPU
@@ -44,57 +44,56 @@
  - The \a __local specifier allocates the small \a d_conc_tile array in cache
  - The \a __constant specifier allocates the small \a d_mask array in cache
 */
-__kernel void convolution_kernel(__global fp_t* d_conc_old,
-                                 __global fp_t* d_conc_lap,
+__kernel void convolution_kernel(__global   fp_t* d_conc_old,
+                                 __global   fp_t* d_conc_lap,
                                  __constant fp_t* d_mask,
+                                 __local    fp_t* d_conc_tile,
                                  int nx,
                                  int ny,
                                  int nm)
 {
 	int i, j;
-	int dst_col, dst_cols, dst_row, dst_rows;
-	int src_col, src_cols, src_row, src_rows;
-	int til_col, til_row;
+	int dst_nx, dst_ny, dst_x, dst_y;
+	int src_nx, src_ny, src_x, src_y;
+	int til_nx, til_x, til_y;
 	fp_t value = 0.;
 
 	/* source tile includes the halo cells, destination tile does not */
-	src_cols = get_local_size(0);
-	src_rows = get_local_size(1);
+	src_ny = get_local_size(0);
+	src_nx = get_local_size(1);
+	til_nx = src_nx;
 
-	dst_cols = src_cols - nm + 1;
-	dst_rows = src_rows - nm + 1;
+	dst_ny = src_ny - nm + 1;
+	dst_nx = src_nx - nm + 1;
 
 	/* determine indices on which to operate */
-	til_col = get_local_id(0);
-	til_row = get_local_id(1);
+	til_x = get_local_id(0);
+	til_y = get_local_id(1);
 
-	dst_col = get_group_id(0) * dst_cols + til_col;
-	dst_row = get_group_id(1) * dst_rows + til_row;
+	dst_x = get_group_id(0) * dst_ny + til_x;
+	dst_y = get_group_id(1) * dst_nx + til_y;
 
-	src_col = dst_col - nm/2;
-	src_row = dst_row - nm/2;
+	src_x = dst_x - nm/2;
+	src_y = dst_y - nm/2;
 
-	/* shared memory tile: __local gives access to all threads in the group */
-	__local fp_t d_conc_tile[TILE_H + MAX_MASK_H - 1][TILE_W + MAX_MASK_W - 1];
-
-	if (src_row >= 0 && src_row < ny &&
-	    src_col >= 0 && src_col < nx) {
-		d_conc_tile[til_row][til_col] = d_conc_old[src_row * nx + src_col];
+	if (src_x >= 0 && src_x < nx &&
+	    src_y >= 0 && src_y < ny) {
+		d_conc_tile[til_nx * til_y + til_x] = d_conc_old[nx * src_y + src_x];
 	}
 
 	/* tile data is shared: wait for all threads to finish copying */
 	barrier(CLK_LOCAL_MEM_FENCE);
 
 	/* compute the convolution */
-	if (til_col < dst_cols && til_row < dst_rows) {
+	if (til_x < dst_ny && til_y < dst_nx) {
 		for (j = 0; j < nm; j++) {
 			for (i = 0; i < nm; i++) {
-				value += d_mask[j * nm + i] * d_conc_tile[j+til_row][i+til_col];
+				value += d_mask[nm * j + i] * d_conc_tile[til_nx * (til_y+j) + til_x+i];
 			}
 		}
 		/* record value */
-		if (dst_row < ny && dst_col < nx) {
-			d_conc_lap[dst_row * nx + dst_col] = value;
+		if (dst_y < ny && dst_x < nx) {
+			d_conc_lap[nx * dst_y + dst_x] = value;
 		}
 	}
 

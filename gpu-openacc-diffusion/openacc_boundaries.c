@@ -59,47 +59,48 @@ void apply_initial_conditions(fp_t** conc, int nx, int ny, int nm, fp_t bc[2][2]
 	}
 }
 
-void boundary_kernel(fp_t** conc, int nx, int ny, int nm, fp_t bc[2][2])
+void boundary_kernel(fp_t** __restrict__ conc, int nx, int ny, int nm, fp_t bc[2][2])
 {
 	/* apply fixed boundary values: sequence does not matter */
 
-	#pragma acc parallel
+	#pragma acc declare present(conc[0:ny][0:nx], bc[0:2][0:2])
 	{
-		#pragma acc loop
-		for (int j = 0; j < ny/2; j++) {
-			#pragma acc loop
-			for (int i = 0; i < 1+nm/2; i++) {
-				conc[j][i] = bc[1][0]; /* left value */
+		#pragma acc parallel
+		{
+			#pragma acc loop independent collapse(2)
+			for (int j = 0; j < ny/2; j++) {
+				for (int i = 0; i < 1+nm/2; i++) {
+					conc[j][i] = bc[1][0]; /* left value */
+				}
 			}
-		}
 
-		#pragma acc loop
-		for (int j = ny/2; j < ny; j++) {
-			#pragma acc loop
-			for (int i = nx-1-nm/2; i < nx; i++) {
-				conc[j][i] = bc[1][1]; /* right value */
+			#pragma acc loop independent collapse(2)
+			for (int j = ny/2; j < ny; j++) {
+				for (int i = nx-1-nm/2; i < nx; i++) {
+					conc[j][i] = bc[1][1]; /* right value */
+				}
 			}
 		}
 
 		/* apply no-flux boundary conditions: inside to out, sequence matters */
 
 		for (int offset = 0; offset < nm/2; offset++) {
-			int ilo = nm/2 - offset;
-			int ihi = nx - 1 - nm/2 + offset;
-			#pragma acc loop
-			for (int j = 0; j < ny; j++) {
-				conc[j][ilo-1] = conc[j][ilo]; /* left condition */
-				conc[j][ihi+1] = conc[j][ihi]; /* right condition */
-			}
-		}
-
-		for (int offset = 0; offset < nm/2; offset++) {
-			int jlo = nm/2 - offset;
-			int jhi = ny - 1 - nm/2 + offset;
-			#pragma acc loop
-			for (int i = 0; i < nx; i++) {
-				conc[jlo-1][i] = conc[jlo][i]; /* bottom condition */
-				conc[jhi+1][i] = conc[jhi][i]; /* top condition */
+			#pragma acc parallel
+			{
+				int ilo = nm/2 - offset;
+				int ihi = nx - 1 - nm/2 + offset;
+				int jlo = nm/2 - offset;
+				int jhi = ny - 1 - nm/2 + offset;
+				#pragma acc loop independent
+				for (int j = 0; j < ny; j++) {
+					conc[j][ilo-1] = conc[j][ilo]; /* left condition */
+					conc[j][ihi+1] = conc[j][ihi]; /* right condition */
+				}
+				#pragma acc loop independent
+				for (int i = 0; i < nx; i++) {
+					conc[jlo-1][i] = conc[jlo][i]; /* bottom condition */
+					conc[jhi+1][i] = conc[jhi][i]; /* top condition */
+				}
 			}
 		}
 	}

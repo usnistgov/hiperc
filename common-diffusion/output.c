@@ -32,9 +32,6 @@
 void param_parser(int argc, char* argv[], int* bx, int* by, int* checks, int* code, fp_t* D, fp_t* dx, fp_t* dy, fp_t* linStab, int* nm, int* nx, int* ny, int* steps)
 {
 	FILE * input;
-	char buffer[256];
-	char* pch;
-	int ibx=0, iby=0, ico=0, idc=0, idx=0, idy=0, inc=0, ins=0, inx=0, iny=0, isc=0;
 
 	if (argc != 2) {
 		printf("Error: improper arguments supplied.\nUsage: ./%s filename\n", argv[0]);
@@ -45,6 +42,10 @@ void param_parser(int argc, char* argv[], int* bx, int* by, int* checks, int* co
 	if (input == NULL) {
 		printf("Warning: unable to open parameter file %s. Marching with default values.\n", argv[1]);
 	} else {
+		char buffer[256];
+		char* pch;
+		int ibx=0, iby=0, ico=0, idc=0, idx=0, idy=0, inc=0, ins=0, inx=0, iny=0, isc=0;
+
 		/* read parameters */
 		while ( !feof(input))
 		{
@@ -130,16 +131,17 @@ void param_parser(int argc, char* argv[], int* bx, int* by, int* checks, int* co
 			printf("Warning: parameter %s undefined. Using default values, %i and %i.\n", "sc", *nm, *code);
 		}
 	}
+	fclose(input);
 }
 
 void print_progress(const int step, const int steps)
 {
 	char* timestring;
 	static unsigned long tstart;
-	struct tm* timeinfo;
 	time_t rawtime;
 
 	if (step==0) {
+		struct tm* timeinfo;
 		tstart = time(NULL);
 		time( &rawtime );
 		timeinfo = localtime( &rawtime );

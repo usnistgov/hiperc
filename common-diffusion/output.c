@@ -29,7 +29,8 @@
 #include <png.h>
 #include "output.h"
 
-void param_parser(int argc, char* argv[], int* bx, int* by, int* checks, int* code, fp_t* D, fp_t* dx, fp_t* dy, fp_t* linStab, int* nm, int* nx, int* ny, int* steps)
+void param_parser(int argc, char* argv[], int* bx, int* by, int* checks, int* code,
+     fp_t* D, fp_t* dx, fp_t* dy, fp_t* linStab, int* nm, int* nx, int* ny, int* steps)
 {
 	FILE * input;
 
@@ -136,17 +137,16 @@ void param_parser(int argc, char* argv[], int* bx, int* by, int* checks, int* co
 
 void print_progress(const int step, const int steps)
 {
-	char* timestring;
 	static unsigned long tstart;
 	time_t rawtime;
 
 	if (step==0) {
+		char timestring[256] = {'\0'};
 		struct tm* timeinfo;
 		tstart = time(NULL);
 		time( &rawtime );
 		timeinfo = localtime( &rawtime );
-		timestring = asctime(timeinfo);
-		timestring[strlen(timestring)-1] = '\0';
+		strftime(timestring, 80, "%c", timeinfo);
 		printf("%s [", timestring);
 		fflush(stdout);
 	} else if (step==steps) {
@@ -159,10 +159,9 @@ void print_progress(const int step, const int steps)
 	}
 }
 
-void write_csv(fp_t** conc, int nx, int ny, fp_t dx, fp_t dy, int step)
+void write_csv(fp_t** conc, const int nx, const int ny, const fp_t dx, const fp_t dy, const int step)
 {
 	int i, j;
-	fp_t x, y;
 	FILE* output;
 	char name[256];
 	char num[20];
@@ -183,9 +182,9 @@ void write_csv(fp_t** conc, int nx, int ny, fp_t dx, fp_t dy, int step)
 	/* write csv data */
 	fprintf(output, "x,y,c\n");
 	for (j = 1; j < ny-1; j++) {
-		y = dy * (j - 1);
+		fp_t y = dy * (j - 1);
 		for (i = 1; i < nx-1; i++)	{
-			x = dx * (i - 1);
+			fp_t x = dx * (i - 1);
 			fprintf(output, "%f,%f,%f\n", x, y, conc[j][i]);
 		}
 	}
@@ -193,7 +192,7 @@ void write_csv(fp_t** conc, int nx, int ny, fp_t dx, fp_t dy, int step)
 	fclose(output);
 }
 
-void write_png(fp_t** conc, int nx, int ny, int step)
+void write_png(fp_t** conc, const int nx, const int ny, const int step)
 {
 	/* After "A simple libpng example program," http://zarb.org/~gc/html/libpng.html
 	   and the libpng manual, http://www.libpng.org/pub/png */

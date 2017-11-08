@@ -55,21 +55,21 @@
  If your stencil is larger than \f$ 5\times 5\f$, you must increase the values
  defined by #MAX_MASK_W and #MAX_MASK_H.
 */
-void set_mask(fp_t dx, fp_t dy, int code, fp_t** mask_lap, int nm);
+void set_mask(const fp_t dx, const fp_t dy, const int code, fp_t** mask_lap, const int nm);
 
 /**
  \brief Write 5-point Laplacian stencil into convolution mask
 
  \f$3\times3\f$ mask, 5 values, truncation error \f$\mathcal{O}(\Delta x^2)\f$
 */
-void five_point_Laplacian_stencil(fp_t dx, fp_t dy, fp_t** mask_lap, int nm);
+void five_point_Laplacian_stencil(const fp_t dx, const fp_t dy, fp_t** mask_lap, const int nm);
 
 /**
  \brief Write 9-point Laplacian stencil into convolution mask
 
  \f$3\times3\f$ mask, 9 values, truncation error \f$\mathcal{O}(\Delta x^4)\f$
 */
-void nine_point_Laplacian_stencil(fp_t dx, fp_t dy, fp_t** mask_lap, int nm);
+void nine_point_Laplacian_stencil(const fp_t dx, const fp_t dy, fp_t** mask_lap, const int nm);
 
 /**
  \brief Write 9-point Laplacian stencil into convolution mask
@@ -81,17 +81,17 @@ void nine_point_Laplacian_stencil(fp_t dx, fp_t dy, fp_t** mask_lap, int nm);
  more expensive than the \f$3\times3\f$ version. If your code requires
  \f$\mathcal{O}(\Delta x^4)\f$ accuracy, please use nine_point_Laplacian_stencil().
 */
-void slow_nine_point_Laplacian_stencil(fp_t dx, fp_t dy, fp_t** mask_lap, int nm);
+void slow_nine_point_Laplacian_stencil(const fp_t dx, const fp_t dy, fp_t** mask_lap, const int nm);
 
 /**
  \brief Compute Euclidean distance between two points, \a a and \a b
 */
-fp_t euclidean_distance(fp_t ax, fp_t ay, fp_t bx, fp_t by);
+fp_t euclidean_distance(const fp_t ax, const fp_t ay, const fp_t bx, const fp_t by);
 
 /**
  \brief Compute Manhattan distance between two points, \a a and \a b
 */
-fp_t manhattan_distance(fp_t ax, fp_t ay, fp_t bx, fp_t by);
+fp_t manhattan_distance(const fp_t ax, const fp_t ay, const fp_t bx, const fp_t by);
 
 /**
  \brief Compute minimum distance from point \a p to a line segment bounded by points \a a and \a b
@@ -100,7 +100,7 @@ fp_t manhattan_distance(fp_t ax, fp_t ay, fp_t bx, fp_t by);
  projected range to [0, 1] to handle projections that fall outside of \a ab.
  Implemented after Grumdrig on Stackoverflow, https://stackoverflow.com/a/1501725.
 */
-fp_t distance_point_to_segment(fp_t ax, fp_t ay, fp_t bx, fp_t by, fp_t px, fp_t py);
+fp_t distance_point_to_segment(const fp_t ax, const fp_t ay, const fp_t bx, const fp_t by, const fp_t px, const fp_t py);
 
 /**
  \brief Analytical solution of the diffusion equation for a carburizing process
@@ -112,7 +112,7 @@ fp_t distance_point_to_segment(fp_t ax, fp_t ay, fp_t bx, fp_t by, fp_t px, fp_t
  which reduces, when \f$ c_{\infty} = 0 \f$, to
  \f[ c(x,t) = c_0\left[1 - \mathrm{erf}\left(\frac{x}{\sqrt{4Dt}}\right)\right]. \f]
 */
-void analytical_value(fp_t x, fp_t t, fp_t D, fp_t bc[2][2], fp_t* c);
+void analytical_value(const fp_t x, const fp_t t, const fp_t D, fp_t bc[2][2], fp_t* c);
 
 /** \cond SuppressGuard */
 #endif /* _NUMERICS_H_ */

@@ -35,14 +35,16 @@ __constant__ fp_t d_bc[2][2];
 
 void set_boundaries(fp_t bc[2][2])
 {
+	/* Change these values to your liking: */
 	fp_t clo = 0.0, chi = 1.0;
+
 	bc[0][0] = clo; /* bottom boundary */
 	bc[0][1] = clo; /* top boundary */
 	bc[1][0] = chi; /* left boundary */
 	bc[1][1] = chi; /* right boundary */
 }
 
-void apply_initial_conditions(fp_t** conc, int nx, int ny, int nm, fp_t bc[2][2])
+void apply_initial_conditions(fp_t** conc, const int nx, const int ny, const int nm, fp_t bc[2][2])
 {
 	#pragma omp parallel
 	{

@@ -17,7 +17,6 @@
  Questions/comments to Trevor Keller (trevor.keller@nist.gov)
  **********************************************************************************/
 
-
 /**
  \file  phi_boundaries.c
  \brief Implementation of boundary condition functions with OpenMP threading
@@ -29,7 +28,9 @@
 
 void set_boundaries(fp_t bc[2][2])
 {
+	/* Change these values to your liking: */
 	fp_t clo = 0.0, chi = 1.0;
+
 	bc[0][0] = clo; /* bottom boundary */
 	bc[0][1] = clo; /* top boundary */
 	bc[1][0] = chi; /* left boundary */

@@ -13,7 +13,7 @@ Ever wonder if a GPU or Xeon Phi accelerator card would make your code faster?
 Fast enough to justify the expense to your manager, adviser, or funding agency?
 This project can help answer your questions!
 
-|Source on GitHub|_ |Documentation on readthedocs|_ |Conversation on Gitter|_
+|Documentation on readthedocs|_ |Conversation on Gitter|_ |Source on GitHub|_ |Codacy Score|_
 
 The example codes in this repository implement the same basic algorithm using
 whichever of the mainstream accelerator programming methods apply. Running the
@@ -342,6 +342,8 @@ the best available for the purpose.
 .. _`Trevor Keller`: mailto::trevor.keller@nist.gov
 .. _Bebop: http://www.lcrc.anl.gov/systems/resources/bebop/
 .. _ccNUMA: https://en.wikipedia.org/wiki/Non-uniform_memory_access#Cache_coherent_NUMA
+.. _`Codacy Score`:	https://www.codacy.com/app/trevor.keller/hiperc?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=usnistgov/hiperc&amp;utm_campaign=Badge_Grade
+.. |Codacy Score| image::https://api.codacy.com/project/badge/Grade/651feab686bc400b9aadc180fe0a167f
 .. _`Conversation on Gitter`: https://gitter.im/usnistgov/hiperc?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=body_badge
 .. |Conversation on Gitter| image:: https://badges.gitter.im/usnistgov/hiperc.svg
 .. _`Contributing Guidelines`: CONTRIBUTING.md

@@ -48,9 +48,9 @@ __kernel void convolution_kernel(__global   fp_t* d_conc_old,
                                  __global   fp_t* d_conc_lap,
                                  __constant fp_t* d_mask,
                                  __local    fp_t* d_conc_tile,
-                                 int nx,
-                                 int ny,
-                                 int nm)
+                                 const int nx,
+                                 const int ny,
+                                 const int nm)
 {
 	int i, j;
 	int dst_nx, dst_ny, dst_x, dst_y;

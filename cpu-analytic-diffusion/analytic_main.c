@@ -34,7 +34,8 @@
 /**
  \brief Update the scalar composition field using analytical solution
 */
-void solve_diffusion_equation(fp_t** conc, int nx, int ny, int nm, fp_t dx, fp_t dy, fp_t D, fp_t dt, fp_t elapsed)
+void solve_diffusion_equation(fp_t** conc, const int nx, const int ny, const int nm,
+     const fp_t dx, const fp_t dy, const fp_t D, const fp_t dt, const fp_t elapsed)
 {
 	int i, j;
 	fp_t r, cal, car;
@@ -73,7 +74,7 @@ int main(int argc, char* argv[])
 	/* declare default mesh size and resolution */
 	fp_t **conc_old, **conc_new, **conc_lap, **mask_lap;
 	int bx=32, by=32, nx=512, ny=512, nm=3, code=53;
-	fp_t dx=0.5, dy=0.5, h=0.5;
+	fp_t dx=0.5, dy=0.5, h;
 
 	/* declare default materials and numerical parameters */
 	fp_t D=0.00625, linStab=0.1, dt=1., elapsed=0., rss=0.;
@@ -110,8 +111,8 @@ int main(int argc, char* argv[])
 	fprintf(output, "%i,%f,%f,%f,%f,%f,%f,%f\n", step, elapsed, rss, conv_time, step_time, file_time, soln_time, GetTimer());
 
 	/* do the work */
-	for (step = 1; step < steps+1; step++) {
-		print_progress(step-1, steps);
+	for (step = 0; step < steps; step++) {
+		print_progress(step, steps);
 
 		if (step % checks == 0) {
 			start_time = GetTimer();

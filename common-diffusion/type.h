@@ -33,7 +33,7 @@
  choice propagates throughout the code, and may significantly affect runtime
  on GPU hardware.
 */
-typedef double fp_t;
+typedef float fp_t;
 
 /**
  Container for timing data
@@ -42,22 +42,22 @@ struct Stopwatch {
 	/**
 	 Cumulative time executing compute_convolution()
 	*/
-	double conv;
+	fp_t conv;
 
 	/**
 	 Cumulative time executing solve_diffusion_equation()
 	*/
-	double step;
+	fp_t step;
 
 	/**
 	 Cumulative time executing write_csv() and write_png()
 	*/
-	double file;
+	fp_t file;
 
 	/**
 	 Cumulative time executing check_solution()
 	*/
-	double soln;
+	fp_t soln;
 };
 
 /** \cond SuppressGuard */

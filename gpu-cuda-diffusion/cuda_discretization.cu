@@ -110,9 +110,9 @@ __global__ void convolution_kernel(fp_t* d_conc_old,
  data transfers between the host (CPU) and device (GPU).
 */
 void compute_convolution(fp_t** conc_old, fp_t** conc_lap, fp_t** mask_lap,
-                         int bx, int by,
-                         int nm,
-                         int nx, int ny)
+                         const int bx, const int by,
+                         const int nm,
+                         const int nx, const int ny)
 {
 	fp_t* d_conc_old, *d_conc_lap;
 
@@ -189,9 +189,9 @@ __global__ void diffusion_kernel(fp_t* d_conc_old,
  transfers and with reduced risk of memory leaks.
 */
 void cuda_diffusion_solver(struct CudaData* dev, fp_t** conc_new,
-                           fp_t bc[2][2], int bx, int by,
-                           int nm, int nx, int ny,
-                           fp_t D, fp_t dt, int checks,
+                           fp_t bc[2][2], const int bx, const int by,
+                           const int nm, const int nx, const int ny,
+                           const fp_t D, const fp_t dt, const int checks,
                            fp_t* elapsed, struct Stopwatch* sw)
 {
 	double start_time;
@@ -238,8 +238,8 @@ void cuda_diffusion_solver(struct CudaData* dev, fp_t** conc_new,
 	sw->file += GetTimer() - start_time;
 }
 
-void check_solution(fp_t** conc_new, fp_t** conc_lap, int nx, int ny,
-                    fp_t dx, fp_t dy, int nm, fp_t elapsed, fp_t D,
+void check_solution(fp_t** conc_new, fp_t** conc_lap, const int nx, const int ny,
+                    const fp_t dx, const fp_t dy, const int nm, const fp_t elapsed, const fp_t D,
                     fp_t bc[2][2], fp_t* rss)
 {
 	fp_t sum=0.;

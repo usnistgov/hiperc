@@ -49,7 +49,7 @@ int main(int argc, char* argv[])
 	/* declare default mesh size and resolution */
 	fp_t **conc_old, **conc_new, **conc_lap, **mask_lap;
 	int bx=32, by=32, nx=512, ny=512, nm=3, code=53;
-	fp_t dx=0.5, dy=0.5, h=0.5;
+	fp_t dx=0.5, dy=0.5, h;
 	fp_t bc[2][2];
 
 	/* declare default materials and numerical parameters */

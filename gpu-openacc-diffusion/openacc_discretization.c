@@ -29,7 +29,7 @@
 #include "mesh.h"
 #include "openacc_kernels.h"
 
-void convolution_kernel(fp_t** conc_old, fp_t** conc_lap, fp_t** mask_lap, int nx, int ny, int nm)
+void convolution_kernel(fp_t** conc_old, fp_t** conc_lap, fp_t** mask_lap, const int nx, const int ny, const int nm)
 {
 	#pragma acc declare present(conc_old[0:ny][0:nx], conc_lap[0:ny][0:nx], mask_lap[0:nm][0:nm])
 	#pragma acc parallel
@@ -51,7 +51,7 @@ void convolution_kernel(fp_t** conc_old, fp_t** conc_lap, fp_t** mask_lap, int n
 }
 
 void diffusion_kernel(fp_t** conc_old, fp_t** conc_new, fp_t** conc_lap,
-                      int nx, int ny, int nm, fp_t D, fp_t dt)
+                      const int nx, const int ny, const int nm, const fp_t D, const fp_t dt)
 {
 	#pragma acc declare present(conc_old[0:ny][0:nx], conc_new[0:ny][0:nx], conc_lap[0:ny][0:nx])
 	#pragma acc parallel
@@ -66,8 +66,8 @@ void diffusion_kernel(fp_t** conc_old, fp_t** conc_new, fp_t** conc_lap,
 }
 
 void solve_diffusion_equation(fp_t** conc_old, fp_t** conc_new, fp_t** conc_lap,
-                              fp_t** mask_lap, int nx, int ny, int nm,
-                              fp_t bc[2][2], fp_t D, fp_t dt, int checks,
+                              fp_t** mask_lap, const int nx, const int ny, const int nm,
+                              fp_t bc[2][2], const fp_t D, const fp_t dt, const int checks,
                               fp_t* elapsed, struct Stopwatch* sw)
 {
 	#pragma acc data present_or_copy(conc_old[0:ny][0:nx]) \
@@ -95,8 +95,8 @@ void solve_diffusion_equation(fp_t** conc_old, fp_t** conc_new, fp_t** conc_lap,
 	*elapsed += dt * checks;
 }
 
-void check_solution(fp_t** conc_new, fp_t** conc_lap,  int nx, int ny,
-                    fp_t dx, fp_t dy, int nm, fp_t elapsed, fp_t D,
+void check_solution(fp_t** conc_new, fp_t** conc_lap,  const int nx, const int ny,
+                    const fp_t dx, const fp_t dy, const int nm, const fp_t elapsed, const fp_t D,
                     fp_t bc[2][2], fp_t* rss)
 {
 	fp_t sum=0.;
@@ -104,13 +104,13 @@ void check_solution(fp_t** conc_new, fp_t** conc_lap,  int nx, int ny,
 	#pragma omp parallel reduction(+:sum)
 	{
 		int i, j;
-		fp_t r, cal, car, ca, cn;
+		fp_t r, cal, car;
 
 		#pragma omp for collapse(2) private(ca,cal,car,cn,i,j,r)
 		for (j = nm/2; j < ny-nm/2; j++) {
 			for (i = nm/2; i < nx-nm/2; i++) {
 				/* numerical solution */
-				cn = conc_new[j][i];
+				const fp_t cn = conc_new[j][i];
 
 				/* shortest distance to left-wall source */
 				r = distance_point_to_segment(dx * (nm/2), dy * (nm/2),
@@ -125,7 +125,7 @@ void check_solution(fp_t** conc_new, fp_t** conc_lap,  int nx, int ny,
 				analytical_value(r, elapsed, D, bc, &car);
 
 				/* superposition of analytical solutions */
-				ca = cal + car;
+				const fp_t ca = cal + car;
 
 				/* residual sum of squares (RSS) */
 				conc_lap[j][i] = (ca - cn) * (ca - cn) / (fp_t)((nx-1-nm/2) * (ny-1-nm/2));

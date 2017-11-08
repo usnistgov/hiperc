@@ -5,9 +5,6 @@ CC = gcc
 CFLAGS = -O3 -Wall -pedantic -std=c11 -I../common-diffusion -fopenmp
 LINKS = -lm -lpng -lOpenCL
 
-LLVM = clang
-LFLAGS = -S -emit-llvm -x cl -I../common-diffusion
-
 KERNELS = kernel_boundary.cl kernel_convolution.cl kernel_diffusion.cl
 OBJS = boundaries.o data.o discretization.o mesh.o numerics.o output.o timer.o
 
@@ -37,18 +34,6 @@ output.o: ../common-diffusion/output.c
 
 timer.o: ../common-diffusion/timer.c
 	$(CC) $(CFLAGS) -c $<
-
-.PHONY: kernel
-kernel: kernel_boundary.clb kernel_convolution.clb kernel_diffusion.clb
-
-kernel_boundary.clb: kernel_boundary.cl
-	$(LLVM) $(LFLAGS) $< -o $@
-
-kernel_convolution.clb: kernel_convolution.cl
-	$(LLVM) $(LFLAGS) $< -o $@
-
-kernel_diffusion.clb: kernel_diffusion.cl
-	$(LLVM) $(LFLAGS) $< -o $@
 
 # Helper scripts
 .PHONY: run

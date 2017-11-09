@@ -161,10 +161,10 @@ void print_progress(const int step, const int steps)
 
 void write_csv(fp_t** conc, const int nx, const int ny, const fp_t dx, const fp_t dy, const int step)
 {
-	int i, j;
 	FILE* output;
 	char name[256];
 	char num[20];
+	int i, j;
 
 	/* generate the filename */
 	sprintf(num, "%07i", step);

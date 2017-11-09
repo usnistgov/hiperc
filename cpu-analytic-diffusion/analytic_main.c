@@ -37,12 +37,11 @@
 void solve_diffusion_equation(fp_t** conc, const int nx, const int ny, const int nm,
      const fp_t dx, const fp_t dy, const fp_t D, const fp_t dt, const fp_t elapsed)
 {
-	int i, j;
 	fp_t r, cal, car;
 	fp_t bc[2][2] = {{1., 1.}, {1., 1.}};
 
-	for (j = nm/2; j < ny-nm/2; j++) {
-		for (i = nm/2; i < nx-nm/2; i++) {
+	for (int j = nm/2; j < ny-nm/2; j++) {
+		for (int i = nm/2; i < nx-nm/2; i++) {
 			/* shortest distance to left-wall source */
 			r = distance_point_to_segment(dx * (nm/2), dy * (nm/2),
 			                              dx * (nm/2), dy * (ny/2),

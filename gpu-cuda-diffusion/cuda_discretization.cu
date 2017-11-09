@@ -46,7 +46,6 @@ __global__ void convolution_kernel(fp_t* d_conc_old,
                                    const int ny,
                                    const int nm)
 {
-	int i, j;
 	int dst_x, dst_y, dst_nx, dst_ny;
 	int src_x, src_y, src_nx, src_ny;
 	int til_x, til_y, til_nx;
@@ -85,8 +84,8 @@ __global__ void convolution_kernel(fp_t* d_conc_old,
 
 	/* compute the convolution */
 	if (til_x < dst_nx && til_y < dst_ny) {
-		for (j = 0; j < nm; j++) {
-			for (i = 0; i < nm; i++) {
+		for (int j = 0; j < nm; j++) {
+			for (int i = 0; i < nm; i++) {
 				value += d_mask[j * nm + i] * d_conc_tile[til_nx * (til_y+j) + til_x+i];
 			}
 		}
@@ -246,14 +245,13 @@ void check_solution(fp_t** conc_new, fp_t** conc_lap, const int nx, const int ny
 
 	#pragma omp parallel reduction(+:sum)
 	{
-		int i, j;
-		fp_t r, cal, car, ca, cn;
+		fp_t r, cal, car;
 
-		#pragma omp for collapse(2) private(ca,cal,car,cn,i,j,r)
-		for (j = nm/2; j < ny-nm/2; j++) {
-			for (i = nm/2; i < nx-nm/2; i++) {
+		#pragma omp for collapse(2) private(cal,car,r)
+		for (int j = nm/2; j < ny-nm/2; j++) {
+			for (int i = nm/2; i < nx-nm/2; i++) {
 				/* numerical solution */
-				cn = conc_new[j][i];
+				const fp_t cn = conc_new[j][i];
 
 				/* shortest distance to left-wall source */
 				r = distance_point_to_segment(dx * (nm/2), dy * (nm/2),
@@ -268,16 +266,16 @@ void check_solution(fp_t** conc_new, fp_t** conc_lap, const int nx, const int ny
 				analytical_value(r, elapsed, D, bc, &car);
 
 				/* superposition of analytical solutions */
-				ca = cal + car;
+				const fp_t ca = cal + car;
 
 				/* residual sum of squares (RSS) */
 				conc_lap[j][i] = (ca - cn) * (ca - cn) / (fp_t)((nx-1-nm/2) * (ny-1-nm/2));
 			}
 		}
 
-		#pragma omp for collapse(2) private(i,j)
-		for (j = nm/2; j < ny-nm/2; j++) {
-			for (i = nm/2; i < nx-nm/2; i++) {
+		#pragma omp for collapse(2)
+		for (int j = nm/2; j < ny-nm/2; j++) {
+			for (int i = nm/2; i < nx-nm/2; i++) {
 				sum += conc_lap[j][i];
 			}
 		}

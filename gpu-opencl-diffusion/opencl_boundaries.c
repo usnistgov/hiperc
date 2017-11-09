@@ -43,21 +43,19 @@ void apply_initial_conditions(fp_t** conc, const int nx, const int ny, const int
 {
 	#pragma omp parallel
 	{
-		int i, j;
-
 		#pragma omp for collapse(2)
-		for (j = 0; j < ny; j++)
-			for (i = 0; i < nx; i++)
+		for (int j = 0; j < ny; j++)
+			for (int i = 0; i < nx; i++)
 				conc[j][i] = bc[0][0];
 
 		#pragma omp for collapse(2)
-		for (j = 0; j < ny/2; j++)
-			for (i = 0; i < 1+nm/2; i++)
+		for (int j = 0; j < ny/2; j++)
+			for (int i = 0; i < 1+nm/2; i++)
 				conc[j][i] = bc[1][0]; /* left half-wall */
 
 		#pragma omp for collapse(2)
-		for (j = ny/2; j < ny; j++)
-			for (i = nx-1-nm/2; i < nx; i++)
+		for (int j = ny/2; j < ny; j++)
+			for (int i = nx-1-nm/2; i < nx; i++)
 				conc[j][i] = bc[1][1]; /* right half-wall */
 	}
 }

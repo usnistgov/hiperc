@@ -103,12 +103,11 @@ void check_solution(fp_t** conc_new, fp_t** conc_lap,  const int nx, const int n
 
 	#pragma omp parallel reduction(+:sum)
 	{
-		int i, j;
 		fp_t r, cal, car;
 
-		#pragma omp for collapse(2) private(ca,cal,car,cn,i,j,r)
-		for (j = nm/2; j < ny-nm/2; j++) {
-			for (i = nm/2; i < nx-nm/2; i++) {
+		#pragma omp for collapse(2) private(cal,car,r)
+		for (int j = nm/2; j < ny-nm/2; j++) {
+			for (int i = nm/2; i < nx-nm/2; i++) {
 				/* numerical solution */
 				const fp_t cn = conc_new[j][i];
 
@@ -132,9 +131,9 @@ void check_solution(fp_t** conc_new, fp_t** conc_lap,  const int nx, const int n
 			}
 		}
 
-		#pragma omp for collapse(2) private(i,j)
-		for (j = nm/2; j < ny-nm/2; j++) {
-			for (i = nm/2; i < nx-nm/2; i++) {
+		#pragma omp for collapse(2)
+		for (int j = nm/2; j < ny-nm/2; j++) {
+			for (int i = nm/2; i < nx-nm/2; i++) {
 				sum += conc_lap[j][i];
 			}
 		}

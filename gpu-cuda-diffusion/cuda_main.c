@@ -54,7 +54,7 @@ int main(int argc, char* argv[])
 
 	/* declare default materials and numerical parameters */
 	fp_t D=0.00625, linStab=0.1, dt=1., elapsed=0., rss=0.;
-	int i=0, step=0, steps=100000, checks=10000;
+	int i, step=0, steps=100000, checks=10000;
 	double start_time=0.;
 	struct Stopwatch sw = {0., 0., 0., 0.};
 

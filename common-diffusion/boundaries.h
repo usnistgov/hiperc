@@ -47,12 +47,12 @@ void set_boundaries(fp_t bc[2][2]);
  to produce an inhomogeneous workload and highlight numerical errors at the
  boundaries.
 */
-void apply_initial_conditions(fp_t** conc_old, int nx, int ny, int nm, fp_t bc[2][2]);
+void apply_initial_conditions(fp_t** conc_old, const int nx, const int ny, const int nm, fp_t bc[2][2]);
 
 /**
  \brief Set fixed value \f$ (c_{hi}) \f$ along left and bottom, zero-flux elsewhere
 */
-void apply_boundary_conditions(fp_t** conc_old, int nx, int ny, int nm, fp_t bc[2][2]);
+void apply_boundary_conditions(fp_t** conc_old, const int nx, const int ny, const int nm, fp_t bc[2][2]);
 
 /** \cond SuppressGuard */
 #endif /* _BOUNDARIES_H_ */

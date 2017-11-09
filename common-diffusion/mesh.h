@@ -37,7 +37,7 @@
  the task is spatially dependent or not.
 */
 void make_arrays(fp_t*** conc_old, fp_t*** conc_new, fp_t*** conc_lap, fp_t*** mask_lap,
-                 int nx, int ny, int nm);
+                 const int nx, const int ny, const int nm);
 
 /**
  \brief Free dynamically allocated memory

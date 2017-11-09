@@ -31,14 +31,16 @@
 
 void set_boundaries(fp_t bc[2][2])
 {
+	/* Change these values to your liking: */
 	fp_t clo = 0.0, chi = 1.0;
+
 	bc[0][0] = clo; /* bottom boundary */
 	bc[0][1] = clo; /* top boundary */
 	bc[1][0] = chi; /* left boundary */
 	bc[1][1] = chi; /* right boundary */
 }
 
-void apply_initial_conditions(fp_t** conc, int nx, int ny, int nm, fp_t bc[2][2])
+void apply_initial_conditions(fp_t** conc, const int nx, const int ny, const int nm, fp_t bc[2][2])
 {
 	/* Lambda function executed on each thread, applying flat field values */
 	tbb::parallel_for(tbb::blocked_range2d<int>(0, nx, 0, ny),
@@ -74,7 +76,7 @@ void apply_initial_conditions(fp_t** conc, int nx, int ny, int nm, fp_t bc[2][2]
 	);
 }
 
-void apply_boundary_conditions(fp_t** conc, int nx, int ny, int nm, fp_t bc[2][2])
+void apply_boundary_conditions(fp_t** conc, const int nx, const int ny, const int nm, fp_t bc[2][2])
 {
 	/* apply fixed boundary values: sequence does not matter */
 
@@ -103,8 +105,8 @@ void apply_boundary_conditions(fp_t** conc, int nx, int ny, int nm, fp_t bc[2][2
 	/* apply no-flux boundary conditions: inside to out, sequence matters */
 
 	for (int offset = 0; offset < nm/2; offset++) {
-		int ilo = nm/2 - offset;
-		int ihi = nx - 1 - nm/2 + offset;
+		const int ilo = nm/2 - offset;
+		const int ihi = nx - 1 - nm/2 + offset;
 		/* Lambda function executed on each thread, applying x-axis boundary condition */
 		tbb::parallel_for(tbb::blocked_range<int>(0, ny),
 			[=](const tbb::blocked_range<int>& r) {
@@ -117,8 +119,8 @@ void apply_boundary_conditions(fp_t** conc, int nx, int ny, int nm, fp_t bc[2][2
 	}
 
 	for (int offset = 0; offset < nm/2; offset++) {
-		int jlo = nm/2 - offset;
-		int jhi = ny - 1 - nm/2 + offset;
+		const int jlo = nm/2 - offset;
+		const int jhi = ny - 1 - nm/2 + offset;
 		/* Lambda function executed on each thread, applying y-axis boundary condition */
 		tbb::parallel_for(tbb::blocked_range<int>(0, nx),
 			[=](const tbb::blocked_range<int>& r) {

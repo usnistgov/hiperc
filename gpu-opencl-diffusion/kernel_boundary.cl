@@ -26,24 +26,22 @@
 
 /**
  \brief Boundary condition kernel for execution on the GPU
- \fn void boundary_kernel(fp_t* d_conc, fp_t d_bc[2][2], int nx, int ny, int nm)
+ \fn void boundary_kernel(fp_t* d_conc, const fp_t d_bc[2][2], const int nx, const int ny, const int nm)
 
  This function accesses 1D data rather than the 2D array representation of the
  scalar composition field
 */
 __kernel void boundary_kernel(__global fp_t* d_conc,
                               __constant fp_t* d_bc,
-                              int nx,
-                              int ny,
-                              int nm)
+                              const int nx,
+                              const int ny,
+                              const int nm)
 {
-	int x, y;
-	int ihi, ilo, jhi, jlo, offset;
 
 	/* determine indices on which to operate */
 
-	x = get_global_id(0);
-	y = get_global_id(1);
+	const int x = get_global_id(0);
+	const int y = get_global_id(1);
 
 	/* apply fixed boundary values: sequence does not matter */
 
@@ -60,11 +58,11 @@ __kernel void boundary_kernel(__global fp_t* d_conc,
 
 	/* apply no-flux boundary conditions: inside to out, sequence matters */
 
-	for (offset = 0; offset < nm/2; offset++) {
-		ilo = nm/2 - offset;
-		ihi = nx - 1 - nm/2 + offset;
-		jlo = nm/2 - offset;
-		jhi = ny - 1 - nm/2 + offset;
+	for (int offset = 0; offset < nm/2; offset++) {
+		const int ilo = nm/2 - offset;
+		const int ihi = nx - 1 - nm/2 + offset;
+		const int jlo = nm/2 - offset;
+		const int jhi = ny - 1 - nm/2 + offset;
 
 		if (ilo-1 == x && y < ny) {
 			d_conc[nx * y + ilo-1] = d_conc[nx * y + ilo]; /* left condition */

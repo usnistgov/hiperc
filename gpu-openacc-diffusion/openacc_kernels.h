@@ -32,19 +32,19 @@
 /**
  \brief Boundary condition kernel for execution on the GPU
 */
-void boundary_kernel(fp_t** conc, int nx, int ny, int nm, fp_t bc[2][2]);
+void boundary_kernel(fp_t** conc, const int nx, const int ny, const int nm, fp_t bc[2][2]);
 
 /**
  \brief Tiled convolution algorithm for execution on the GPU
 */
 void convolution_kernel(fp_t** conc_old, fp_t** conc_lap, fp_t** mask_lap,
-                        int nx, int ny, int nm);
+                        const int nx, const int ny, const int nm);
 
 /**
  \brief Vector addition algorithm for execution on the GPU
 */
 void diffusion_kernel(fp_t** conc_old, fp_t** conc_new, fp_t** conc_lap,
-                      int nx, int ny, int nm, fp_t D, fp_t dt);
+                      const int nx, const int ny, const int nm, const fp_t D, const fp_t dt);
 
 /** \cond SuppressGuard */
 #endif /* _OPENACC_KERNELS_H_ */

@@ -1,7 +1,7 @@
 # Makefile for HiPerC diffusion code
 # serial implementation
 
-CC = gcc
+CC = icc
 CFLAGS = -O3 -Wall -pedantic -I../common-diffusion
 LINKS = -lm -lpng
 

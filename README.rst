@@ -9,11 +9,11 @@
 High Performance Computing Strategies for Boundary Value Problems
 *****************************************************************
 
+|GitHub|_ |readthedocs|_ |Gitter|_ |Codacy|_
+
 Ever wonder if a GPU or Xeon Phi accelerator card would make your code faster?
 Fast enough to justify the expense to your manager, adviser, or funding agency?
 This project can help answer your questions!
-
-|Source on GitHub|_ |Documentation on readthedocs|_ |Conversation on Gitter|_
 
 The example codes in this repository implement the same basic algorithm using
 whichever of the mainstream accelerator programming methods apply. Running the
@@ -342,20 +342,21 @@ the best available for the purpose.
 .. _`Trevor Keller`: mailto::trevor.keller@nist.gov
 .. _Bebop: http://www.lcrc.anl.gov/systems/resources/bebop/
 .. _ccNUMA: https://en.wikipedia.org/wiki/Non-uniform_memory_access#Cache_coherent_NUMA
-.. _`Conversation on Gitter`: https://gitter.im/usnistgov/hiperc?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=body_badge
-.. |Conversation on Gitter| image:: https://badges.gitter.im/usnistgov/hiperc.svg
+.. |Codacy| image:: https://api.codacy.com/project/badge/Grade/651feab686bc400b9aadc180fe0a167f
+.. _Codacy: https://www.codacy.com/app/trevor.keller/hiperc?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=usnistgov/hiperc&amp;utm_campaign=Badge_Grade
 .. _`Contributing Guidelines`: CONTRIBUTING.md
 .. _convolution: https://en.wikipedia.org/wiki/Discrete_Laplace_operator#Image_Processing
 .. _Cori: http://www.nersc.gov/users/computational-systems/cori/
 .. _Cray: http://www.cray.com/
 .. _CUDA: https://developer.nvidia.com/cuda-zone
-.. |Documentation on readthedocs| image:: http://readthedocs.org/projects/hiperc/badge/?version=latest
-.. _`Documentation on readthedocs`: http://hiperc.readthedocs.io/en/latest/?badge=latest
 .. _Doxygen: http://www.stack.nl/~dimitri/doxygen/
 .. _EC2: https://aws.amazon.com/ec2/Elastic-GPUs/
 .. _`file an issue`: https://github.com/usnistgov/hiperc/issues
 .. |`final conc`| image:: common-diffusion/diffusion.10000.png
-.. _Gitter: https://gitter.im/usnistgov/hiperc
+.. |GitHub| image:: https://assets-cdn.github.com/favicon.ico
+.. _GitHub: https://github.com/usnistgov/hiperc
+.. |Gitter| image:: https://badges.gitter.im/usnistgov/hiperc.svg
+.. _Gitter: https://gitter.im/usnistgov/hiperc?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=body_badge
 .. _GNU: https://gcc.gnu.org/
 .. _`hiperc_guide.pdf`: doc/hiperc_guide.pdf
 .. _htop: http://hisham.hm/htop/
@@ -375,10 +376,10 @@ the best available for the purpose.
 .. _PGI: http://www.pgroup.com/
 .. _POSIX: http://www.opengroup.org/austin/papers/posix_faq.html
 .. _radeontop: https://github.com/clbr/radeontop
+.. |readthedocs| image:: http://readthedocs.org/projects/hiperc/badge/?version=latest
+.. _readthedocs: http://hiperc.readthedocs.io/en/latest/?badge=latest
 .. _ScaleX: http://www.rescale.com/products/
 .. _SIMD: https://en.wikipedia.org/wiki/SIMD
-.. |Source on GitHub| image:: https://assets-cdn.github.com/favicon.ico
-.. _`Source on GitHub`: https://github.com/usnistgov/hiperc
 .. _Stampede2: https://www.tacc.utexas.edu/systems/stampede2
 .. _`Threading Building Blocks`: https://www.threadingbuildingblocks.org/
 .. _`Xeon Phi`: https://www.intel.com/content/www/us/en/products/processors/xeon-phi/xeon-phi-processors.html

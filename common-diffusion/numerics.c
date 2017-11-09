@@ -28,7 +28,7 @@
 #include <stdlib.h>
 #include "numerics.h"
 
-void set_mask(fp_t dx, fp_t dy, int code, fp_t** mask_lap, int nm)
+void set_mask(const fp_t dx, const fp_t dy, const int code, fp_t** mask_lap, const int nm)
 {
     switch(code) {
 	    case 53:
@@ -48,7 +48,7 @@ void set_mask(fp_t dx, fp_t dy, int code, fp_t** mask_lap, int nm)
 	assert(nm <= MAX_MASK_H);
 }
 
-void five_point_Laplacian_stencil(fp_t dx, fp_t dy, fp_t** mask_lap, int nm)
+void five_point_Laplacian_stencil(const fp_t dx, const fp_t dy, fp_t** mask_lap, const int nm)
 {
 	assert(nm == 3);
 
@@ -59,7 +59,7 @@ void five_point_Laplacian_stencil(fp_t dx, fp_t dy, fp_t** mask_lap, int nm)
 	mask_lap[2][1] =  1. / (dy * dy); /* lower */
 }
 
-void nine_point_Laplacian_stencil(fp_t dx, fp_t dy, fp_t** mask_lap, int nm)
+void nine_point_Laplacian_stencil(const fp_t dx, const fp_t dy, fp_t** mask_lap, const int nm)
 {
 	assert(nm == 3);
 
@@ -76,7 +76,7 @@ void nine_point_Laplacian_stencil(fp_t dx, fp_t dy, fp_t** mask_lap, int nm)
 	mask_lap[2][2] =   1. / (6. * dx * dy); /* lower-right */
 }
 
-void slow_nine_point_Laplacian_stencil(fp_t dx, fp_t dy, fp_t** mask_lap, int nm)
+void slow_nine_point_Laplacian_stencil(const fp_t dx, const fp_t dy, fp_t** mask_lap, const int nm)
 {
 	assert(nm == 5);
 
@@ -95,30 +95,28 @@ void slow_nine_point_Laplacian_stencil(fp_t dx, fp_t dy, fp_t** mask_lap, int nm
 	mask_lap[4][2] = -1. / (12. * dy * dy); /* lower-lower-middle */
 }
 
-fp_t euclidean_distance(fp_t ax, fp_t ay, fp_t bx, fp_t by)
+fp_t euclidean_distance(const fp_t ax, const fp_t ay, const fp_t bx, const fp_t by)
 {
 	return sqrt((ax - bx) * (ax - bx) + (ay - by) * (ay - by));
 }
 
-fp_t manhattan_distance(fp_t ax, fp_t ay, fp_t bx, fp_t by)
+fp_t manhattan_distance(const fp_t ax, const fp_t ay, const fp_t bx, const fp_t by)
 {
 	return fabs(ax - bx) + fabs(ay - by);
 }
 
-fp_t distance_point_to_segment(fp_t ax, fp_t ay, fp_t bx, fp_t by, fp_t px, fp_t py)
+fp_t distance_point_to_segment(const fp_t ax, const fp_t ay, const fp_t bx, const fp_t by, const fp_t px, const fp_t py)
 {
-	fp_t L2, t, zx, zy;
-
-	L2 = (ax - bx) * (ax - bx) + (ay - by) * (ay - by);
+	const fp_t L2 = (ax - bx) * (ax - bx) + (ay - by) * (ay - by);
 	if (L2 == 0.) /* line segment is just a point */
 		return euclidean_distance(ax, ay, px, py);
-	t = fmax(0., fmin(1., ((px - ax) * (bx - ax) + (py - ay) * (by - ay)) / L2));
-	zx = ax + t * (bx - ax);
-	zy = ay + t * (by - ay);
+	const fp_t t = fmax(0., fmin(1., ((px - ax) * (bx - ax) + (py - ay) * (by - ay)) / L2));
+	const fp_t zx = ax + t * (bx - ax);
+	const fp_t zy = ay + t * (by - ay);
 	return euclidean_distance(px, py, zx, zy);
 }
 
-void analytical_value(fp_t x, fp_t t, fp_t D, fp_t bc[2][2], fp_t* c)
+void analytical_value(const fp_t x, const fp_t t, const fp_t D, fp_t bc[2][2], fp_t* c)
 {
-	*c = bc[1][0] * (1.0 - erf(x / sqrt(4.0 * D * t)));
+	*c = bc[1][0] * erfc(x / sqrt(4.0 * D * t));
 }

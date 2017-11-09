@@ -49,13 +49,13 @@ void report_error(cl_int status, const char* message)
 }
 
 void init_opencl(fp_t** conc_old, fp_t** mask_lap, fp_t bc[2][2],
-               int nx, int ny, int nm, struct OpenCLData* dev)
+               const int nx, const int ny, const int nm, struct OpenCLData* dev)
 {
 	/* Here's a lot of source code required to prepare your accelerator to do work. */
 
-	int gridSize = nx * ny * sizeof(fp_t);
-	int maskSize = nm * nm * sizeof(fp_t);
-	int bcSize = 2 * 2 * sizeof(fp_t);
+	const int gridSize = nx * ny * sizeof(fp_t);
+	const int maskSize = nm * nm * sizeof(fp_t);
+	const int bcSize = 2 * 2 * sizeof(fp_t);
 
 	cl_int status;
 	cl_device_id gpu;

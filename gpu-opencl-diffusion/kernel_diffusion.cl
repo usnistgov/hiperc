@@ -33,11 +33,11 @@
 __kernel void diffusion_kernel(__global fp_t* d_conc_old,
                                __global fp_t* d_conc_new,
                                __global fp_t* d_conc_lap,
-                               int nx,
-                               int ny,
-                               int nm,
-                               fp_t D,
-                               fp_t dt)
+                               const int nx,
+                               const int ny,
+                               const int nm,
+                               const fp_t D,
+                               const fp_t dt)
 {
 	int col, idx, row;
 

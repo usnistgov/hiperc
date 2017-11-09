@@ -33,26 +33,26 @@
 #include "opencl_data.h"
 
 void opencl_diffusion_solver(struct OpenCLData* dev, fp_t** conc_new,
-                             int bx, int by,
-                             int nx, int ny, int nm,
-                             fp_t D, fp_t dt, int checks,
+                             const int bx, const int by,
+                             const int nx, const int ny, const int nm,
+                             const fp_t D, const fp_t dt, const int checks,
                              fp_t *elapsed, struct Stopwatch* sw)
 {
 	double start_time;
 	int check=0;
-	int grid_size = nx * ny * sizeof(fp_t);
+	const int grid_size = nx * ny * sizeof(fp_t);
 	/** Per <a href="https://software.intel.com/sites/landingpage/opencl/optimization-guide/Work-Group_Size_Considerations.htm">
 	 Intel's OpenCL advice</a>, the ideal block size \f$ (bx \times by)\f$ is
 	 within the range from 64 to 128 mesh points. The block size must be an even
 	 power of two: 4, 8, 16, 32, etc. OpenCL will make a best-guess optimal
 	 block size if you set size_t* tile_dim = NULL.
 	*/
-	size_t tile_dim[2] = {bx, by};
-	size_t bloc_dim[2] = {ceil((float)(nx) / (tile_dim[0] - nm + 1)),
-	                      ceil((float)(ny) / (tile_dim[1] - nm + 1))};
-	size_t grid_dim[2] = {bloc_dim[0] * tile_dim[0],
-	                      bloc_dim[1] * tile_dim[1]};
-	size_t buf_size = (tile_dim[0] + nm) * (tile_dim[1] + nm) * sizeof(fp_t);
+	const size_t tile_dim[2] = {bx, by};
+	const size_t bloc_dim[2] = {ceil((float)(nx) / (tile_dim[0] - nm + 1)),
+	                            ceil((float)(ny) / (tile_dim[1] - nm + 1))};
+	const size_t grid_dim[2] = {bloc_dim[0] * tile_dim[0],
+	                            bloc_dim[1] * tile_dim[1]};
+	const size_t buf_size = (tile_dim[0] + nm) * (tile_dim[1] + nm) * sizeof(fp_t);
 
 	cl_mem d_conc_old = dev->conc_old;
 	cl_mem d_conc_new = dev->conc_new;
@@ -131,22 +131,21 @@ void opencl_diffusion_solver(struct OpenCLData* dev, fp_t** conc_new,
 	sw->file += GetTimer() - start_time;
 }
 
-void check_solution(fp_t** conc_new, fp_t** conc_lap, int nx, int ny,
-                    fp_t dx, fp_t dy, int nm, fp_t elapsed, fp_t D,
+void check_solution(fp_t** conc_new, fp_t** conc_lap, const int nx, const int ny,
+                    const fp_t dx, const fp_t dy, const int nm, const fp_t elapsed, const fp_t D,
                     fp_t bc[2][2], fp_t* rss)
 {
 	fp_t sum=0.;
 
 	#pragma omp parallel reduction(+:sum)
 	{
-		int i, j;
-		fp_t r, cal, car, ca, cn;
+		fp_t r, cal, car;
 
-		#pragma omp for collapse(2) private(ca,cal,car,cn,i,j,r)
-		for (j = nm/2; j < ny-nm/2; j++) {
-			for (i = nm/2; i < nx-nm/2; i++) {
+		#pragma omp for collapse(2) private(cal,car,r)
+		for (int j = nm/2; j < ny-nm/2; j++) {
+			for (int i = nm/2; i < nx-nm/2; i++) {
 				/* numerical solution */
-				cn = conc_new[j][i];
+				const fp_t cn = conc_new[j][i];
 
 				/* shortest distance to left-wall source */
 				r = distance_point_to_segment(dx * (nm/2), dy * (nm/2),
@@ -161,16 +160,16 @@ void check_solution(fp_t** conc_new, fp_t** conc_lap, int nx, int ny,
 				analytical_value(r, elapsed, D, bc, &car);
 
 				/* superposition of analytical solutions */
-				ca = cal + car;
+				const fp_t ca = cal + car;
 
 				/* residual sum of squares (RSS) */
 				conc_lap[j][i] = (ca - cn) * (ca - cn) / (fp_t)((nx-1-nm/2) * (ny-1-nm/2));
 			}
 		}
 
-		#pragma omp for collapse(2) private(i,j)
-		for (j = nm/2; j < ny-nm/2; j++) {
-			for (i = nm/2; i < nx-nm/2; i++) {
+		#pragma omp for collapse(2)
+		for (int j = nm/2; j < ny-nm/2; j++) {
+			for (int i = nm/2; i < nx-nm/2; i++) {
 				sum += conc_lap[j][i];
 			}
 		}

@@ -51,12 +51,12 @@ void print_progress(const int step, const int steps);
 /**
  \brief Writes scalar composition field to diffusion.???????.csv
 */
-void write_csv(fp_t** conc, int nx, int ny, fp_t dx, fp_t dy, int step);
+void write_csv(fp_t** conc, const int nx, const int ny, const fp_t dx, const fp_t dy, const int step);
 
 /**
  \brief Writes scalar composition field to diffusion.???????.png
 */
-void write_png(fp_t** conc, int nx, int ny, int step);
+void write_png(fp_t** conc, const int nx, const int ny, const int step);
 
 /** \cond SuppressGuard */
 #endif /* _OUTPUT_H_ */

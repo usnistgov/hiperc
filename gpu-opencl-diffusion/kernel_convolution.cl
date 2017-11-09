@@ -48,33 +48,27 @@ __kernel void convolution_kernel(__global   fp_t* d_conc_old,
                                  __global   fp_t* d_conc_lap,
                                  __constant fp_t* d_mask,
                                  __local    fp_t* d_conc_tile,
-                                 int nx,
-                                 int ny,
-                                 int nm)
+                                 const int nx,
+                                 const int ny,
+                                 const int nm)
 {
-	int i, j;
-	int dst_nx, dst_ny, dst_x, dst_y;
-	int src_nx, src_ny, src_x, src_y;
-	int til_nx, til_x, til_y;
-	fp_t value = 0.;
-
 	/* source tile includes the halo cells, destination tile does not */
-	src_ny = get_local_size(0);
-	src_nx = get_local_size(1);
-	til_nx = src_nx;
+	const int src_ny = get_local_size(0);
+	const int src_nx = get_local_size(1);
+	const int til_nx = src_nx;
 
-	dst_ny = src_ny - nm + 1;
-	dst_nx = src_nx - nm + 1;
+	const int dst_ny = src_ny - nm + 1;
+	const int dst_nx = src_nx - nm + 1;
 
 	/* determine indices on which to operate */
-	til_x = get_local_id(0);
-	til_y = get_local_id(1);
+	const int til_x = get_local_id(0);
+	const int til_y = get_local_id(1);
 
-	dst_x = get_group_id(0) * dst_ny + til_x;
-	dst_y = get_group_id(1) * dst_nx + til_y;
+	const int dst_x = get_group_id(0) * dst_ny + til_x;
+	const int dst_y = get_group_id(1) * dst_nx + til_y;
 
-	src_x = dst_x - nm/2;
-	src_y = dst_y - nm/2;
+	const int src_x = dst_x - nm/2;
+	const int src_y = dst_y - nm/2;
 
 	if (src_x >= 0 && src_x < nx &&
 	    src_y >= 0 && src_y < ny) {
@@ -86,8 +80,9 @@ __kernel void convolution_kernel(__global   fp_t* d_conc_old,
 
 	/* compute the convolution */
 	if (til_x < dst_ny && til_y < dst_nx) {
-		for (j = 0; j < nm; j++) {
-			for (i = 0; i < nm; i++) {
+		fp_t value = 0.;
+		for (int j = 0; j < nm; j++) {
+			for (int i = 0; i < nm; i++) {
 				value += d_mask[nm * j + i] * d_conc_tile[til_nx * (til_y+j) + til_x+i];
 			}
 		}

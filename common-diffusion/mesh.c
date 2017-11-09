@@ -27,9 +27,9 @@
 #include "mesh.h"
 
 void make_arrays(fp_t*** conc_old, fp_t*** conc_new, fp_t*** conc_lap, fp_t*** mask_lap,
-                 int nx, int ny, int nm)
+                 const int nx, const int ny, const int nm)
 {
-	int j;
+	int i;
 
 	/* create 2D pointers */
 	*conc_old = (fp_t **)calloc(nx, sizeof(fp_t *));
@@ -44,14 +44,14 @@ void make_arrays(fp_t*** conc_old, fp_t*** conc_new, fp_t*** conc_lap, fp_t*** m
 	(*mask_lap)[0] = (fp_t *)calloc(nm * nm, sizeof(fp_t));
 
 	/* map 2D pointers onto 1D data */
-	for (j = 1; j < ny; j++) {
-		(*conc_old)[j] = &(*conc_old[0])[nx * j];
-		(*conc_new)[j] = &(*conc_new[0])[nx * j];
-		(*conc_lap)[j] = &(*conc_lap[0])[nx * j];
+	for (i = 1; i < ny; i++) {
+		(*conc_old)[i] = &(*conc_old[0])[nx * i];
+		(*conc_new)[i] = &(*conc_new[0])[nx * i];
+		(*conc_lap)[i] = &(*conc_lap[0])[nx * i];
 	}
 
-	for (j = 1; j < nm; j++) {
-		(*mask_lap)[j] = &(*mask_lap[0])[nm * j];
+	for (i = 1; i < nm; i++) {
+		(*mask_lap)[i] = &(*mask_lap[0])[nm * i];
 	}
 }
 

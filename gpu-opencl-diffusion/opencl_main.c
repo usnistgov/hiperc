@@ -50,12 +50,12 @@ int main(int argc, char* argv[])
 	/* declare default mesh size and resolution */
 	fp_t **conc_old, **conc_new, **conc_lap, **mask_lap;
 	int bx=32, by=32, nx=512, ny=512, nm=3, code=53;
-	fp_t dx=0.5, dy=0.5, h=0.5;
+	fp_t dx=0.5, dy=0.5, h;
 	fp_t bc[2][2];
 
 	/* declare default materials and numerical parameters */
 	fp_t D=0.00625, linStab=0.1, dt=1., elapsed=0., rss=0.;
-	int i=0, step=0, steps=100000, checks=10000;
+	int step=0, steps=100000, checks=10000;
 	double start_time=0.;
 	struct Stopwatch sw = {0., 0., 0., 0.};
 
@@ -111,7 +111,7 @@ int main(int argc, char* argv[])
 
 		opencl_diffusion_solver(&dev, conc_new, bx, by, nx, ny, nm, D, dt, checks, &elapsed, &sw);
 
-		for (i = 0; i < checks; i++) {
+		for (int i = 0; i < checks; i++) {
 			step++;
 			print_progress(step, steps);
 		}

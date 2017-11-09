@@ -38,15 +38,15 @@
  purpose: as long as the dimensions \a nx, \a ny, and \a nm are properly specified,
  the convolution will be correctly computed.
 */
-void compute_convolution(fp_t** conc_old, fp_t** conc_lap, fp_t** mask_lap,
-                         int nx, int ny, int nm);
+void compute_convolution(fp_t** const conc_old, fp_t** conc_lap, fp_t** const mask_lap,
+                         const int nx, const int ny, const int nm);
 
 /**
  \brief Update the scalar composition field using old and Laplacian values
 */
 void solve_diffusion_equation(fp_t** conc_old, fp_t** conc_new, fp_t** conc_lap,
-                              fp_t** mask_lap, int nx, int ny, int nm,
-                              fp_t bc[2][2], fp_t D, fp_t dt, int checks,
+                              fp_t** mask_lap, const int nx, const int ny, const int nm,
+                              fp_t bc[2][2], const fp_t D, const fp_t dt, const int checks,
                               fp_t *elapsed, struct Stopwatch* sw);
 
 /**
@@ -56,8 +56,9 @@ void solve_diffusion_equation(fp_t** conc_old, fp_t** conc_new, fp_t** conc_lap,
  Overwrites \a conc_lap, into which the point-wise RSS is written.
  Normalized RSS is then computed as the sum of the point-wise values.
 */
-void check_solution(fp_t** conc_new, fp_t** conc_lap, int nx, int ny, fp_t dx, fp_t dy,
-                    int nm, fp_t elapsed, fp_t D, fp_t bc[2][2], fp_t* rss);
+void check_solution(fp_t** conc_new, fp_t** conc_lap, const int nx, const int ny,
+                    const fp_t dx, const fp_t dy, const int nm,
+                    const fp_t elapsed, const fp_t D, fp_t bc[2][2], fp_t* rss);
 
 /** \cond SuppressGuard */
 #endif /* _DISCRETIZATION_H_ */

@@ -35,32 +35,32 @@ __constant__ fp_t d_bc[2][2];
 
 void set_boundaries(fp_t bc[2][2])
 {
+	/* Change these values to your liking: */
 	fp_t clo = 0.0, chi = 1.0;
+
 	bc[0][0] = clo; /* bottom boundary */
 	bc[0][1] = clo; /* top boundary */
 	bc[1][0] = chi; /* left boundary */
 	bc[1][1] = chi; /* right boundary */
 }
 
-void apply_initial_conditions(fp_t** conc, int nx, int ny, int nm, fp_t bc[2][2])
+void apply_initial_conditions(fp_t** conc, const int nx, const int ny, const int nm, fp_t bc[2][2])
 {
 	#pragma omp parallel
 	{
-		int i, j;
-
 		#pragma omp for collapse(2)
-		for (j = 0; j < ny; j++)
-			for (i = 0; i < nx; i++)
+		for (int j = 0; j < ny; j++)
+			for (int i = 0; i < nx; i++)
 				conc[j][i] = bc[0][0];
 
 		#pragma omp for collapse(2)
-		for (j = 0; j < ny/2; j++)
-			for (i = 0; i < 1+nm/2; i++)
+		for (int j = 0; j < ny/2; j++)
+			for (int i = 0; i < 1+nm/2; i++)
 				conc[j][i] = bc[1][0]; /* left half-wall */
 
 		#pragma omp for collapse(2)
-		for (j = ny/2; j < ny; j++)
-			for (i = nx-1-nm/2; i < nx; i++)
+		for (int j = ny/2; j < ny; j++)
+			for (int i = nx-1-nm/2; i < nx; i++)
 				conc[j][i] = bc[1][1]; /* right half-wall */
 	}
 }
@@ -70,16 +70,12 @@ __global__ void boundary_kernel(fp_t* d_conc,
                                 const int ny,
                                 const int nm)
 {
-	int tx, ty, row, col;
-	int ihi, ilo, jhi, jlo, offset;
-
 	/* determine indices on which to operate */
+	const int tx = threadIdx.x;
+	const int ty = threadIdx.y;
 
-	tx = threadIdx.x;
-	ty = threadIdx.y;
-
-	row = blockDim.y * blockIdx.y + ty;
-	col = blockDim.x * blockIdx.x + tx;
+	const int row = blockDim.y * blockIdx.y + ty;
+	const int col = blockDim.x * blockIdx.x + tx;
 
 	/* apply fixed boundary values: sequence does not matter */
 
@@ -96,11 +92,11 @@ __global__ void boundary_kernel(fp_t* d_conc,
 
 	/* apply no-flux boundary conditions: inside to out, sequence matters */
 
-	for (offset = 0; offset < nm/2; offset++) {
-		ilo = nm/2 - offset;
-		ihi = nx - 1 - nm/2 + offset;
-		jlo = nm/2 - offset;
-		jhi = ny - 1 - nm/2 + offset;
+	for (int offset = 0; offset < nm/2; offset++) {
+		const int ilo = nm/2 - offset;
+		const int ihi = nx - 1 - nm/2 + offset;
+		const int jlo = nm/2 - offset;
+		const int jhi = ny - 1 - nm/2 + offset;
 
 		if (ilo-1 == col && row < ny) {
 			d_conc[row * nx + ilo-1] = d_conc[row * nx + ilo]; /* left condition */

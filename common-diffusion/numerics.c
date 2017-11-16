@@ -95,17 +95,21 @@ void slow_nine_point_Laplacian_stencil(const fp_t dx, const fp_t dy, fp_t** mask
 	mask_lap[4][2] = -1. / (12. * dy * dy); /* lower-lower-middle */
 }
 
-fp_t euclidean_distance(const fp_t ax, const fp_t ay, const fp_t bx, const fp_t by)
+fp_t euclidean_distance(const fp_t ax, const fp_t ay,
+						const fp_t bx, const fp_t by)
 {
 	return sqrt((ax - bx) * (ax - bx) + (ay - by) * (ay - by));
 }
 
-fp_t manhattan_distance(const fp_t ax, const fp_t ay, const fp_t bx, const fp_t by)
+fp_t manhattan_distance(const fp_t ax, const fp_t ay,
+						const fp_t bx, const fp_t by)
 {
 	return fabs(ax - bx) + fabs(ay - by);
 }
 
-fp_t distance_point_to_segment(const fp_t ax, const fp_t ay, const fp_t bx, const fp_t by, const fp_t px, const fp_t py)
+fp_t distance_point_to_segment(const fp_t ax, const fp_t ay,
+							   const fp_t bx, const fp_t by,
+							   const fp_t px, const fp_t py)
 {
 	const fp_t L2 = (ax - bx) * (ax - bx) + (ay - by) * (ay - by);
 	if (L2 == 0.) /* line segment is just a point */
@@ -116,7 +120,7 @@ fp_t distance_point_to_segment(const fp_t ax, const fp_t ay, const fp_t bx, cons
 	return euclidean_distance(px, py, zx, zy);
 }
 
-void analytical_value(const fp_t x, const fp_t t, const fp_t D, fp_t bc[2][2], fp_t* c)
+void analytical_value(const fp_t x, const fp_t t, const fp_t D, fp_t* c)
 {
-	*c = bc[1][0] * erfc(x / sqrt(4.0 * D * t));
+	*c = erfc(x / sqrt(4.0 * D * t));
 }

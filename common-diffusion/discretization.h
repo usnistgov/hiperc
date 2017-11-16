@@ -46,7 +46,7 @@ void compute_convolution(fp_t** const conc_old, fp_t** conc_lap, fp_t** const ma
 */
 void solve_diffusion_equation(fp_t** conc_old, fp_t** conc_new, fp_t** conc_lap,
                               fp_t** mask_lap, const int nx, const int ny, const int nm,
-                              fp_t bc[2][2], const fp_t D, const fp_t dt, const int checks,
+                              const fp_t D, const fp_t dt, const int checks,
                               fp_t *elapsed, struct Stopwatch* sw);
 
 /**
@@ -58,7 +58,7 @@ void solve_diffusion_equation(fp_t** conc_old, fp_t** conc_new, fp_t** conc_lap,
 */
 void check_solution(fp_t** conc_new, fp_t** conc_lap, const int nx, const int ny,
                     const fp_t dx, const fp_t dy, const int nm,
-                    const fp_t elapsed, const fp_t D, fp_t bc[2][2], fp_t* rss);
+                    const fp_t elapsed, const fp_t D, fp_t* rss);
 
 /** \cond SuppressGuard */
 #endif /* _DISCRETIZATION_H_ */

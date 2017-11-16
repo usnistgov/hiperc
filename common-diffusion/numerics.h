@@ -86,12 +86,14 @@ void slow_nine_point_Laplacian_stencil(const fp_t dx, const fp_t dy, fp_t** mask
 /**
  \brief Compute Euclidean distance between two points, \a a and \a b
 */
-fp_t euclidean_distance(const fp_t ax, const fp_t ay, const fp_t bx, const fp_t by);
+fp_t euclidean_distance(const fp_t ax, const fp_t ay,
+                        const fp_t bx, const fp_t by);
 
 /**
  \brief Compute Manhattan distance between two points, \a a and \a b
 */
-fp_t manhattan_distance(const fp_t ax, const fp_t ay, const fp_t bx, const fp_t by);
+fp_t manhattan_distance(const fp_t ax, const fp_t ay,
+                        const fp_t bx, const fp_t by);
 
 /**
  \brief Compute minimum distance from point \a p to a line segment bounded by points \a a and \a b
@@ -100,7 +102,9 @@ fp_t manhattan_distance(const fp_t ax, const fp_t ay, const fp_t bx, const fp_t 
  projected range to [0, 1] to handle projections that fall outside of \a ab.
  Implemented after Grumdrig on Stackoverflow, https://stackoverflow.com/a/1501725.
 */
-fp_t distance_point_to_segment(const fp_t ax, const fp_t ay, const fp_t bx, const fp_t by, const fp_t px, const fp_t py);
+fp_t distance_point_to_segment(const fp_t ax, const fp_t ay,
+                               const fp_t bx, const fp_t by,
+                               const fp_t px, const fp_t py);
 
 /**
  \brief Analytical solution of the diffusion equation for a carburizing process
@@ -112,7 +116,7 @@ fp_t distance_point_to_segment(const fp_t ax, const fp_t ay, const fp_t bx, cons
  which reduces, when \f$ c_{\infty} = 0 \f$, to
  \f[ c(x,t) = c_0\left[1 - \mathrm{erf}\left(\frac{x}{\sqrt{4Dt}}\right)\right]. \f]
 */
-void analytical_value(const fp_t x, const fp_t t, const fp_t D, fp_t bc[2][2], fp_t* c);
+void analytical_value(const fp_t x, const fp_t t, const fp_t D, fp_t* c);
 
 /** \cond SuppressGuard */
 #endif /* _NUMERICS_H_ */

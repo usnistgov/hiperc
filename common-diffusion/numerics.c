@@ -124,3 +124,55 @@ void analytical_value(const fp_t x, const fp_t t, const fp_t D, fp_t* c)
 {
 	*c = erfc(x / sqrt(4.0 * D * t));
 }
+
+void check_solution(fp_t** conc_new, fp_t** conc_lap, const int nx, const int ny, const fp_t dx, const fp_t dy, const int nm,
+                    const fp_t elapsed, const fp_t D, fp_t* rss)
+{
+	fp_t sum=0.;
+
+	#ifdef __OPENMP
+	#pragma omp parallel reduction(+:sum)
+	{
+		#pragma omp for collapse(2)
+	#endif
+		for (int j = nm/2; j < ny-nm/2; j++) {
+			for (int i = nm/2; i < nx-nm/2; i++) {
+				fp_t cal, car, r;
+
+				/* numerical solution */
+				const fp_t cn = conc_new[j][i];
+
+				/* shortest distance to left-wall source */
+				r = distance_point_to_segment(dx * (nm/2), dy * (nm/2),
+				                              dx * (nm/2), dy * (ny/2),
+				                              dx * i, dy * j);
+				analytical_value(r, elapsed, D, &cal);
+
+				/* shortest distance to right-wall source */
+				r = distance_point_to_segment(dx * (nx-1-nm/2), dy * (ny/2),
+				                              dx * (nx-1-nm/2), dy * (ny-1-nm/2),
+				                              dx * i, dy * j);
+				analytical_value(r, elapsed, D, &car);
+
+				/* superposition of analytical solutions */
+				const fp_t ca = cal + car;
+
+				/* residual sum of squares (RSS) */
+				conc_lap[j][i] = (ca - cn) * (ca - cn) / (fp_t)((nx-1-nm/2) * (ny-1-nm/2));
+			}
+		}
+
+		#ifdef __OPENMP
+		#pragma omp for collapse(2)
+		#endif
+		for (int j = nm/2; j < ny-nm/2; j++) {
+			for (int i = nm/2; i < nx-nm/2; i++) {
+				sum += conc_lap[j][i];
+			}
+		}
+	#ifdef __OPENMP
+	}
+	#endif
+
+	*rss = sum;
+}

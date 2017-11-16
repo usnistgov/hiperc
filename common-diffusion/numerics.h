@@ -84,6 +84,25 @@ void nine_point_Laplacian_stencil(const fp_t dx, const fp_t dy, fp_t** mask_lap,
 void slow_nine_point_Laplacian_stencil(const fp_t dx, const fp_t dy, fp_t** mask_lap, const int nm);
 
 /**
+   \brief Perform the convolution of the mask matrix with the composition matrix
+
+   If the convolution mask is the Laplacian stencil, the convolution evaluates
+   the discrete Laplacian of the composition field. Other masks are possible, for
+   example the Sobel filters for edge detection. This function is general
+   purpose: as long as the dimensions \a nx, \a ny, and \a nm are properly specified,
+   the convolution will be correctly computed.
+*/
+void compute_convolution(fp_t** const conc_old, fp_t** conc_lap, fp_t** const mask_lap,
+                         const int nx, const int ny, const int nm);
+
+/**
+   \brief Update composition field using explicit Euler discretization (forward-time centered space)
+*/
+void update_composition(fp_t** conc_old, fp_t** conc_lap, fp_t** conc_new,
+				   const int nx, const int ny, const int nm,
+				   const fp_t D, const fp_t dt);
+
+/**
  \brief Compute Euclidean distance between two points, \a a and \a b
 */
 fp_t euclidean_distance(const fp_t ax, const fp_t ay,
@@ -117,6 +136,17 @@ fp_t distance_point_to_segment(const fp_t ax, const fp_t ay,
  \f[ c(x,t) = c_0\left[1 - \mathrm{erf}\left(\frac{x}{\sqrt{4Dt}}\right)\right]. \f]
 */
 void analytical_value(const fp_t x, const fp_t t, const fp_t D, fp_t* c);
+
+/**
+   \brief Compare numerical and analytical solutions of the diffusion equation
+   \return Residual sum of squares (RSS), normalized to the domain size.
+
+   Overwrites \a conc_lap, into which the point-wise RSS is written.
+   Normalized RSS is then computed as the sum of the point-wise values.
+*/
+void check_solution(fp_t** conc_new, fp_t** conc_lap, const int nx, const int ny,
+                    const fp_t dx, const fp_t dy, const int nm,
+                    const fp_t elapsed, const fp_t D, fp_t* rss);
 
 /** \cond SuppressGuard */
 #endif /* _NUMERICS_H_ */

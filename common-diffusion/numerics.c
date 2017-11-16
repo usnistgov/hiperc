@@ -129,14 +129,15 @@ void check_solution(fp_t** conc_new, fp_t** conc_lap, const int nx, const int ny
                     const fp_t elapsed, const fp_t D, fp_t* rss)
 {
 	fp_t sum=0.;
+	int i, j;
 
 	#ifdef __OPENMP
 	#pragma omp parallel reduction(+:sum)
 	{
-		#pragma omp for collapse(2)
+		#pragma omp for collapse(2) private (i,j)
 	#endif
-		for (int j = nm/2; j < ny-nm/2; j++) {
-			for (int i = nm/2; i < nx-nm/2; i++) {
+		for (j = nm/2; j < ny-nm/2; j++) {
+			for (i = nm/2; i < nx-nm/2; i++) {
 				fp_t cal, car, r;
 
 				/* numerical solution */
@@ -163,10 +164,10 @@ void check_solution(fp_t** conc_new, fp_t** conc_lap, const int nx, const int ny
 		}
 
 		#ifdef __OPENMP
-		#pragma omp for collapse(2)
+		#pragma omp for collapse(2) private(i,j)
 		#endif
-		for (int j = nm/2; j < ny-nm/2; j++) {
-			for (int i = nm/2; i < nx-nm/2; i++) {
+		for (j = nm/2; j < ny-nm/2; j++) {
+			for (i = nm/2; i < nx-nm/2; i++) {
 				sum += conc_lap[j][i];
 			}
 		}

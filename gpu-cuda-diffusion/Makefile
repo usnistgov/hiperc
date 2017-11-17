@@ -9,19 +9,19 @@ LINKS = -lm -lpng -lcuda
 OBJS = boundaries.o data.o discretization.o mesh.o numerics.o output.o timer.o
 
 # Executable
-diffusion: cuda_main.c $(OBJS)
+diffusion: cuda_main.cu $(OBJS)
 	$(NVCXX) $(NVCXXFLAGS) $(OBJS) $< -o $@ $(LINKS)
 
 # CUDA objects
 
 boundaries.o: cuda_boundaries.cu
-	$(NVCXX) $(NVCXXFLAGS) -dc $< -o $@
+	$(NVCXX) $(NVCXXFLAGS) -c $< -o $@
 
 data.o: cuda_data.cu
-	$(NVCXX) $(NVCXXFLAGS) -dc $< -o $@
+	$(NVCXX) $(NVCXXFLAGS) -c $< -o $@
 
 discretization.o: cuda_discretization.cu
-	$(NVCXX) $(NVCXXFLAGS) -dc $< -o $@
+	$(NVCXX) $(NVCXXFLAGS) -c $< -o $@
 
 # Common objects
 

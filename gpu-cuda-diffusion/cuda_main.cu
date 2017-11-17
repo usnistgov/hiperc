@@ -27,10 +27,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <cuda.h>
 
+extern "C" {
 /* common includes */
 #include "boundaries.h"
-#include "discretization.h"
 #include "mesh.h"
 #include "numerics.h"
 #include "output.h"
@@ -38,6 +39,9 @@
 
 /* specific includes */
 #include "cuda_data.h"
+/* #include "cuda_kernels.cuh" */
+}
+
 
 /**
  \brief Run simulation using input parameters specified on the command line
@@ -50,13 +54,12 @@ int main(int argc, char* argv[])
 	fp_t **conc_old, **conc_new, **conc_lap, **mask_lap;
 	int bx=32, by=32, nx=512, ny=512, nm=3, code=53;
 	fp_t dx=0.5, dy=0.5, h;
-	fp_t bc[2][2];
 
 	/* declare default materials and numerical parameters */
 	fp_t D=0.00625, linStab=0.1, dt=1., elapsed=0., rss=0.;
-	int i, step=0, steps=100000, checks=10000;
+	int step=0, steps=100000, checks=10000;
 	double start_time=0.;
-	struct Stopwatch sw = {0., 0., 0., 0.};
+	struct Stopwatch watch = {0., 0., 0., 0.};
 
 	StartTimer();
 
@@ -68,15 +71,16 @@ int main(int argc, char* argv[])
 	/* initialize memory */
 	make_arrays(&conc_old, &conc_new, &conc_lap, &mask_lap, nx, ny, nm);
 	set_mask(dx, dy, code, mask_lap, nm);
-	set_boundaries(bc);
+
+	print_progress(0, steps);
 
 	start_time = GetTimer();
-	apply_initial_conditions(conc_old, nx, ny, nm, bc);
-	sw.step = GetTimer() - start_time;
+	apply_initial_conditions(conc_old, nx, ny, nm);
+	watch.step = GetTimer() - start_time;
 
 	/* initialize GPU */
 	struct CudaData dev;
-	init_cuda(conc_old, mask_lap, bc, nx, ny, nm, &dev);
+	init_cuda(conc_old, mask_lap, nx, ny, nm, &dev);
 
 	/* write initial condition data */
 	start_time = GetTimer();
@@ -88,45 +92,73 @@ int main(int argc, char* argv[])
 		printf("Error: unable to %s for output. Check permissions.\n", "runlog.csv");
 		exit(-1);
 	}
-	sw.file = GetTimer() - start_time;
+	watch.file = GetTimer() - start_time;
 
 	fprintf(output, "iter,sim_time,wrss,conv_time,step_time,IO_time,soln_time,run_time\n");
-	fprintf(output, "%i,%f,%f,%f,%f,%f,%f,%f\n", step, elapsed, rss, sw.conv, sw.step, sw.file, sw.soln, GetTimer());
+	fprintf(output, "%i,%f,%f,%f,%f,%f,%f,%f\n", step, elapsed, rss,
+			watch.conv, watch.step, watch.file, watch.soln, GetTimer());
 	fflush(output);
 
-	/* Note: block is equivalent to a typical
-	  for (int step=1; step < steps+1; step++),
-	  1-indexed so as not to overwrite the initial condition image,
-	  but the loop-internals are farmed out to a coprocessor.
-	  So we use a while loop instead. */
-
 	/* do the work */
-	step = 0;
-	print_progress(step, steps);
-	while (step < steps) {
-		if (checks > steps - step)
-			checks = steps - step;
+	for (step = 1; step < steps+1; step++) {
+		print_progress(step, steps);
 
-		assert(step + checks <= steps);
+		/* === Start Architecture-Specific Kernel === */
+		/* divide matrices into blocks of bx * by threads */
+		dim3 tile_size(bx, by, 1);
+		dim3 num_tiles(ceil(float(nx) / (tile_size.x - nm + 1)),
+					   ceil(float(ny) / (tile_size.y - nm + 1)),
+					   1);
+		size_t buf_size = (tile_size.x + nm) * (tile_size.y + nm) * sizeof(fp_t);
 
-		cuda_diffusion_solver(&dev, conc_new, bc, bx, by, nm, nx, ny, D, dt, checks, &elapsed, &sw);
+		/* apply boundary conditions */
+		apply_boundary_conditions<<<num_tiles,tile_size>>> (dev.conc_old,
+															nx, ny, nm);
 
-		for (i = 0; i < checks; i++) {
-			step++;
-			print_progress(step, steps);
+		/* compute Laplacian */
+		start_time = GetTimer();
+		compute_convolution<<<num_tiles,tile_size,buf_size>>> (dev.conc_old,
+                                                               dev.conc_lap,
+															   nx, ny, nm);
+		watch.conv += GetTimer() - start_time;
+
+		/* compute result */
+		start_time = GetTimer();
+		update_composition<<<num_tiles,tile_size>>> (dev.conc_old,
+                                                     dev.conc_new,
+                                                     dev.conc_lap,
+													 nx, ny, nm, D, dt);
+		watch.step += GetTimer() - start_time;
+
+		swap_pointers_1D(&(dev.conc_old), &(dev.conc_new));
+		elapsed += dt * checks;
+
+		/* === Finish Architecture-Specific Kernel === */
+
+		if (step % checks == 0) {
+			/* transfer result to host (conc_new) from device (dev.conc_old) */
+			start_time = GetTimer();
+			cudaMemcpy(conc_new[0], dev.conc_old, nx * ny * sizeof(fp_t), cudaMemcpyDeviceToHost);
+			watch.file += GetTimer() - start_time;
+
+			start_time = GetTimer();
+			write_png(conc_new, nx, ny, step);
+			watch.file += GetTimer() - start_time;
+
+			start_time = GetTimer();
+			check_solution(conc_new, conc_lap, nx, ny, dx, dy, nm, elapsed, D, &rss);
+			watch.soln += GetTimer() - start_time;
+
+			fprintf(output, "%i,%f,%f,%f,%f,%f,%f,%f\n", step, elapsed, rss,
+					watch.conv, watch.step, watch.file, watch.soln, GetTimer());
+			fflush(output);
 		}
-
-		start_time = GetTimer();
-		write_png(conc_new, nx, ny, step);
-		sw.file += GetTimer() - start_time;
-
-		start_time = GetTimer();
-		check_solution(conc_new, conc_lap, nx, ny, dx, dy, nm, elapsed, D, bc, &rss);
-		sw.soln += GetTimer() - start_time;
-
-		fprintf(output, "%i,%f,%f,%f,%f,%f,%f,%f\n", step, elapsed, rss, sw.conv, sw.step, sw.file, sw.soln, GetTimer());
-		fflush(output);
 	}
+
+	/* transfer result to host (conc_new) from device (dev.conc_old) */
+	start_time = GetTimer();
+	cudaMemcpy(conc_new[0], dev.conc_old, nx * ny * sizeof(fp_t), cudaMemcpyDeviceToHost);
+	watch.file += GetTimer() - start_time;
 
 	write_csv(conc_new, nx, ny, dx, dy, step);
 

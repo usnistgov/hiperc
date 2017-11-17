@@ -30,7 +30,7 @@
 #include "type.h"
 
 /**
- \brief Container for GPU array pointers and parameters
+ \brief Container for pointers to arrays on the GPU
 */
 struct CudaData {
 	fp_t* conc_old;
@@ -41,17 +41,8 @@ struct CudaData {
 /**
  \brief Initialize CUDA device memory before marching
 */
-void init_cuda(fp_t** conc_old, fp_t** mask_lap, fp_t bc[2][2],
+void init_cuda(fp_t** conc_old, fp_t** mask_lap,
                const int nx, const int ny, const int nm, struct CudaData* dev);
-
-/**
- \brief Specialization of solve_diffusion_equation() using CUDA
-*/
-void cuda_diffusion_solver(struct CudaData* dev, fp_t** conc_new,
-                           fp_t bc[2][2], const int bx, const int by,
-                           const int nm, const int nx, const int ny,
-                           const fp_t D, const fp_t dt, const int checks,
-                           fp_t *elapsed, struct Stopwatch* sw);
 
 /**
  \brief Free CUDA device memory after marching

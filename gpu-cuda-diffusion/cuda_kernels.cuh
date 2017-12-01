@@ -37,20 +37,13 @@ extern "C" {
 __constant__ extern fp_t d_mask[MAX_MASK_W * MAX_MASK_H];
 
 /**
- \brief Boundary condition array on the GPU, allocated in protected memory
-*/
-__constant__ extern fp_t d_bc[2][2];
-
-/**
  \brief Boundary condition kernel for execution on the GPU
 
  This function accesses 1D data rather than the 2D array representation of the
  scalar composition field
 */
 __global__ void boundary_kernel(fp_t* conc,
-                                const int nx,
-                                const int ny,
-                                const int nm);
+                                const int nx, const int ny, const int nm);
 
 /**
  \brief Tiled convolution algorithm for execution on the GPU
@@ -76,7 +69,11 @@ __global__ void convolution_kernel(fp_t* conc_old,
  \brief Vector addition algorithm for execution on the GPU
 
  This function accesses 1D data rather than the 2D array representation of the
- scalar composition field
+ scalar composition field. Memory allocation, data transfer, and array release
+ are handled in cuda_init(), with arrays on the host and device managed through
+ CudaData, which is a struct passed by reference into the function. In this way,
+ device kernels can be called in isolation without incurring the cost of data
+ transfers and with reduced risk of memory leaks.
 */
 __global__ void diffusion_kernel(fp_t* conc_old,
                                  fp_t* conc_new,

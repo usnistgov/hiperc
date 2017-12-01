@@ -29,7 +29,6 @@
 #include <string.h>
 #include <cuda.h>
 
-extern "C" {
 /* common includes */
 #include "boundaries.h"
 #include "mesh.h"
@@ -39,9 +38,21 @@ extern "C" {
 
 /* specific includes */
 #include "cuda_data.h"
-/* #include "cuda_kernels.cuh" */
-}
 
+extern void tiled_boundary_conditions(fp_t* conc,
+                               const int nx, const int ny, const int nm,
+                               const int bx, const int by);
+
+extern void compute_convolution_tiled(fp_t* conc_old, fp_t* conc_lap,
+                               const int nx, const int ny, const int nm,
+                               const int bx, const int by);
+
+extern void update_composition_tiled(fp_t* conc_old, fp_t* conc_new, fp_t* conc_lap,
+							  const int nx, const int ny, const int nm,
+							  const int bx, const int by,
+							  const fp_t D, const fp_t dt);
+
+extern void read_out_result(fp_t* conc, fp_t* d_conc, const int nx, const int ny);
 
 /**
  \brief Run simulation using input parameters specified on the command line
@@ -104,30 +115,14 @@ int main(int argc, char* argv[])
 		print_progress(step, steps);
 
 		/* === Start Architecture-Specific Kernel === */
-		/* divide matrices into blocks of bx * by threads */
-		dim3 tile_size(bx, by, 1);
-		dim3 num_tiles(ceil(float(nx) / (tile_size.x - nm + 1)),
-					   ceil(float(ny) / (tile_size.y - nm + 1)),
-					   1);
-		size_t buf_size = (tile_size.x + nm) * (tile_size.y + nm) * sizeof(fp_t);
+		tiled_boundary_conditions(dev.conc_old,	nx, ny, nm, bx, by);
 
-		/* apply boundary conditions */
-		apply_boundary_conditions<<<num_tiles,tile_size>>> (dev.conc_old,
-															nx, ny, nm);
-
-		/* compute Laplacian */
 		start_time = GetTimer();
-		compute_convolution<<<num_tiles,tile_size,buf_size>>> (dev.conc_old,
-                                                               dev.conc_lap,
-															   nx, ny, nm);
+		compute_convolution_tiled(dev.conc_old, dev.conc_lap, nx, ny, nm, bx, by);
 		watch.conv += GetTimer() - start_time;
 
-		/* compute result */
 		start_time = GetTimer();
-		update_composition<<<num_tiles,tile_size>>> (dev.conc_old,
-                                                     dev.conc_new,
-                                                     dev.conc_lap,
-													 nx, ny, nm, D, dt);
+		update_composition_tiled(dev.conc_old, dev.conc_new, dev.conc_lap, nx, ny, nm, bx, by, D, dt);
 		watch.step += GetTimer() - start_time;
 
 		swap_pointers_1D(&(dev.conc_old), &(dev.conc_new));
@@ -138,7 +133,7 @@ int main(int argc, char* argv[])
 		if (step % checks == 0) {
 			/* transfer result to host (conc_new) from device (dev.conc_old) */
 			start_time = GetTimer();
-			cudaMemcpy(conc_new[0], dev.conc_old, nx * ny * sizeof(fp_t), cudaMemcpyDeviceToHost);
+			read_out_result(conc_new[0], dev.conc_old, nx, ny);
 			watch.file += GetTimer() - start_time;
 
 			start_time = GetTimer();
@@ -157,7 +152,7 @@ int main(int argc, char* argv[])
 
 	/* transfer result to host (conc_new) from device (dev.conc_old) */
 	start_time = GetTimer();
-	cudaMemcpy(conc_new[0], dev.conc_old, nx * ny * sizeof(fp_t), cudaMemcpyDeviceToHost);
+	read_out_result(conc_new[0], dev.conc_old, nx, ny);
 	watch.file += GetTimer() - start_time;
 
 	write_csv(conc_new, nx, ny, dx, dy, step);

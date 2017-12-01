@@ -38,7 +38,7 @@ extern "C" {
 
 __constant__ fp_t d_mask[MAX_MASK_W * MAX_MASK_H];
 
-__global__ void compute_convolution(fp_t* d_conc_old,
+__global__ void convolution_kernel(fp_t* d_conc_old,
                                    fp_t* d_conc_lap,
                                    const int nx,
                                    const int ny,
@@ -97,6 +97,70 @@ __global__ void compute_convolution(fp_t* d_conc_old,
 	__syncthreads();
 }
 
+__global__ void diffusion_kernel(fp_t* d_conc_old,
+                                 fp_t* d_conc_new,
+                                 fp_t* d_conc_lap,
+                                 const int nx,
+                                 const int ny,
+                                 const int nm,
+                                 const fp_t D,
+                                 const fp_t dt)
+{
+	int thr_x, thr_y, x, y;
+
+	/* determine indices on which to operate */
+	thr_x = threadIdx.x;
+	thr_y = threadIdx.y;
+
+	x = blockDim.x * blockIdx.x + thr_x;
+	y = blockDim.y * blockIdx.y + thr_y;
+
+	/* explicit Euler solution to the equation of motion */
+	if (x < nx && y < ny) {
+		d_conc_new[nx * y + x] = d_conc_old[nx * y + x]
+		              + dt * D * d_conc_lap[nx * y + x];
+	}
+
+	/* wait for all threads to finish writing */
+	__syncthreads();
+}
+
+void compute_convolution_tiled(fp_t* d_conc_old, fp_t* d_conc_lap,
+                         const int nx, const int ny, const int nm,
+                         const int bx, const int by)
+{
+  dim3 tile_size(bx, by, 1);
+  dim3 num_tiles(ceil(float(nx) / (tile_size.x - nm + 1)),
+                 ceil(float(ny) / (tile_size.y - nm + 1)),
+                 1);
+  size_t buf_size = (tile_size.x + nm) * (tile_size.y + nm) * sizeof(fp_t);
+
+  convolution_kernel<<<num_tiles,tile_size,buf_size>>> (d_conc_old,
+                                                        d_conc_lap,
+                                                        nx, ny, nm);
+
+}
+
+void update_composition_tiled(fp_t* d_conc_old, fp_t* d_conc_lap, fp_t* d_conc_new,
+                        const int nx, const int ny, const int nm,
+                        const int bx, const int by, const fp_t D, const fp_t dt)
+{
+  dim3 tile_size(bx, by, 1);
+  dim3 num_tiles(ceil(float(nx) / (tile_size.x - nm + 1)),
+                 ceil(float(ny) / (tile_size.y - nm + 1)),
+                 1);
+
+  diffusion_kernel<<<num_tiles,tile_size>>> (d_conc_old,
+                                             d_conc_new,
+                                             d_conc_lap,
+                                             nx, ny, nm, D, dt);	
+}
+
+void read_out_result(fp_t* conc, fp_t* d_conc, const int nx, const int ny)
+{
+  cudaMemcpy(conc, d_conc, nx * ny * sizeof(fp_t), cudaMemcpyDeviceToHost);
+}
+
 /**
  \brief Reference showing how to invoke the convolution kernel.
 
@@ -134,7 +198,7 @@ void standalone_convolution(fp_t** conc_old, fp_t** conc_lap, fp_t** mask_lap,
 	           cudaMemcpyHostToDevice);
 
 	/* compute Laplacian */
-	compute_convolution<<<num_tiles,tile_size,buf_size>>> (
+	convolution_kernel<<<num_tiles,tile_size,buf_size>>> (
 		d_conc_old, d_conc_lap, nx, ny, nm
 	);
 
@@ -147,30 +211,3 @@ void standalone_convolution(fp_t** conc_old, fp_t** conc_lap, fp_t** mask_lap,
 	cudaFree(d_conc_lap);
 }
 
-__global__ void update_composition(fp_t* d_conc_old,
-                                 fp_t* d_conc_new,
-                                 fp_t* d_conc_lap,
-                                 const int nx,
-                                 const int ny,
-                                 const int nm,
-                                 const fp_t D,
-                                 const fp_t dt)
-{
-	int thr_x, thr_y, x, y;
-
-	/* determine indices on which to operate */
-	thr_x = threadIdx.x;
-	thr_y = threadIdx.y;
-
-	x = blockDim.x * blockIdx.x + thr_x;
-	y = blockDim.y * blockIdx.y + thr_y;
-
-	/* explicit Euler solution to the equation of motion */
-	if (x < nx && y < ny) {
-		d_conc_new[nx * y + x] = d_conc_old[nx * y + x]
-		              + dt * D * d_conc_lap[nx * y + x];
-	}
-
-	/* wait for all threads to finish writing */
-	__syncthreads();
-}

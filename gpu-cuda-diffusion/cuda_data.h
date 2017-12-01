@@ -49,6 +49,33 @@ void init_cuda(fp_t** conc_old, fp_t** mask_lap,
 */
 void free_cuda(struct CudaData* dev);
 
+/**
+ \brief Apply boundary conditions on device
+*/
+void tiled_boundary_conditions(fp_t* conc,
+                               const int nx, const int ny, const int nm,
+                               const int bx, const int by);
+
+/**
+ \brief Compute convolution on device
+*/
+void compute_convolution_tiled(fp_t* conc_old, fp_t* conc_lap,
+                               const int nx, const int ny, const int nm,
+                               const int bx, const int by);
+
+/**
+ \brief Step diffusion equation on device
+*/
+void update_composition_tiled(fp_t* conc_old, fp_t* conc_new, fp_t* conc_lap,
+                              const int nx, const int ny, const int nm,
+                              const int bx, const int by,
+                              const fp_t D, const fp_t dt);
+
+/**
+  \brief Read data from device
+*/
+void read_out_result(fp_t** conc, fp_t* d_conc, const int nx, const int ny);
+
 /** \cond SuppressGuard */
 #endif /* _CUDA_DATA_H_ */
 /** \endcond */

@@ -27,6 +27,7 @@
 
 extern "C" {
 #include "boundaries.h"
+#include "cuda_data.h"
 }
 
 #include "cuda_kernels.cuh"

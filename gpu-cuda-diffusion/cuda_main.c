@@ -39,21 +39,6 @@
 /* specific includes */
 #include "cuda_data.h"
 
-extern void tiled_boundary_conditions(fp_t* conc,
-                               const int nx, const int ny, const int nm,
-                               const int bx, const int by);
-
-extern void compute_convolution_tiled(fp_t* conc_old, fp_t* conc_lap,
-                               const int nx, const int ny, const int nm,
-                               const int bx, const int by);
-
-extern void update_composition_tiled(fp_t* conc_old, fp_t* conc_new, fp_t* conc_lap,
-							  const int nx, const int ny, const int nm,
-							  const int bx, const int by,
-							  const fp_t D, const fp_t dt);
-
-extern void read_out_result(fp_t* conc, fp_t* d_conc, const int nx, const int ny);
-
 /**
  \brief Run simulation using input parameters specified on the command line
 */
@@ -68,7 +53,7 @@ int main(int argc, char* argv[])
 
 	/* declare default materials and numerical parameters */
 	fp_t D=0.00625, linStab=0.1, dt=1., elapsed=0., rss=0.;
-	int step=0, steps=100000, checks=10000;
+	int step=0, steps=100000, checks=10000, synced=0;
 	double start_time=0.;
 	struct Stopwatch watch = {0., 0., 0., 0.};
 
@@ -96,6 +81,7 @@ int main(int argc, char* argv[])
 	/* write initial condition data */
 	start_time = GetTimer();
 	write_png(conc_old, nx, ny, 0);
+	watch.file = GetTimer() - start_time;
 
 	/* prepare to log comparison to analytical solution */
 	output = fopen("runlog.csv", "w");
@@ -103,7 +89,6 @@ int main(int argc, char* argv[])
 		printf("Error: unable to %s for output. Check permissions.\n", "runlog.csv");
 		exit(-1);
 	}
-	watch.file = GetTimer() - start_time;
 
 	fprintf(output, "iter,sim_time,wrss,conv_time,step_time,IO_time,soln_time,run_time\n");
 	fprintf(output, "%i,%f,%f,%f,%f,%f,%f,%f\n", step, elapsed, rss,
@@ -113,6 +98,7 @@ int main(int argc, char* argv[])
 	/* do the work */
 	for (step = 1; step < steps+1; step++) {
 		print_progress(step, steps);
+        synced = 0;
 
 		/* === Start Architecture-Specific Kernel === */
 		tiled_boundary_conditions(dev.conc_old,	nx, ny, nm, bx, by);
@@ -127,13 +113,13 @@ int main(int argc, char* argv[])
 
 		swap_pointers_1D(&(dev.conc_old), &(dev.conc_new));
 		elapsed += dt * checks;
-
 		/* === Finish Architecture-Specific Kernel === */
 
 		if (step % checks == 0) {
 			/* transfer result to host (conc_new) from device (dev.conc_old) */
 			start_time = GetTimer();
-			read_out_result(conc_new[0], dev.conc_old, nx, ny);
+			read_out_result(conc_new, dev.conc_old, nx, ny);
+            synced = 1;
 			watch.file += GetTimer() - start_time;
 
 			start_time = GetTimer();
@@ -150,10 +136,13 @@ int main(int argc, char* argv[])
 		}
 	}
 
-	/* transfer result to host (conc_new) from device (dev.conc_old) */
-	start_time = GetTimer();
-	read_out_result(conc_new[0], dev.conc_old, nx, ny);
-	watch.file += GetTimer() - start_time;
+    if (synced == 0) {
+      /* transfer result to host (conc_new) from device (dev.conc_old) */
+      start_time = GetTimer();
+      read_out_result(conc_new, dev.conc_old, nx, ny);
+      synced = 1;
+      watch.file += GetTimer() - start_time;
+    }
 
 	write_csv(conc_new, nx, ny, dx, dy, step);
 

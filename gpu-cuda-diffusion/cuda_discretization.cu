@@ -28,13 +28,14 @@
 #include <cuda.h>
 
 extern "C" {
-#include "cuda_data.h"
 #include "boundaries.h"
+#include "cuda_data.h"
 #include "numerics.h"
 #include "mesh.h"
 #include "timer.h"
-#include "cuda_kernels.cuh"
 }
+
+#include "cuda_kernels.cuh"
 
 __constant__ fp_t d_mask[MAX_MASK_W * MAX_MASK_H];
 
@@ -156,9 +157,9 @@ void update_composition_tiled(fp_t* d_conc_old, fp_t* d_conc_lap, fp_t* d_conc_n
                                              nx, ny, nm, D, dt);	
 }
 
-void read_out_result(fp_t* conc, fp_t* d_conc, const int nx, const int ny)
+void read_out_result(fp_t** conc, fp_t* d_conc, const int nx, const int ny)
 {
-  cudaMemcpy(conc, d_conc, nx * ny * sizeof(fp_t), cudaMemcpyDeviceToHost);
+  cudaMemcpy(conc[0], d_conc, nx * ny * sizeof(fp_t), cudaMemcpyDeviceToHost);
 }
 
 /**
@@ -210,4 +211,3 @@ void standalone_convolution(fp_t** conc_old, fp_t** conc_lap, fp_t** mask_lap,
 	cudaFree(d_conc_old);
 	cudaFree(d_conc_lap);
 }
-

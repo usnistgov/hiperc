@@ -27,7 +27,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <cuda.h>
 
 /* common includes */
 #include "boundaries.h"
@@ -53,7 +52,7 @@ int main(int argc, char* argv[])
 
 	/* declare default materials and numerical parameters */
 	fp_t D=0.00625, linStab=0.1, dt=1., elapsed=0., rss=0.;
-	int step=0, steps=100000, checks=10000, synced=0;
+	int step=0, steps=100000, checks=10000;
 	double start_time=0.;
 	struct Stopwatch watch = {0., 0., 0., 0.};
 
@@ -68,7 +67,7 @@ int main(int argc, char* argv[])
 	make_arrays(&conc_old, &conc_new, &conc_lap, &mask_lap, nx, ny, nm);
 	set_mask(dx, dy, code, mask_lap, nm);
 
-	print_progress(0, steps);
+    print_progress(step, steps);
 
 	start_time = GetTimer();
 	apply_initial_conditions(conc_old, nx, ny, nm);
@@ -81,68 +80,59 @@ int main(int argc, char* argv[])
 	/* write initial condition data */
 	start_time = GetTimer();
 	write_png(conc_old, nx, ny, 0);
-	watch.file = GetTimer() - start_time;
 
 	/* prepare to log comparison to analytical solution */
 	output = fopen("runlog.csv", "w");
 	if (output == NULL) {
-		printf("Error: unable to open %s for output. Check permissions.\n", "runlog.csv");
+		printf("Error: unable to %s for output. Check permissions.\n", "runlog.csv");
 		exit(-1);
 	}
+	watch.file = GetTimer() - start_time;
 
 	fprintf(output, "iter,sim_time,wrss,conv_time,step_time,IO_time,soln_time,run_time\n");
 	fprintf(output, "%i,%f,%f,%f,%f,%f,%f,%f\n", step, elapsed, rss,
-			watch.conv, watch.step, watch.file, watch.soln, GetTimer());
+                    watch.conv, watch.step, watch.file, watch.soln, GetTimer());
 	fflush(output);
 
-	/* do the work */
-	for (step = 1; step < steps+1; step++) {
-		print_progress(step, steps);
-        synced = 0;
+    /* do the work */
+    for (step = 1; step < steps+1; step++) {
+      print_progress(step, steps);
 
-		/* === Start Architecture-Specific Kernel === */
-		tiled_boundary_conditions(dev.conc_old,	nx, ny, nm, bx, by);
+      /* === Start Architecture-Specific Kernel === */
+      device_boundaries(dev.conc_old, nx, ny, nm, bx, by);
 
-		start_time = GetTimer();
-		compute_convolution_tiled(dev.conc_old, dev.conc_lap, nx, ny, nm, bx, by);
-		watch.conv += GetTimer() - start_time;
-
-		start_time = GetTimer();
-		update_composition_tiled(dev.conc_old, dev.conc_new, dev.conc_lap, nx, ny, nm, bx, by, D, dt);
-		watch.step += GetTimer() - start_time;
-
-		swap_pointers_1D(&(dev.conc_old), &(dev.conc_new));
-		elapsed += dt;
-		/* === Finish Architecture-Specific Kernel === */
-
-		if (step % checks == 0) {
-			/* transfer result to host (conc_new) from device (dev.conc_old) */
-			start_time = GetTimer();
-			read_out_result(conc_new, dev.conc_old, nx, ny);
-            synced = 1;
-			watch.file += GetTimer() - start_time;
-
-			start_time = GetTimer();
-			write_png(conc_new, nx, ny, step);
-			watch.file += GetTimer() - start_time;
-
-			start_time = GetTimer();
-			check_solution(conc_new, conc_lap, nx, ny, dx, dy, nm, elapsed, D, &rss);
-			watch.soln += GetTimer() - start_time;
-
-			fprintf(output, "%i,%f,%f,%f,%f,%f,%f,%f\n", step, elapsed, rss,
-					watch.conv, watch.step, watch.file, watch.soln, GetTimer());
-			fflush(output);
-		}
-	}
-
-    if (synced == 0) {
-      /* transfer result to host (conc_new) from device (dev.conc_old) */
       start_time = GetTimer();
-      read_out_result(conc_new, dev.conc_old, nx, ny);
-      synced = 1;
-      watch.file += GetTimer() - start_time;
-    }
+      device_convolution(dev.conc_old, dev.conc_lap, nx, ny, nm, bx, by);
+      watch.conv += GetTimer() - start_time;
+
+      start_time = GetTimer();
+      device_composition(dev.conc_old, dev.conc_new, dev.conc_lap, nx, ny, nm, bx, by, D, dt);
+      watch.conv += GetTimer() - start_time;
+
+      swap_pointers_1D(&(dev.conc_old), &(dev.conc_new));
+      /* === Finish Architecture-Specific Kernel === */
+
+      elapsed += dt;
+
+      if (step % checks == 0) {
+        /* transfer result to host (conc_new) from device (dev.conc_old) */
+        start_time = GetTimer();
+        read_out_result(conc_old, dev.conc_new, nx, ny);
+        watch.file += GetTimer() - start_time;
+
+        start_time = GetTimer();
+        write_png(conc_old, nx, ny, step);
+        watch.file += GetTimer() - start_time;
+
+        start_time = GetTimer();
+        check_solution(conc_old, conc_lap, nx, ny, dx, dy, nm, elapsed, D, &rss);
+        watch.soln += GetTimer() - start_time;
+
+        fprintf(output, "%i,%f,%f,%f,%f,%f,%f,%f\n", step, elapsed, rss,
+                watch.conv, watch.step, watch.file, watch.soln, GetTimer());
+        fflush(output);
+      }
+	}
 
 	write_csv(conc_new, nx, ny, dx, dy, steps);
 

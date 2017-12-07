@@ -27,7 +27,6 @@
 
 extern "C" {
 #include "boundaries.h"
-#include "cuda_data.h"
 }
 
 #include "cuda_kernels.cuh"
@@ -39,7 +38,7 @@ void apply_initial_conditions(fp_t** conc, const int nx, const int ny, const int
 		#pragma omp for collapse(2)
 		for (int j = 0; j < ny; j++)
 			for (int i = 0; i < nx; i++)
-              conc[j][i] = 0.; /* bulk value */
+				conc[j][i] = 0.;
 
 		#pragma omp for collapse(2)
 		for (int j = 0; j < ny/2; j++)
@@ -101,16 +100,4 @@ __global__ void boundary_kernel(fp_t* d_conc,
 
 		__syncthreads();
 	}
-}
-
-void tiled_boundary_conditions(fp_t* d_conc,
-                               const int nx, const int ny, const int nm,
-                               const int bx, const int by)
-{
-		dim3 tile_size(bx, by, 1);
-		dim3 num_tiles(ceil(float(nx) / (tile_size.x - nm + 1)),
-					   ceil(float(ny) / (tile_size.y - nm + 1)),
-					   1);
-		
-        boundary_kernel<<<num_tiles,tile_size>>> (d_conc, nx, ny, nm);
 }

@@ -52,24 +52,33 @@ void free_cuda(struct CudaData* dev);
 /**
  \brief Apply boundary conditions on device
 */
-void tiled_boundary_conditions(fp_t* conc,
-                               const int nx, const int ny, const int nm,
-                               const int bx, const int by);
+void device_boundaries(fp_t* conc,
+                      const int nx, const int ny, const int nm,
+                      const int bx, const int by);
 
 /**
  \brief Compute convolution on device
 */
-void compute_convolution_tiled(fp_t* conc_old, fp_t* conc_lap,
-                               const int nx, const int ny, const int nm,
-                               const int bx, const int by);
+void device_convolution(fp_t* conc_old, fp_t* conc_lap,
+                         const int nx, const int ny, const int nm,
+                         const int bx, const int by);
 
 /**
  \brief Step diffusion equation on device
 */
-void update_composition_tiled(fp_t* conc_old, fp_t* conc_new, fp_t* conc_lap,
-                              const int nx, const int ny, const int nm,
-                              const int bx, const int by,
-                              const fp_t D, const fp_t dt);
+void device_composition(fp_t* conc_old, fp_t* conc_new, fp_t* conc_lap,
+                        const int nx, const int ny, const int nm,
+                        const int bx, const int by,
+                        const fp_t D, const fp_t dt);
+
+/**
+ \brief Solve diffusion equation on the GPU
+*/
+void cuda_diffusion_solver(struct CudaData* dev, fp_t** conc_new,
+                           const int bx, const int by,
+                           const int nm, const int nx, const int ny,
+                           const fp_t D, const fp_t dt,
+                           struct Stopwatch* sw);
 
 /**
   \brief Read data from device

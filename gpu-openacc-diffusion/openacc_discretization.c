@@ -25,7 +25,6 @@
 #include <math.h>
 #include <omp.h>
 #include <openacc.h>
-#include "discretization.h"
 #include "mesh.h"
 #include "openacc_kernels.h"
 
@@ -63,81 +62,4 @@ void diffusion_kernel(fp_t** conc_old, fp_t** conc_new, fp_t** conc_lap,
 			}
 		}
 	}
-}
-
-void solve_diffusion_equation(fp_t** conc_old, fp_t** conc_new, fp_t** conc_lap,
-                              fp_t** mask_lap, const int nx, const int ny, const int nm,
-                              fp_t bc[2][2], const fp_t D, const fp_t dt, const int checks,
-                              fp_t* elapsed, struct Stopwatch* sw)
-{
-	#pragma acc data present_or_copy(conc_old[0:ny][0:nx]) \
-	                 present_or_copyin(mask_lap[0:nm][0:nm], bc[0:2][0:2]) \
-	                 present_or_create(conc_lap[0:ny][0:nx], conc_new[0:ny][0:nx])
-	{
-		double start_time=0.;
-		int check=0;
-
-		for (check = 0; check < checks; check++) {
-			boundary_kernel(conc_old, nx, ny, nm, bc);
-
-			start_time = GetTimer();
-			convolution_kernel(conc_old, conc_lap, mask_lap, nx, ny, nm);
-			sw->conv += GetTimer() - start_time;
-
-			start_time = GetTimer();
-			diffusion_kernel(conc_old, conc_new, conc_lap, nx, ny, nm, D, dt);
-			sw->step += GetTimer() - start_time;
-
-			swap_pointers(&conc_old, &conc_new);
-		}
-	}
-
-	*elapsed += dt * checks;
-}
-
-void check_solution(fp_t** conc_new, fp_t** conc_lap,  const int nx, const int ny,
-                    const fp_t dx, const fp_t dy, const int nm, const fp_t elapsed, const fp_t D,
-                    fp_t bc[2][2], fp_t* rss)
-{
-	fp_t sum=0.;
-
-	#pragma omp parallel reduction(+:sum)
-	{
-		fp_t r, cal, car;
-
-		#pragma omp for collapse(2) private(cal,car,r)
-		for (int j = nm/2; j < ny-nm/2; j++) {
-			for (int i = nm/2; i < nx-nm/2; i++) {
-				/* numerical solution */
-				const fp_t cn = conc_new[j][i];
-
-				/* shortest distance to left-wall source */
-				r = distance_point_to_segment(dx * (nm/2), dy * (nm/2),
-				                              dx * (nm/2), dy * (ny/2),
-				                              dx * i, dy * j);
-				analytical_value(r, elapsed, D, bc, &cal);
-
-				/* shortest distance to right-wall source */
-				r = distance_point_to_segment(dx * (nx-1-nm/2), dy * (ny/2),
-				                              dx * (nx-1-nm/2), dy * (ny-1-nm/2),
-				                              dx * i, dy * j);
-				analytical_value(r, elapsed, D, bc, &car);
-
-				/* superposition of analytical solutions */
-				const fp_t ca = cal + car;
-
-				/* residual sum of squares (RSS) */
-				conc_lap[j][i] = (ca - cn) * (ca - cn) / (fp_t)((nx-1-nm/2) * (ny-1-nm/2));
-			}
-		}
-
-		#pragma omp for collapse(2)
-		for (int j = nm/2; j < ny-nm/2; j++) {
-			for (int i = nm/2; i < nx-nm/2; i++) {
-				sum += conc_lap[j][i];
-			}
-		}
-	}
-
-	*rss = sum;
 }

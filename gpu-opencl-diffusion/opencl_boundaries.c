@@ -28,34 +28,23 @@
 #include "boundaries.h"
 #include "numerics.h"
 
-void set_boundaries(fp_t bc[2][2])
-{
-	/* Change these values to your liking: */
-	fp_t clo = 0.0, chi = 1.0;
-
-	bc[0][0] = clo; /* bottom boundary */
-	bc[0][1] = clo; /* top boundary */
-	bc[1][0] = chi; /* left boundary */
-	bc[1][1] = chi; /* right boundary */
-}
-
-void apply_initial_conditions(fp_t** conc, const int nx, const int ny, const int nm, fp_t bc[2][2])
+void apply_initial_conditions(fp_t** conc, const int nx, const int ny, const int nm)
 {
 	#pragma omp parallel
 	{
 		#pragma omp for collapse(2)
 		for (int j = 0; j < ny; j++)
 			for (int i = 0; i < nx; i++)
-				conc[j][i] = bc[0][0];
+				conc[j][i] = 0.;
 
 		#pragma omp for collapse(2)
 		for (int j = 0; j < ny/2; j++)
 			for (int i = 0; i < 1+nm/2; i++)
-				conc[j][i] = bc[1][0]; /* left half-wall */
+				conc[j][i] = 1.; /* left half-wall */
 
 		#pragma omp for collapse(2)
 		for (int j = ny/2; j < ny; j++)
 			for (int i = nx-1-nm/2; i < nx; i++)
-				conc[j][i] = bc[1][1]; /* right half-wall */
+				conc[j][i] = 1.; /* right half-wall */
 	}
 }

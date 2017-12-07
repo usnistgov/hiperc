@@ -30,7 +30,6 @@
 
 /* common includes */
 #include "boundaries.h"
-#include "discretization.h"
 #include "mesh.h"
 #include "numerics.h"
 #include "output.h"
@@ -51,13 +50,12 @@ int main(int argc, char* argv[])
 	fp_t **conc_old, **conc_new, **conc_lap, **mask_lap;
 	int bx=32, by=32, nx=512, ny=512, nm=3, code=53;
 	fp_t dx=0.5, dy=0.5, h;
-	fp_t bc[2][2];
 
 	/* declare default materials and numerical parameters */
 	fp_t D=0.00625, linStab=0.1, dt=1., elapsed=0., rss=0.;
 	int step=0, steps=100000, checks=10000;
 	double start_time=0.;
-	struct Stopwatch sw = {0., 0., 0., 0.};
+	struct Stopwatch watch = {0., 0., 0., 0.};
 
 	StartTimer();
 
@@ -69,14 +67,15 @@ int main(int argc, char* argv[])
 	/* initialize memory */
 	make_arrays(&conc_old, &conc_new, &conc_lap, &mask_lap, nx, ny, nm);
 	set_mask(dx, dy, code, mask_lap, nm);
-	set_boundaries(bc);
+
+	print_progress(step, steps);
 
 	start_time = GetTimer();
-	apply_initial_conditions(conc_old, nx, ny, nm, bc);
-	sw.step = GetTimer() - start_time;
+	apply_initial_conditions(conc_old, nx, ny, nm);
+	watch.step = GetTimer() - start_time;
 
 	/* initialize GPU */
-	init_opencl(conc_old, mask_lap, bc, nx, ny, nm, &dev);
+	init_opencl(conc_old, mask_lap, nx, ny, nm, &dev);
 
 	/* write initial condition data */
 	start_time = GetTimer();
@@ -88,10 +87,10 @@ int main(int argc, char* argv[])
 		printf("Error: unable to open %s for output. Check permissions.\n", "runlog.csv");
 		exit(-1);
 	}
-	sw.file = GetTimer() - start_time;
+	watch.file = GetTimer() - start_time;
 
 	fprintf(output, "iter,sim_time,wrss,conv_time,step_time,IO_time,soln_time,run_time\n");
-	fprintf(output, "%i,%f,%f,%f,%f,%f,%f,%f\n", step, elapsed, rss, sw.conv, sw.step, sw.file, sw.soln, GetTimer());
+	fprintf(output, "%i,%f,%f,%f,%f,%f,%f,%f\n", step, elapsed, rss, watch.conv, watch.step, watch.file, watch.soln, GetTimer());
 	fflush(output);
 
 	/* Note: block is equivalent to a typical
@@ -101,34 +100,44 @@ int main(int argc, char* argv[])
 	  So we use a while loop instead. */
 
 	/* do the work */
-	step = 0;
-	print_progress(step, steps);
-	while (step < steps) {
-		if (checks > steps - step)
-			checks = steps - step;
+	for (step = 1; step < steps+1; step++) {
+		print_progress(step, steps);
+    	int flip = (step % 2 == 0)? 0 : 1;
 
-		assert(step + checks <= steps);
+      /* === Start Architecture-Specific Kernel === */
+      device_boundaries(&dev, flip, nx, ny, nm, bx, by);
 
-		opencl_diffusion_solver(&dev, conc_new, bx, by, nx, ny, nm, D, dt, checks, &elapsed, &sw);
+      start_time = GetTimer();
+      device_convolution(&dev, flip, nx, ny, nm, bx, by);
+      watch.conv += GetTimer() - start_time;
 
-		for (int i = 0; i < checks; i++) {
-			step++;
-			print_progress(step, steps);
-		}
+      start_time = GetTimer();
+      device_diffusion(&dev, flip, nx, ny, nm, bx, by, D, dt);
+      watch.conv += GetTimer() - start_time;
+      /* === Finish Architecture-Specific Kernel === */
+
+      elapsed += dt;
+
+      if (step % checks == 0) {
+        start_time = GetTimer();
+        read_out_result(&dev, flip, conc_new, nx, ny);
+        watch.file += GetTimer() - start_time;
 
 		start_time = GetTimer();
 		write_png(conc_new, nx, ny, step);
-		sw.file += GetTimer() - start_time;
+		watch.file += GetTimer() - start_time;
 
 		start_time = GetTimer();
-		check_solution(conc_new, conc_lap, nx, ny, dx, dy, nm, elapsed, D, bc, &rss);
-		sw.soln += GetTimer() - start_time;
+		check_solution(conc_new, conc_lap, nx, ny, dx, dy, nm, elapsed, D, &rss);
+		watch.soln += GetTimer() - start_time;
 
-		fprintf(output, "%i,%f,%f,%f,%f,%f,%f,%f\n", step, elapsed, rss, sw.conv, sw.step, sw.file, sw.soln, GetTimer());
+		fprintf(output, "%i,%f,%f,%f,%f,%f,%f,%f\n", step, elapsed, rss,
+                watch.conv, watch.step, watch.file, watch.soln, GetTimer());
 		fflush(output);
+      }
 	}
 
-	write_csv(conc_new, nx, ny, dx, dy, step);
+	write_csv(conc_new, nx, ny, dx, dy, steps);
 
 	/* clean up */
 	fclose(output);

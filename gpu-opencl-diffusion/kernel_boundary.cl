@@ -20,19 +20,22 @@
 /**
  \brief Enable double-precision floats
 */
-#pragma OPENCL EXTENSION cl_khr_fp64: enable
+#if defined(cl_khr_fp64)  // Khronos extension available?
+	#pragma OPENCL EXTENSION cl_khr_fp64 : enable
+#elif defined(cl_amd_fp64)  // AMD extension available?
+	#pragma OPENCL EXTENSION cl_amd_fp64 : enable
+#endif
 
 #include "numerics.h"
 
 /**
  \brief Boundary condition kernel for execution on the GPU
- \fn void boundary_kernel(fp_t* d_conc, const fp_t d_bc[2][2], const int nx, const int ny, const int nm)
+ \fn void boundary_kernel(fp_t* d_conc, const int nx, const int ny, const int nm)
 
  This function accesses 1D data rather than the 2D array representation of the
  scalar composition field
 */
 __kernel void boundary_kernel(__global fp_t* d_conc,
-                              __constant fp_t* d_bc,
                               const int nx,
                               const int ny,
                               const int nm)
@@ -46,11 +49,11 @@ __kernel void boundary_kernel(__global fp_t* d_conc,
 	/* apply fixed boundary values: sequence does not matter */
 
 	if (x < 1+nm/2 && y < ny/2) {
-		d_conc[nx * y + x] = d_bc[2]; /* left value, bc[1][0] = bc[2*1 + 0] */
+		d_conc[nx * y + x] = 1.; /* left value */
 	}
 
 	if (x >= nx-1-nm/2 && x < nx && y >= ny/2 && y < ny) {
-		d_conc[nx * y + x] = d_bc[3]; /* right value, bc[1][1] = bc[2*1 + 1] */
+		d_conc[nx * y + x] = 1.; /* right value */
 	}
 
 	/* wait for all threads to finish writing */

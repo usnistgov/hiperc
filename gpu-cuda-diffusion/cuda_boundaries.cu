@@ -72,7 +72,7 @@ __global__ void boundary_kernel(fp_t* d_conc,
 	}
 
 	if (row >= ny/2 && row < ny && col >= nx-1-nm/2 && col < nx) {
-		d_conc[row * nx + col] = 0.; /* right value */
+		d_conc[row * nx + col] = 1.; /* right value */
 	}
 
 	/* wait for all threads to finish writing */

@@ -28,11 +28,8 @@
 #include <cuda.h>
 
 extern "C" {
-#include "boundaries.h"
 #include "cuda_data.h"
 #include "numerics.h"
-#include "mesh.h"
-#include "timer.h"
 }
 
 #include "cuda_kernels.cuh"
@@ -73,7 +70,7 @@ __global__ void convolution_kernel(fp_t* d_conc_old,
 	extern __shared__ fp_t d_conc_tile[];
 
 	if (src_x >= 0 && src_x < nx &&
-	    src_y >= 0 && src_y < ny ) {
+	    src_y >= 0 && src_y < ny) {
 		/* if src_y==0, then dst_y==nm/2: this is a halo row */
 		d_conc_tile[til_nx * til_y + til_x] = d_conc_old[nx * src_y + src_x];
 	}

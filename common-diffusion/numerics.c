@@ -128,7 +128,7 @@ void analytical_value(const fp_t x, const fp_t t, const fp_t D, fp_t* c)
 void check_solution(fp_t** conc_new, fp_t** conc_lap, const int nx, const int ny, const fp_t dx, const fp_t dy, const int nm,
                     const fp_t elapsed, const fp_t D, fp_t* rss)
 {
-	fp_t sum=0.;
+	fp_t sum = 0.;
 	int i, j;
 
 	#ifdef __OPENMP

@@ -123,7 +123,7 @@ int main(int argc, char* argv[])
 		}
 	}
 
-	write_csv(conc_old, nx, ny, dx, dy, step);
+	write_csv(conc_old, nx, ny, dx, dy, steps);
 
 	/* clean up */
 	fclose(output);

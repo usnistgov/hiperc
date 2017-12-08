@@ -18,7 +18,7 @@
  **********************************************************************************/
 
 /**
- \file  opencl_main.c
+ \file	opencl_main.c
  \brief OpenCL implementation of semi-infinite diffusion equation
 */
 
@@ -43,11 +43,11 @@
 */
 int main(int argc, char* argv[])
 {
-	FILE * output;
+	FILE* output;
 	struct OpenCLData dev;
 
 	/* declare default mesh size and resolution */
-	fp_t **conc_old, **conc_new, **conc_lap, **mask_lap;
+	fp_t** conc_old, **conc_new, **conc_lap, **mask_lap;
 	int bx=32, by=32, nx=512, ny=512, nm=3, code=53;
 	fp_t dx=0.5, dy=0.5, h;
 
@@ -94,47 +94,49 @@ int main(int argc, char* argv[])
 	fflush(output);
 
 	/* Note: block is equivalent to a typical
-	  for (int step=1; step < steps+1; step++),
-	  1-indexed so as not to overwrite the initial condition image,
-	  but the loop-internals are farmed out to a coprocessor.
-	  So we use a while loop instead. */
+	   for (int step=1; step < steps+1; step++),
+	   1-indexed so as not to overwrite the initial condition image,
+	   but the loop-internals are farmed out to a coprocessor.
+	   So we use a while loop instead.
+	 */
 
 	/* do the work */
 	for (step = 1; step < steps+1; step++) {
 		print_progress(step, steps);
-    	int flip = (step % 2 == 0)? 0 : 1;
+		const int flip = (step % 2 == 0)? 0 : 1;
 
-      /* === Start Architecture-Specific Kernel === */
-      device_boundaries(&dev, flip, nx, ny, nm, bx, by);
-
-      start_time = GetTimer();
-      device_convolution(&dev, flip, nx, ny, nm, bx, by);
-      watch.conv += GetTimer() - start_time;
-
-      start_time = GetTimer();
-      device_diffusion(&dev, flip, nx, ny, nm, bx, by, D, dt);
-      watch.conv += GetTimer() - start_time;
-      /* === Finish Architecture-Specific Kernel === */
-
-      elapsed += dt;
-
-      if (step % checks == 0) {
-        start_time = GetTimer();
-        read_out_result(&dev, flip, conc_new, nx, ny);
-        watch.file += GetTimer() - start_time;
+		/* === Start Architecture-Specific Kernel === */
+		device_boundaries(&dev, flip, nx, ny, nm, bx, by);
 
 		start_time = GetTimer();
-		write_png(conc_new, nx, ny, step);
-		watch.file += GetTimer() - start_time;
+		device_convolution(&dev, flip, nx, ny, nm, bx, by);
+		watch.conv += GetTimer() - start_time;
 
 		start_time = GetTimer();
-		check_solution(conc_new, conc_lap, nx, ny, dx, dy, nm, elapsed, D, &rss);
-		watch.soln += GetTimer() - start_time;
+		device_diffusion(&dev, flip, nx, ny, nm, bx, by, D, dt);
+		watch.conv += GetTimer() - start_time;
+		/* === Finish Architecture-Specific Kernel === */
 
-		fprintf(output, "%i,%f,%f,%f,%f,%f,%f,%f\n", step, elapsed, rss,
-                watch.conv, watch.step, watch.file, watch.soln, GetTimer());
-		fflush(output);
-      }
+		elapsed += dt;
+
+		if (step % checks == 0) {
+			/* transfer result to host (conc_new) from device (dev.conc_old) */
+			start_time = GetTimer();
+			read_out_result(&dev, flip, conc_new, nx, ny);
+			watch.file += GetTimer() - start_time;
+
+			start_time = GetTimer();
+			write_png(conc_new, nx, ny, step);
+			watch.file += GetTimer() - start_time;
+
+			start_time = GetTimer();
+			check_solution(conc_new, conc_lap, nx, ny, dx, dy, nm, elapsed, D, &rss);
+			watch.soln += GetTimer() - start_time;
+
+			fprintf(output, "%i,%f,%f,%f,%f,%f,%f,%f\n", step, elapsed, rss,
+			        watch.conv, watch.step, watch.file, watch.soln, GetTimer());
+			fflush(output);
+		}
 	}
 
 	write_csv(conc_new, nx, ny, dx, dy, steps);

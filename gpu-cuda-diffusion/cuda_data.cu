@@ -32,12 +32,12 @@ void init_cuda(fp_t** conc_old, fp_t** mask_lap,
                const int nx, const int ny, const int nm, struct CudaData* dev)
 {
 	/* allocate memory on device */
-	cudaMalloc((void **) &(dev->conc_old), nx * ny * sizeof(fp_t));
-	cudaMalloc((void **) &(dev->conc_lap), nx * ny * sizeof(fp_t));
-	cudaMalloc((void **) &(dev->conc_new), nx * ny * sizeof(fp_t));
+	cudaMalloc((void**) &(dev->conc_old), nx * ny * sizeof(fp_t));
+	cudaMalloc((void**) &(dev->conc_lap), nx * ny * sizeof(fp_t));
+	cudaMalloc((void**) &(dev->conc_new), nx * ny * sizeof(fp_t));
 
 	/* transfer mask and boundary conditions to protected memory on GPU */
-    cudaMemcpyToSymbol(d_mask, mask_lap[0], nm * nm * sizeof(fp_t));
+	cudaMemcpyToSymbol(d_mask, mask_lap[0], nm * nm * sizeof(fp_t));
 
 	/* transfer data from host in to GPU */
 	cudaMemcpy(dev->conc_old, conc_old[0], nx * ny * sizeof(fp_t),

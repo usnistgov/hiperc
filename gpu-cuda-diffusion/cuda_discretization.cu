@@ -120,8 +120,8 @@ __global__ void diffusion_kernel(fp_t* d_conc_old, fp_t* d_conc_new, fp_t* d_con
 }
 
 void device_boundaries(fp_t* conc,
-                      const int nx, const int ny, const int nm,
-                      const int bx, const int by)
+                       const int nx, const int ny, const int nm,
+                       const int bx, const int by)
 {
 	/* divide matrices into blocks of bx * by threads */
 	dim3 tile_size(bx, by, 1);
@@ -129,14 +129,14 @@ void device_boundaries(fp_t* conc,
 	               ceil(float(ny) / (tile_size.y - nm + 1)),
 	               1);
 
-    boundary_kernel<<<num_tiles,tile_size>>> (
-        conc, nx, ny, nm
-    );
+	boundary_kernel<<<num_tiles,tile_size>>> (
+	    conc, nx, ny, nm
+	);
 }
 
 void device_convolution(fp_t* conc_old, fp_t* conc_lap,
-                         const int nx, const int ny, const int nm,
-                         const int bx, const int by)
+                        const int nx, const int ny, const int nm,
+                        const int bx, const int by)
 {
 	/* divide matrices into blocks of bx * by threads */
 	dim3 tile_size(bx, by, 1);
@@ -145,9 +145,9 @@ void device_convolution(fp_t* conc_old, fp_t* conc_lap,
 	               1);
 	size_t buf_size = (tile_size.x + nm) * (tile_size.y + nm) * sizeof(fp_t);
 
-    convolution_kernel<<<num_tiles,tile_size,buf_size>>> (
-        conc_old, conc_lap, nx, ny, nm
-    );
+	convolution_kernel<<<num_tiles,tile_size,buf_size>>> (
+	    conc_old, conc_lap, nx, ny, nm
+	);
 
 }
 
@@ -161,16 +161,16 @@ void device_composition(fp_t* conc_old, fp_t* conc_new, fp_t* conc_lap,
 	dim3 num_tiles(ceil(float(nx) / (tile_size.x - nm + 1)),
 	               ceil(float(ny) / (tile_size.y - nm + 1)),
 	               1);
-    diffusion_kernel<<<num_tiles,tile_size>>> (
-        conc_old, conc_new, conc_lap, nx, ny, nm, D, dt
-    );
+	diffusion_kernel<<<num_tiles,tile_size>>> (
+	    conc_old, conc_new, conc_lap, nx, ny, nm, D, dt
+	);
 }
 
 void read_out_result(fp_t** conc, fp_t* d_conc, const int nx, const int ny)
 {
-  cudaMemcpy(conc[0], d_conc, nx * ny * sizeof(fp_t),
-             cudaMemcpyDeviceToHost);
-}                  
+	cudaMemcpy(conc[0], d_conc, nx * ny * sizeof(fp_t),
+	           cudaMemcpyDeviceToHost);
+}
 
 /**
  \brief Reference showing how to invoke the convolution kernel.
@@ -189,8 +189,8 @@ void compute_convolution(fp_t** conc_old, fp_t** conc_lap, fp_t** mask_lap,
 	fp_t* d_conc_old, *d_conc_lap;
 
 	/* allocate memory on device */
-	cudaMalloc((void **) &d_conc_old, nx * ny * sizeof(fp_t));
-	cudaMalloc((void **) &d_conc_lap, nx * ny * sizeof(fp_t));
+	cudaMalloc((void**) &d_conc_old, nx * ny * sizeof(fp_t));
+	cudaMalloc((void**) &d_conc_lap, nx * ny * sizeof(fp_t));
 
 	/* divide matrices into blocks of TILE_W * TILE_H threads */
 	dim3 tile_size(bx, by, 1);
@@ -208,7 +208,7 @@ void compute_convolution(fp_t** conc_old, fp_t** conc_lap, fp_t** mask_lap,
 
 	/* compute Laplacian */
 	convolution_kernel<<<num_tiles,tile_size,buf_size>>> (
-		d_conc_old, d_conc_lap, nx, ny, nm
+	    d_conc_old, d_conc_lap, nx, ny, nm
 	);
 
 	/* transfer from device out to host */
@@ -247,20 +247,20 @@ void cuda_diffusion_solver(struct CudaData* dev, fp_t** conc_new,
 
 	/* apply boundary conditions */
 	boundary_kernel<<<num_tiles,tile_size>>> (
-		dev->conc_old, nx, ny, nm
-    );
+	    dev->conc_old, nx, ny, nm
+	);
 
-    /* compute Laplacian */
-    start_time = GetTimer();
-    convolution_kernel<<<num_tiles,tile_size,buf_size>>> (
-        dev->conc_old, dev->conc_lap, nx, ny, nm
-    );
-    sw->conv += GetTimer() - start_time;
+	/* compute Laplacian */
+	start_time = GetTimer();
+	convolution_kernel<<<num_tiles,tile_size,buf_size>>> (
+	    dev->conc_old, dev->conc_lap, nx, ny, nm
+	);
+	sw->conv += GetTimer() - start_time;
 
-    /* compute result */
-    start_time = GetTimer();
-    diffusion_kernel<<<num_tiles,tile_size>>> (
-        dev->conc_old, dev->conc_new, dev->conc_lap, nx, ny, nm, D, dt
-    );
-    sw->step += GetTimer() - start_time;
+	/* compute result */
+	start_time = GetTimer();
+	diffusion_kernel<<<num_tiles,tile_size>>> (
+	    dev->conc_old, dev->conc_new, dev->conc_lap, nx, ny, nm, D, dt
+	);
+	sw->step += GetTimer() - start_time;
 }

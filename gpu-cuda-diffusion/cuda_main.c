@@ -43,10 +43,10 @@
 */
 int main(int argc, char* argv[])
 {
-	FILE * output;
+	FILE* output;
 
 	/* declare default mesh size and resolution */
-	fp_t **conc_old, **conc_new, **conc_lap, **mask_lap;
+	fp_t** conc_old, **conc_new, **conc_lap, **mask_lap;
 	int bx=32, by=32, nx=512, ny=512, nm=3, code=53;
 	fp_t dx=0.5, dy=0.5, h;
 
@@ -67,7 +67,7 @@ int main(int argc, char* argv[])
 	make_arrays(&conc_old, &conc_new, &conc_lap, &mask_lap, nx, ny, nm);
 	set_mask(dx, dy, code, mask_lap, nm);
 
-    print_progress(step, steps);
+	print_progress(step, steps);
 
 	start_time = GetTimer();
 	apply_initial_conditions(conc_old, nx, ny, nm);
@@ -91,47 +91,47 @@ int main(int argc, char* argv[])
 
 	fprintf(output, "iter,sim_time,wrss,conv_time,step_time,IO_time,soln_time,run_time\n");
 	fprintf(output, "%i,%f,%f,%f,%f,%f,%f,%f\n", step, elapsed, rss,
-                    watch.conv, watch.step, watch.file, watch.soln, GetTimer());
+	        watch.conv, watch.step, watch.file, watch.soln, GetTimer());
 	fflush(output);
 
-    /* do the work */
-    for (step = 1; step < steps+1; step++) {
-      print_progress(step, steps);
+	/* do the work */
+	for (step = 1; step < steps+1; step++) {
+		print_progress(step, steps);
 
-      /* === Start Architecture-Specific Kernel === */
-      device_boundaries(dev.conc_old, nx, ny, nm, bx, by);
+		/* === Start Architecture-Specific Kernel === */
+		device_boundaries(dev.conc_old, nx, ny, nm, bx, by);
 
-      start_time = GetTimer();
-      device_convolution(dev.conc_old, dev.conc_lap, nx, ny, nm, bx, by);
-      watch.conv += GetTimer() - start_time;
+		start_time = GetTimer();
+		device_convolution(dev.conc_old, dev.conc_lap, nx, ny, nm, bx, by);
+		watch.conv += GetTimer() - start_time;
 
-      start_time = GetTimer();
-      device_composition(dev.conc_old, dev.conc_new, dev.conc_lap, nx, ny, nm, bx, by, D, dt);
-      watch.conv += GetTimer() - start_time;
+		start_time = GetTimer();
+		device_composition(dev.conc_old, dev.conc_new, dev.conc_lap, nx, ny, nm, bx, by, D, dt);
+		watch.conv += GetTimer() - start_time;
 
-      swap_pointers_1D(&(dev.conc_old), &(dev.conc_new));
-      /* === Finish Architecture-Specific Kernel === */
+		swap_pointers_1D(&(dev.conc_old), &(dev.conc_new));
+		/* === Finish Architecture-Specific Kernel === */
 
-      elapsed += dt;
+		elapsed += dt;
 
-      if (step % checks == 0) {
-        /* transfer result to host (conc_new) from device (dev.conc_old) */
-        start_time = GetTimer();
-        read_out_result(conc_old, dev.conc_new, nx, ny);
-        watch.file += GetTimer() - start_time;
+		if (step % checks == 0) {
+			/* transfer result to host (conc_new) from device (dev.conc_old) */
+			start_time = GetTimer();
+			read_out_result(conc_new, dev.conc_old, nx, ny);
+			watch.file += GetTimer() - start_time;
 
-        start_time = GetTimer();
-        write_png(conc_old, nx, ny, step);
-        watch.file += GetTimer() - start_time;
+			start_time = GetTimer();
+			write_png(conc_new, nx, ny, step);
+			watch.file += GetTimer() - start_time;
 
-        start_time = GetTimer();
-        check_solution(conc_old, conc_lap, nx, ny, dx, dy, nm, elapsed, D, &rss);
-        watch.soln += GetTimer() - start_time;
+			start_time = GetTimer();
+			check_solution(conc_new, conc_lap, nx, ny, dx, dy, nm, elapsed, D, &rss);
+			watch.soln += GetTimer() - start_time;
 
-        fprintf(output, "%i,%f,%f,%f,%f,%f,%f,%f\n", step, elapsed, rss,
-                watch.conv, watch.step, watch.file, watch.soln, GetTimer());
-        fflush(output);
-      }
+			fprintf(output, "%i,%f,%f,%f,%f,%f,%f,%f\n", step, elapsed, rss,
+			        watch.conv, watch.step, watch.file, watch.soln, GetTimer());
+			fflush(output);
+		}
 	}
 
 	write_csv(conc_new, nx, ny, dx, dy, steps);

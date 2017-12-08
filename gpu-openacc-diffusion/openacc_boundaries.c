@@ -57,14 +57,16 @@ void boundary_kernel(fp_t** __restrict__ conc, const int nx, const int ny, const
 		#pragma acc parallel
 		{
 			#pragma acc loop independent collapse(2)
-			for (int j = 0; j < ny/2; j++) {
+			for (int j = 0; j < ny/2; j++)
+			{
 				for (int i = 0; i < 1+nm/2; i++) {
 					conc[j][i] = 1.; /* left value */
 				}
 			}
 
 			#pragma acc loop independent collapse(2)
-			for (int j = ny/2; j < ny; j++) {
+			for (int j = ny/2; j < ny; j++)
+			{
 				for (int i = nx-1-nm/2; i < nx; i++) {
 					conc[j][i] = 1.; /* right value */
 				}
@@ -80,13 +82,17 @@ void boundary_kernel(fp_t** __restrict__ conc, const int nx, const int ny, const
 				int ihi = nx - 1 - nm/2 + offset;
 				int jlo = nm/2 - offset;
 				int jhi = ny - 1 - nm/2 + offset;
+
 				#pragma acc loop independent
-				for (int j = 0; j < ny; j++) {
+				for (int j = 0; j < ny; j++)
+				{
 					conc[j][ilo-1] = conc[j][ilo]; /* left condition */
 					conc[j][ihi+1] = conc[j][ihi]; /* right condition */
 				}
+
 				#pragma acc loop independent
-				for (int i = 0; i < nx; i++) {
+				for (int i = 0; i < nx; i++)
+				{
 					conc[jlo-1][i] = conc[jlo][i]; /* bottom condition */
 					conc[jhi+1][i] = conc[jhi][i]; /* top condition */
 				}

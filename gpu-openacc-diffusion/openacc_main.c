@@ -46,10 +46,10 @@
 */
 int main(int argc, char* argv[])
 {
-	FILE * output;
+	FILE* output;
 
 	/* declare default mesh size and resolution */
-	fp_t **conc_old, **conc_new, **conc_lap, **mask_lap;
+	fp_t** conc_old, **conc_new, **conc_lap, **mask_lap;
 	int bx=32, by=32, nx=512, ny=512, nm=3, code=53;
 	fp_t dx=0.5, dy=0.5, h;
 
@@ -96,41 +96,41 @@ int main(int argc, char* argv[])
 	for (step = 1; step < steps+1; step++) {
 		print_progress(step, steps);
 
-		#pragma acc data present_or_copy(conc_old[0:ny][0:nx])           \
+		#pragma acc data present_or_copy(conc_old[0:ny][0:nx])   \
                          present_or_copyin(mask_lap[0:nm][0:nm]) \
                          present_or_create(conc_lap[0:ny][0:nx], conc_new[0:ny][0:nx])
-        {
-          /* === Start Architecture-Specific Kernel === */
-          boundary_kernel(conc_old, nx, ny, nm);
+		{
+			/* === Start Architecture-Specific Kernel === */
+			boundary_kernel(conc_old, nx, ny, nm);
 
-          start_time = GetTimer();
-          convolution_kernel(conc_old, conc_lap, mask_lap, nx, ny, nm);
-          watch.conv += GetTimer() - start_time;
+			start_time = GetTimer();
+			convolution_kernel(conc_old, conc_lap, mask_lap, nx, ny, nm);
+			watch.conv += GetTimer() - start_time;
 
-          start_time = GetTimer();
-          diffusion_kernel(conc_old, conc_new, conc_lap, nx, ny, nm, D, dt);
-          watch.step += GetTimer() - start_time;
+			start_time = GetTimer();
+			diffusion_kernel(conc_old, conc_new, conc_lap, nx, ny, nm, D, dt);
+			watch.step += GetTimer() - start_time;
 
-          swap_pointers(&conc_old, &conc_new);
-          /* === Finish Architecture-Specific Kernel === */
+			swap_pointers(&conc_old, &conc_new);
+			/* === Finish Architecture-Specific Kernel === */
 
-          elapsed += dt;
+			elapsed += dt;
 
-          if (step % checks == 0) {
-            start_time = GetTimer();
-            write_png(conc_old, nx, ny, step);
-            watch.file += GetTimer() - start_time;
+			if (step % checks == 0) {
+				start_time = GetTimer();
+				write_png(conc_old, nx, ny, step);
+				watch.file += GetTimer() - start_time;
 
-            start_time = GetTimer();
-            check_solution(conc_old, conc_lap, nx, ny, dx, dy, nm, elapsed, D, &rss);
-            watch.soln += GetTimer() - start_time;
+				start_time = GetTimer();
+				check_solution(conc_old, conc_lap, nx, ny, dx, dy, nm, elapsed, D, &rss);
+				watch.soln += GetTimer() - start_time;
 
-            fprintf(output, "%i,%f,%f,%f,%f,%f,%f,%f\n", step, elapsed, rss,
-                            watch.conv, watch.step, watch.file, watch.soln, GetTimer());
-            fflush(output);
-          }
-        }
-    }
+				fprintf(output, "%i,%f,%f,%f,%f,%f,%f,%f\n", step, elapsed, rss,
+				        watch.conv, watch.step, watch.file, watch.soln, GetTimer());
+				fflush(output);
+			}
+		}
+	}
 
 	write_csv(conc_old, nx, ny, dx, dy, steps);
 

@@ -33,7 +33,7 @@
  choice propagates throughout the code, and may significantly affect runtime
  on GPU hardware.
 */
-typedef float fp_t;
+typedef double fp_t;
 
 /**
  Container for timing data

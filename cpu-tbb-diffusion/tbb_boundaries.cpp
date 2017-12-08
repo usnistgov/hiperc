@@ -29,25 +29,14 @@
 #include <tbb/blocked_range2d.h>
 #include "boundaries.h"
 
-void set_boundaries(fp_t bc[2][2])
-{
-	/* Change these values to your liking: */
-	fp_t clo = 0.0, chi = 1.0;
-
-	bc[0][0] = clo; /* bottom boundary */
-	bc[0][1] = clo; /* top boundary */
-	bc[1][0] = chi; /* left boundary */
-	bc[1][1] = chi; /* right boundary */
-}
-
-void apply_initial_conditions(fp_t** conc, const int nx, const int ny, const int nm, fp_t bc[2][2])
+void apply_initial_conditions(fp_t** conc, const int nx, const int ny, const int nm)
 {
 	/* Lambda function executed on each thread, applying flat field values */
 	tbb::parallel_for(tbb::blocked_range2d<int>(0, nx, 0, ny),
 		[=](const tbb::blocked_range2d<int>& r) {
 			for (int j = r.cols().begin(); j != r.cols().end(); j++) {
 				for (int i = r.rows().begin(); i != r.rows().end(); i++) {
-					conc[j][i] = bc[0][0];
+					conc[j][i] = 0.;
 				}
 			}
 		}
@@ -58,7 +47,7 @@ void apply_initial_conditions(fp_t** conc, const int nx, const int ny, const int
 		[=](const tbb::blocked_range2d<int>& r) {
 			for (int j = r.cols().begin(); j != r.cols().end(); j++) {
 				for (int i = r.rows().begin(); i != r.rows().end(); i++) {
-					conc[j][i] = bc[1][0];
+					conc[j][i] = 1.;
 				}
 			}
 		}
@@ -69,14 +58,14 @@ void apply_initial_conditions(fp_t** conc, const int nx, const int ny, const int
 		[=](const tbb::blocked_range2d<int>& r) {
 			for (int j = r.cols().begin(); j != r.cols().end(); j++) {
 				for (int i = r.rows().begin(); i != r.rows().end(); i++) {
-					conc[j][i] = bc[1][1];
+					conc[j][i] = 1.;
 				}
 			}
 		}
 	);
 }
 
-void apply_boundary_conditions(fp_t** conc, const int nx, const int ny, const int nm, fp_t bc[2][2])
+void apply_boundary_conditions(fp_t** conc, const int nx, const int ny, const int nm)
 {
 	/* apply fixed boundary values: sequence does not matter */
 
@@ -85,7 +74,7 @@ void apply_boundary_conditions(fp_t** conc, const int nx, const int ny, const in
 		[=](const tbb::blocked_range2d<int>& r) {
 			for (int j = r.cols().begin(); j != r.cols().end(); j++) {
 				for (int i = r.rows().begin(); i != r.rows().end(); i++) {
-					conc[j][i] = bc[1][0];
+					conc[j][i] = 1.;
 				}
 			}
 		}
@@ -96,7 +85,7 @@ void apply_boundary_conditions(fp_t** conc, const int nx, const int ny, const in
 		[=](const tbb::blocked_range2d<int>& r) {
 			for (int j = r.cols().begin(); j != r.cols().end(); j++) {
 				for (int i = r.rows().begin(); i != r.rows().end(); i++) {
-					conc[j][i] = bc[1][1];
+					conc[j][i] = 1.;
 				}
 			}
 		}

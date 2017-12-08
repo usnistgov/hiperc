@@ -32,7 +32,7 @@
 /**
  \brief Boundary condition kernel for execution on the GPU
 */
-void boundary_kernel(fp_t** conc, const int nx, const int ny, const int nm, fp_t bc[2][2]);
+void boundary_kernel(fp_t** conc, const int nx, const int ny, const int nm);
 
 /**
  \brief Tiled convolution algorithm for execution on the GPU

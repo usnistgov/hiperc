@@ -61,8 +61,6 @@ struct OpenCLData {
 
 	/** Copy of Laplacian mask on the GPU */
 	cl_mem mask;
-	/** Copy of boundary values on the GPU */
-	cl_mem bc;
 
 	/** Boundary program source for JIT compilation on the GPU */
 	cl_program boundary_program;
@@ -105,16 +103,36 @@ void build_program(const char* filename,
 /**
  \brief Initialize OpenCL device memory before marching
 */
-void init_opencl(fp_t** conc_old, fp_t** mask_lap, fp_t bc[2][2],
+void init_opencl(fp_t** conc_old, fp_t** mask_lap,
                  const int nx, const int ny, const int nm, struct OpenCLData* dev);
 
 /**
- \brief Specialization of solve_diffusion_equation() using OpenCL
+ \brief Apply boundary conditions on OpenCL device
 */
-void opencl_diffusion_solver(struct OpenCLData* dev, fp_t** conc_new,
-                             const int bx, const int by, const int nx, const int ny, const int nm,
-                             const fp_t D, const fp_t dt, const int checks,
-                             fp_t *elapsed, struct Stopwatch* sw);
+void device_boundaries(struct OpenCLData* dev, const int flip,
+                       const int nx, const int ny, const int nm,
+                       const int bx, const int by);
+
+/**
+ \brief Compute convolution on OpenCL device
+*/
+void device_convolution(struct OpenCLData* dev, const int flip,
+                        const int nx, const int ny, const int nm,
+                        const int bx, const int by);
+
+/**
+ \brief Solve diffusion equation on OpenCL device
+*/
+void device_diffusion(struct OpenCLData* dev, const int flip,
+                      const int nx, const int ny, const int nm,
+                      const int bx, const int by,
+                      const fp_t D, const fp_t dt);
+
+/**
+ \brief Copy data out of OpenCL device
+*/
+void read_out_result(struct OpenCLData* dev, const int flip, fp_t** conc_new,
+                     const int nx, const int ny);
 
 /**
  \brief Free OpenCL device memory after marching

@@ -29,7 +29,6 @@
 #include <tbb/parallel_reduce.h>
 #include <tbb/blocked_range2d.h>
 #include "boundaries.h"
-#include "discretization.h"
 #include "mesh.h"
 #include "numerics.h"
 #include "timer.h"
@@ -55,40 +54,25 @@ void compute_convolution(fp_t** conc_old, fp_t** conc_lap, fp_t** mask_lap,
 	);
 }
 
-void solve_diffusion_equation(fp_t** conc_old, fp_t** conc_new, fp_t** conc_lap,
-                              fp_t** mask_lap, const int nx, const int ny, const int nm,
-                              fp_t bc[2][2], const fp_t D, const fp_t dt, const int checks,
-                              fp_t* elapsed, struct Stopwatch* sw)
+void update_composition(fp_t** conc_old, fp_t** conc_lap, fp_t** conc_new,
+                        const int nx, const int ny, const int nm,
+						const fp_t D, const fp_t dt)
 {
-	for (int check = 0; check < checks; check++) {
-		apply_boundary_conditions(conc_old, nx, ny, nm, bc);
-
-		double start_time = GetTimer();
-		compute_convolution(conc_old, conc_lap, mask_lap, nx, ny, nm);
-		sw->conv += GetTimer() - start_time;
-
-		start_time = GetTimer();
-		/* Lambda function executed on each thread, updating diffusion equation */
-		tbb::parallel_for(tbb::blocked_range2d<int>(nm/2, nx-nm/2, nm/2, ny-nm/2),
-			[=](const tbb::blocked_range2d<int>& r) {
-				for (int j = r.cols().begin(); j != r.cols().end(); j++) {
-					for (int i = r.rows().begin(); i != r.rows().end(); i++) {
-						conc_new[j][i] = conc_old[j][i] + dt * D * conc_lap[j][i];
-					}
+	/* Lambda function executed on each thread, updating diffusion equation */
+	tbb::parallel_for(tbb::blocked_range2d<int>(nm/2, nx-nm/2, nm/2, ny-nm/2),
+		[=](const tbb::blocked_range2d<int>& r) {
+			for (int j = r.cols().begin(); j != r.cols().end(); j++) {
+				for (int i = r.rows().begin(); i != r.rows().end(); i++) {
+					conc_new[j][i] = conc_old[j][i] + dt * D * conc_lap[j][i];
 				}
 			}
-		);
-
-		*elapsed += dt;
-		sw->step += GetTimer() - start_time;
-
-		swap_pointers(&conc_old, &conc_new);
-	}
+		}
+	);
 }
 
-void check_solution(fp_t** conc_new, fp_t** conc_lap, const int nx, const int ny,
-                    const fp_t dx, const fp_t dy, const int nm, const fp_t elapsed, const fp_t D,
-                    fp_t bc[2][2], fp_t* rss)
+void check_solution_lambda(fp_t** conc_new, fp_t** conc_lap, const int nx, const int ny,
+						   const fp_t dx, const fp_t dy, const int nm, const fp_t elapsed, const fp_t D,
+						   fp_t* rss)
 {
 	/* Note: tbb::parallel_reduce can only operate on a blocked_range, */
 	/* *not* a blocked_range2d. This requires some creativity to get around. */
@@ -122,13 +106,13 @@ void check_solution(fp_t** conc_new, fp_t** conc_lap, const int nx, const int ny
 					r = distance_point_to_segment(dx * (nm/2), dy * (nm/2),
 					                              dx * (nm/2), dy * (ny/2),
 					                              dx * i, dy * j);
-					analytical_value(r, elapsed, D, bc, &cal);
+					analytical_value(r, elapsed, D, &cal);
 
 					/* shortest distance to right-wall source */
 					r = distance_point_to_segment(dx * (nx-1-nm/2), dy * (ny/2),
 					                              dx * (nx-1-nm/2), dy * (ny-1-nm/2),
 					                              dx * i, dy * j);
-					analytical_value(r, elapsed, D, bc, &car);
+					analytical_value(r, elapsed, D, &car);
 
 					/* superposition of analytical solutions */
 					const fp_t ca = cal + car;

@@ -30,7 +30,6 @@
 extern "C" {
 #include "cuda_data.h"
 #include "boundaries.h"
-#include "discretization.h"
 #include "numerics.h"
 #include "mesh.h"
 #include "timer.h"
@@ -40,11 +39,8 @@ extern "C" {
 
 __constant__ fp_t d_mask[MAX_MASK_W * MAX_MASK_H];
 
-__global__ void convolution_kernel(fp_t* d_conc_old,
-                                   fp_t* d_conc_lap,
-                                   const int nx,
-                                   const int ny,
-                                   const int nm)
+__global__ void convolution_kernel(fp_t* d_conc_old, fp_t* d_conc_lap,
+                                   const int nx, const int ny, const int nm)
 {
 	int dst_x, dst_y, dst_nx, dst_ny;
 	int src_x, src_y, src_nx, src_ny;
@@ -99,64 +95,10 @@ __global__ void convolution_kernel(fp_t* d_conc_old,
 	__syncthreads();
 }
 
-/**
- \brief Reference showing how to invoke the convolution kernel.
 
- A stand-alone function like this incurs the cost of host-to-device data
- transfer each time it is called: it is a teaching tool, not reusable code.
- It is the basis for cuda_diffusion_solver(), which achieves much better
- performance by bundling CUDA kernels together and intelligently managing
- data transfers between the host (CPU) and device (GPU).
-*/
-void compute_convolution(fp_t** conc_old, fp_t** conc_lap, fp_t** mask_lap,
-                         const int bx, const int by,
-                         const int nm,
-                         const int nx, const int ny)
-{
-	fp_t* d_conc_old, *d_conc_lap;
-
-	/* allocate memory on device */
-	cudaMalloc((void **) &d_conc_old, nx * ny * sizeof(fp_t));
-	cudaMalloc((void **) &d_conc_lap, nx * ny * sizeof(fp_t));
-
-	/* divide matrices into blocks of TILE_W * TILE_H threads */
-	dim3 tile_size(bx,
-	               by,
-	               1);
-	dim3 num_tiles(ceil(float(nx) / (tile_size.x - nm + 1)),
-	               ceil(float(ny) / (tile_size.y - nm + 1)),
-	               1);
-	size_t buf_size = (tile_size.x + nm) * (tile_size.x + nm) * sizeof(fp_t);
-
-	/* transfer mask in to constant device memory */
-	cudaMemcpyToSymbol(d_mask, mask_lap[0], nm * nm * sizeof(fp_t));
-
-	/* transfer data from host in to device */
-	cudaMemcpy(d_conc_old, conc_old[0], nx * ny * sizeof(fp_t),
-	           cudaMemcpyHostToDevice);
-
-	/* compute Laplacian */
-	convolution_kernel<<<num_tiles,tile_size,buf_size>>> (
-		d_conc_old, d_conc_lap, nx, ny, nm
-	);
-
-	/* transfer from device out to host */
-	cudaMemcpy(conc_lap[0], d_conc_lap, nx * ny * sizeof(fp_t),
-	           cudaMemcpyDeviceToHost);
-
-	/* free memory on device */
-	cudaFree(d_conc_old);
-	cudaFree(d_conc_lap);
-}
-
-__global__ void diffusion_kernel(fp_t* d_conc_old,
-                                 fp_t* d_conc_new,
-                                 fp_t* d_conc_lap,
-                                 const int nx,
-                                 const int ny,
-                                 const int nm,
-                                 const fp_t D,
-                                 const fp_t dt)
+__global__ void diffusion_kernel(fp_t* d_conc_old, fp_t* d_conc_new, fp_t* d_conc_lap,
+                                 const int nx, const int ny, const int nm,
+                                 const fp_t D, const fp_t dt)
 {
 	int thr_x, thr_y, x, y;
 
@@ -177,8 +119,109 @@ __global__ void diffusion_kernel(fp_t* d_conc_old,
 	__syncthreads();
 }
 
+void device_boundaries(fp_t* conc,
+                       const int nx, const int ny, const int nm,
+                       const int bx, const int by)
+{
+	/* divide matrices into blocks of bx * by threads */
+	dim3 tile_size(bx, by, 1);
+	dim3 num_tiles(ceil(float(nx) / (tile_size.x - nm + 1)),
+	               ceil(float(ny) / (tile_size.y - nm + 1)),
+	               1);
+
+	boundary_kernel<<<num_tiles,tile_size>>> (
+	    conc, nx, ny, nm
+	);
+}
+
+void device_convolution(fp_t* conc_old, fp_t* conc_lap,
+                        const int nx, const int ny, const int nm,
+                        const int bx, const int by)
+{
+	/* divide matrices into blocks of bx * by threads */
+	dim3 tile_size(bx, by, 1);
+	dim3 num_tiles(ceil(float(nx) / (tile_size.x - nm + 1)),
+	               ceil(float(ny) / (tile_size.y - nm + 1)),
+	               1);
+	size_t buf_size = (tile_size.x + nm) * (tile_size.y + nm) * sizeof(fp_t);
+
+	convolution_kernel<<<num_tiles,tile_size,buf_size>>> (
+	    conc_old, conc_lap, nx, ny, nm
+	);
+
+}
+
+void device_composition(fp_t* conc_old, fp_t* conc_new, fp_t* conc_lap,
+                        const int nx, const int ny, const int nm,
+                        const int bx, const int by,
+                        const fp_t D, const fp_t dt)
+{
+	/* divide matrices into blocks of bx * by threads */
+	dim3 tile_size(bx, by, 1);
+	dim3 num_tiles(ceil(float(nx) / (tile_size.x - nm + 1)),
+	               ceil(float(ny) / (tile_size.y - nm + 1)),
+	               1);
+	diffusion_kernel<<<num_tiles,tile_size>>> (
+	    conc_old, conc_new, conc_lap, nx, ny, nm, D, dt
+	);
+}
+
+void read_out_result(fp_t** conc, fp_t* d_conc, const int nx, const int ny)
+{
+	cudaMemcpy(conc[0], d_conc, nx * ny * sizeof(fp_t),
+	           cudaMemcpyDeviceToHost);
+}
+
 /**
- \brief Optimized code for solving the diffusion equation.
+ \brief Reference showing how to invoke the convolution kernel.
+
+ A stand-alone function like this incurs the cost of host-to-device data
+ transfer each time it is called: it is a teaching tool, not reusable code.
+ It is the basis for cuda_diffusion_solver(), which achieves much better
+ performance by bundling CUDA kernels together and intelligently managing
+ data transfers between the host (CPU) and device (GPU).
+*/
+void compute_convolution(fp_t** conc_old, fp_t** conc_lap, fp_t** mask_lap,
+                         const int bx, const int by,
+                         const int nm,
+                         const int nx, const int ny)
+{
+	fp_t* d_conc_old, *d_conc_lap;
+
+	/* allocate memory on device */
+	cudaMalloc((void**) &d_conc_old, nx * ny * sizeof(fp_t));
+	cudaMalloc((void**) &d_conc_lap, nx * ny * sizeof(fp_t));
+
+	/* divide matrices into blocks of TILE_W * TILE_H threads */
+	dim3 tile_size(bx, by, 1);
+	dim3 num_tiles(ceil(float(nx) / (tile_size.x - nm + 1)),
+	               ceil(float(ny) / (tile_size.y - nm + 1)),
+	               1);
+	size_t buf_size = (tile_size.x + nm) * (tile_size.x + nm) * sizeof(fp_t);
+
+	/* transfer mask in to constant device memory */
+	cudaMemcpyToSymbol(d_mask, mask_lap[0], nm * nm * sizeof(fp_t));
+
+	/* transfer data from host in to device */
+	cudaMemcpy(d_conc_old, conc_old[0], nx * ny * sizeof(fp_t),
+	           cudaMemcpyHostToDevice);
+
+	/* compute Laplacian */
+	convolution_kernel<<<num_tiles,tile_size,buf_size>>> (
+	    d_conc_old, d_conc_lap, nx, ny, nm
+	);
+
+	/* transfer from device out to host */
+	cudaMemcpy(conc_lap[0], d_conc_lap, nx * ny * sizeof(fp_t),
+	           cudaMemcpyDeviceToHost);
+
+	/* free memory on device */
+	cudaFree(d_conc_old);
+	cudaFree(d_conc_lap);
+}
+
+/**
+ \brief Reference optimized code for solving the diffusion equation.
 
  Compare cuda_diffusion_solver(): it accomplishes the same result, but without
  the memory allocation, data transfer, and array release. These are handled in
@@ -188,99 +231,36 @@ __global__ void diffusion_kernel(fp_t* d_conc_old,
  transfers and with reduced risk of memory leaks.
 */
 void cuda_diffusion_solver(struct CudaData* dev, fp_t** conc_new,
-                           fp_t bc[2][2], const int bx, const int by,
+                           const int bx, const int by,
                            const int nm, const int nx, const int ny,
-                           const fp_t D, const fp_t dt, const int checks,
-                           fp_t* elapsed, struct Stopwatch* sw)
+                           const fp_t D, const fp_t dt,
+                           struct Stopwatch* sw)
 {
 	double start_time;
-	int check=0;
 
 	/* divide matrices into blocks of bx * by threads */
-	dim3 tile_size(bx,
-	               by,
-	               1);
+	dim3 tile_size(bx, by, 1);
 	dim3 num_tiles(ceil(float(nx) / (tile_size.x - nm + 1)),
 	               ceil(float(ny) / (tile_size.y - nm + 1)),
 	               1);
 	size_t buf_size = (tile_size.x + nm) * (tile_size.y + nm) * sizeof(fp_t);
 
-	for (check = 0; check < checks; check++) {
-		/* apply boundary conditions */
-		boundary_kernel<<<num_tiles,tile_size>>> (
-			dev->conc_old, nx, ny, nm
-		);
+	/* apply boundary conditions */
+	boundary_kernel<<<num_tiles,tile_size>>> (
+	    dev->conc_old, nx, ny, nm
+	);
 
-		/* compute Laplacian */
-		start_time = GetTimer();
-		convolution_kernel<<<num_tiles,tile_size,buf_size>>> (
-			dev->conc_old, dev->conc_lap, nx, ny, nm
-		);
-		sw->conv += GetTimer() - start_time;
-
-		/* compute result */
-		start_time = GetTimer();
-		diffusion_kernel<<<num_tiles,tile_size>>> (
-			dev->conc_old, dev->conc_new, dev->conc_lap, nx, ny, nm, D, dt
-		);
-		sw->step += GetTimer() - start_time;
-
-		swap_pointers_1D(&(dev->conc_old), &(dev->conc_new));
-	}
-
-	*elapsed += dt * checks;
-
-	/* transfer result to host (conc_new) from device (dev->conc_old) */
+	/* compute Laplacian */
 	start_time = GetTimer();
-	cudaMemcpy(conc_new[0], dev->conc_old, nx * ny * sizeof(fp_t),
-	           cudaMemcpyDeviceToHost);
-	sw->file += GetTimer() - start_time;
+	convolution_kernel<<<num_tiles,tile_size,buf_size>>> (
+	    dev->conc_old, dev->conc_lap, nx, ny, nm
+	);
+	sw->conv += GetTimer() - start_time;
+
+	/* compute result */
+	start_time = GetTimer();
+	diffusion_kernel<<<num_tiles,tile_size>>> (
+	    dev->conc_old, dev->conc_new, dev->conc_lap, nx, ny, nm, D, dt
+	);
+	sw->step += GetTimer() - start_time;
 }
-
-void check_solution(fp_t** conc_new, fp_t** conc_lap, const int nx, const int ny,
-                    const fp_t dx, const fp_t dy, const int nm, const fp_t elapsed, const fp_t D,
-                    fp_t bc[2][2], fp_t* rss)
-{
-	fp_t sum=0.;
-
-	#pragma omp parallel reduction(+:sum)
-	{
-		fp_t r, cal, car;
-
-		#pragma omp for collapse(2) private(cal,car,r)
-		for (int j = nm/2; j < ny-nm/2; j++) {
-			for (int i = nm/2; i < nx-nm/2; i++) {
-				/* numerical solution */
-				const fp_t cn = conc_new[j][i];
-
-				/* shortest distance to left-wall source */
-				r = distance_point_to_segment(dx * (nm/2), dy * (nm/2),
-				                              dx * (nm/2), dy * (ny/2),
-				                              dx * i, dy * j);
-				analytical_value(r, elapsed, D, bc, &cal);
-
-				/* shortest distance to right-wall source */
-				r = distance_point_to_segment(dx * (nx-1-nm/2), dy * (ny/2),
-				                              dx * (nx-1-nm/2), dy * (ny-1-nm/2),
-				                              dx * i, dy * j);
-				analytical_value(r, elapsed, D, bc, &car);
-
-				/* superposition of analytical solutions */
-				const fp_t ca = cal + car;
-
-				/* residual sum of squares (RSS) */
-				conc_lap[j][i] = (ca - cn) * (ca - cn) / (fp_t)((nx-1-nm/2) * (ny-1-nm/2));
-			}
-		}
-
-		#pragma omp for collapse(2)
-		for (int j = nm/2; j < ny-nm/2; j++) {
-			for (int i = nm/2; i < nx-nm/2; i++) {
-				sum += conc_lap[j][i];
-			}
-		}
-	}
-
-	*rss = sum;
-}
-

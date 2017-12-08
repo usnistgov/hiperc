@@ -3,8 +3,7 @@
 all: cpu_diffusion gpu_diffusion
 .PHONY: all
 
-cpu_diffusion_list := cpu-analytic-diffusion \
-                      cpu-serial-diffusion \
+cpu_diffusion_list := cpu-serial-diffusion \
                       cpu-openmp-diffusion \
                       cpu-tbb-diffusion
 

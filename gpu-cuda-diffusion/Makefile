@@ -26,16 +26,16 @@ discretization.o: cuda_discretization.cu
 # Common objects
 
 mesh.o: ../common-diffusion/mesh.c
-	$(NVCXX) $(NVCXXFLAGS) -dc $< -o $@
+	$(NVCXX) $(NVCXXFLAGS) -c $< -o $@
 
 numerics.o: ../common-diffusion/numerics.c
-	$(NVCXX) $(NVCXXFLAGS) -dc $<
+	$(NVCXX) $(NVCXXFLAGS) -c $<
 
 output.o: ../common-diffusion/output.c
-	$(NVCXX) $(NVCXXFLAGS) -dc $< -o $@
+	$(NVCXX) $(NVCXXFLAGS) -c $< -o $@
 
 timer.o: ../common-diffusion/timer.c
-	$(NVCXX) $(NVCXXFLAGS) -dc $< -o $@
+	$(NVCXX) $(NVCXXFLAGS) -c $< -o $@
 
 # Helper scripts
 

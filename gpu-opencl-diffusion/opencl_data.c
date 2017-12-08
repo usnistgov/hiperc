@@ -48,14 +48,13 @@ void report_error(cl_int status, const char* message)
 	}
 }
 
-void init_opencl(fp_t** conc_old, fp_t** mask_lap, fp_t bc[2][2],
-               const int nx, const int ny, const int nm, struct OpenCLData* dev)
+void init_opencl(fp_t** conc_old, fp_t** mask_lap,
+                 const int nx, const int ny, const int nm, struct OpenCLData* dev)
 {
-	/* Here's a lot of source code required to prepare your accelerator to do work. */
+	/* There's a lot of code required to prepare your accelerator to do work. */
 
 	const int gridSize = nx * ny * sizeof(fp_t);
 	const int maskSize = nm * nm * sizeof(fp_t);
-	const int bcSize = 2 * 2 * sizeof(fp_t);
 
 	cl_int status;
 	cl_device_id gpu;
@@ -86,7 +85,8 @@ void init_opencl(fp_t** conc_old, fp_t** mask_lap, fp_t bc[2][2],
 	 */
 	cl_context_properties properties[] = {CL_CONTEXT_PLATFORM,
 	                                      (cl_context_properties)platforms[0],
-	                                      0};
+	                                      0
+	                                     };
 	dev->context = clCreateContextFromType(properties, CL_DEVICE_TYPE_ALL, 0, NULL, &status);
 	report_error(status, "clCreateContextFromType");
 
@@ -142,8 +142,6 @@ void init_opencl(fp_t** conc_old, fp_t** mask_lap, fp_t bc[2][2],
 
 	dev->mask = clCreateBuffer(dev->context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, maskSize, mask_lap[0], &status);
 	report_error(status, "create dev->mask");
-	dev->bc = clCreateBuffer(dev->context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, bcSize, bc[0], &status);
-	report_error(status, "create dev->bc");
 
 	/* clean up */
 	free(platforms);
@@ -151,12 +149,12 @@ void init_opencl(fp_t** conc_old, fp_t** mask_lap, fp_t bc[2][2],
 }
 
 void build_program(const char* filename,
-                  cl_context* context,
-                  cl_device_id* gpu,
-                  cl_program* program,
-                  cl_int* status)
+                   cl_context* context,
+                   cl_device_id* gpu,
+                   cl_program* program,
+                   cl_int* status)
 {
-	FILE *fp;
+	FILE* fp;
 	char* source_str;
 	char msg[1024];
 	size_t source_len, program_size, read_size;
@@ -164,8 +162,8 @@ void build_program(const char* filename,
 
 	fp = fopen(filename, "rb");
 	if (!fp) {
-	    printf("Failed to load kernel %s\n", filename);
-	    exit(-1);
+		printf("Failed to load kernel %s\n", filename);
+		exit(-1);
 	}
 
 	fseek(fp, 0, SEEK_END);
@@ -182,7 +180,7 @@ void build_program(const char* filename,
 	strcpy(msg, filename);
 	strcat(msg, ": clCreateProgramWithSource");
 	source_len = strlen(source_str);
-	*program = clCreateProgramWithSource(*context, 1, (const char **)&source_str, &source_len, status);
+	*program = clCreateProgramWithSource(*context, 1, (const char**)&source_str, &source_len, status);
 	report_error(*status, msg);
 
 	strcpy(msg, filename);
@@ -190,9 +188,9 @@ void build_program(const char* filename,
 	*status = clBuildProgram(*program, 0, NULL, (const char*)options, NULL, NULL);
 
 	/* report_error is too granular: report specific build errors */
-	if(*status != CL_SUCCESS) {
+	if (*status != CL_SUCCESS) {
 		/* Thanks to https://stackoverflow.com/a/29813956 */
-		char *buff_erro;
+		char* buff_erro;
 		cl_int errcode;
 		size_t build_log_len;
 		errcode = clGetProgramBuildInfo(*program, *gpu, CL_PROGRAM_BUILD_LOG, 0, NULL, &build_log_len);
@@ -230,7 +228,6 @@ void free_opencl(struct OpenCLData* dev)
 	free(dev->conc_old);
 	free(dev->conc_new);
 	free(dev->conc_lap);
-	free(dev->bc);
 	free(dev->mask);
 
 	clReleaseContext(dev->context);

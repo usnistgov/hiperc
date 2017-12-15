@@ -25,13 +25,13 @@ from sys import argv
 from os import path, stat
 import matplotlib.pylab as plt
 
-cpuBase = ("openmp")
-gpuBase = ("cuda")
+cpuBase = ("openmp",)
+gpuBase = ("cuda",)
 
-sizes = (200)
+sizes = (200,)
 
-dirset = (["cpu-{0}-diffusion".format(c) for c in cpuBase],
-          ["gpu-{0}-diffusion".format(g) for g in gpuBase])
+dirset = (["cpu-{0}-spinodal".format(c) for c in cpuBase],
+          ["gpu-{0}-spinodal".format(g) for g in gpuBase])
 
 dirs = [s for sublist in dirset for s in sublist]
 
@@ -44,7 +44,7 @@ plt.xlabel(r'Simulation Time')
 plt.ylabel(r'Execution Time')
 
 plt.figure(1)
-plt.title('Energy$')
+plt.title('Energy')
 plt.xlabel(r'Simulation Time')
 plt.ylabel(r'Free Energy')
 
@@ -61,7 +61,7 @@ for nx in sizes:
     
     plt.figure(4)
     plt.title('Energy with $N_x={0}$'.format(nx))
-    plt.xlabel(r'Simulation Time$')
+    plt.xlabel(r'Simulation Time')
     plt.ylabel(r'Free Energy')
     
     plt.figure(5)
@@ -71,7 +71,7 @@ for nx in sizes:
     
     plt.figure(6)
     plt.title('I/O with $N_x={0}$'.format(nx))
-    plt.xlabel(r'Simulation Time$')
+    plt.xlabel(r'Simulation Time')
     plt.ylabel(r'I/O Time')
     
     for j in range(len(dirs)):
@@ -79,13 +79,13 @@ for nx in sizes:
         logfile = "{0}/runlog_{1}.csv".format(datdir, nx)
         if path.isdir(datdir) and len(glob.glob(logfile)) > 0:
             base = path.basename(datdir)
-            iter,sim_time,wrss,conv_time,step_time,IO_time,soln_time,run_time = np.loadtxt(logfile, skiprows=1, delimiter=',', unpack=True)
+            iter,sim_time,energy,conv_time,step_time,IO_time,run_time = np.loadtxt(logfile, skiprows=1, delimiter=',', unpack=True)
             
             plt.figure(0)
             plt.plot(sim_time, run_time, '-', color=colors[j], marker=markers[j])
             
             plt.figure(1)
-            plt.plot(sim_time, wrss, '-', color=colors[j], marker=markers[j])
+            plt.plot(sim_time, energy, '-', color=colors[j], marker=markers[j])
             
             plt.figure(2)
             plt.plot(sim_time, step_time, '-', color=colors[j], marker=markers[j])
@@ -94,7 +94,7 @@ for nx in sizes:
             plt.plot(sim_time, run_time, '-', color=colors[j], marker=markers[j], label=dirs[j])
             
             plt.figure(4)
-            plt.plot(sim_time, wrss, '-', color=colors[j], marker=markers[j], label=dirs[j])
+            plt.plot(sim_time, energy, '-', color=colors[j], marker=markers[j], label=dirs[j])
             
             plt.figure(5)
             plt.plot(sim_time, step_time, '-', color=colors[j], marker=markers[j], label=dirs[j])

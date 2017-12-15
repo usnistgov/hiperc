@@ -111,7 +111,7 @@ int main(int argc, char* argv[])
 		watch.conv += GetTimer() - start_time;
 
 		start_time = GetTimer();
-		device_composition(dev.conc_old, dev.conc_new, dev.conc_div, nx, ny, nm, bx, by, M, dt);
+		device_composition(dev.conc_old, dev.conc_div, dev.conc_new, nx, ny, nm, bx, by, M, dt);
 		watch.conv += GetTimer() - start_time;
 
 		swap_pointers_1D(&(dev.conc_old), &(dev.conc_new));

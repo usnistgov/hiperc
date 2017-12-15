@@ -34,6 +34,7 @@ void init_cuda(fp_t** conc_old, fp_t** mask_lap,
 	/* allocate memory on device */
 	cudaMalloc((void**) &(dev->conc_old), nx * ny * sizeof(fp_t));
 	cudaMalloc((void**) &(dev->conc_lap), nx * ny * sizeof(fp_t));
+	cudaMalloc((void**) &(dev->conc_div), nx * ny * sizeof(fp_t));
 	cudaMalloc((void**) &(dev->conc_new), nx * ny * sizeof(fp_t));
 
 	/* transfer mask and boundary conditions to protected memory on GPU */
@@ -49,5 +50,6 @@ void free_cuda(struct CudaData* dev)
 	/* free memory on device */
 	cudaFree(dev->conc_old);
 	cudaFree(dev->conc_lap);
+	cudaFree(dev->conc_div);
 	cudaFree(dev->conc_new);
 }

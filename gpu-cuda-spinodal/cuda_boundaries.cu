@@ -43,7 +43,7 @@ void apply_initial_conditions(fp_t** conc, const int nx, const int ny, const int
 			for (int i = 0; i < nx; i++) {
 				const int x = i - nm/2;
 				const int y = j - nm/2;
-				conc[j][i] = c0 + ep * (  cos(0.105 * x) * cos(0.110 * y)
+				conc[j][i] = c0 + ep * (    cos(0.105 * x) * cos(0.110 * y)
 				                          + cos(0.130 * x) * cos(0.087 * y)
 				                          * cos(0.130 * x) * cos(0.087 * y)
 				                          + cos(0.025 * x - 0.150 * y)

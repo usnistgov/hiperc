@@ -3,6 +3,7 @@
 .directory
 *~
 *.aux
+*.bak
 *.csv
 *.db
 *.log

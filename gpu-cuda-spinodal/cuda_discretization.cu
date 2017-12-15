@@ -165,7 +165,7 @@ __global__ void divergence_kernel(fp_t* d_conc_lap, fp_t* d_conc_div,
 }
 
 
-__global__ void diffusion_kernel(fp_t* d_conc_old, fp_t* d_conc_new, fp_t* d_conc_lap,
+__global__ void diffusion_kernel(fp_t* d_conc_old, fp_t* d_conc_div, fp_t* d_conc_new,
                                  const int nx, const int ny, const int nm,
                                  const fp_t D, const fp_t dt)
 {
@@ -181,7 +181,7 @@ __global__ void diffusion_kernel(fp_t* d_conc_old, fp_t* d_conc_new, fp_t* d_con
 	/* explicit Euler solution to the equation of motion */
 	if (x < nx && y < ny) {
 		d_conc_new[nx * y + x] = d_conc_old[nx * y + x]
-		              + dt * D * d_conc_lap[nx * y + x];
+		              + dt * D * d_conc_div[nx * y + x];
 	}
 
 	/* wait for all threads to finish writing */
@@ -235,7 +235,7 @@ void device_divergence(fp_t* conc_lap, fp_t* conc_div,
 	);
 }
 
-void device_composition(fp_t* conc_old, fp_t* conc_new, fp_t* conc_lap,
+void device_composition(fp_t* conc_old, fp_t* conc_lap, fp_t* conc_new,
                         const int nx, const int ny, const int nm,
                         const int bx, const int by,
                         const fp_t D, const fp_t dt)
@@ -246,7 +246,7 @@ void device_composition(fp_t* conc_old, fp_t* conc_new, fp_t* conc_lap,
 	               ceil(float(ny) / (tile_size.y - nm + 1)),
 	               1);
 	diffusion_kernel<<<num_tiles,tile_size>>> (
-	    conc_old, conc_new, conc_lap, nx, ny, nm, D, dt
+	    conc_old, conc_lap, conc_new, nx, ny, nm, D, dt
 	);
 }
 

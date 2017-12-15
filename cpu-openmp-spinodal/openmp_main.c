@@ -111,7 +111,7 @@ int main(int argc, char* argv[])
 
 		if (step % checks == 0) {
 			start_time = GetTimer();
-			write_png(conc_old, nx, ny, step);
+			write_png(conc_old, nx, ny, dt*step);
 			watch.file += GetTimer() - start_time;
 
 			free_energy(conc_old, conc_lap, dx, dy, nx, ny, nm, kappa, &energy);
@@ -122,7 +122,7 @@ int main(int argc, char* argv[])
 		}
 	}
 
-	write_csv(conc_old, nx, ny, dx, dy, steps);
+	write_csv(conc_old, nx, ny, dx, dy, dt*steps);
 
 	/* clean up */
 	fclose(output);

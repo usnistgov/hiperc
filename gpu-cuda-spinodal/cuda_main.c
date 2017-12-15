@@ -128,7 +128,7 @@ int main(int argc, char* argv[])
 			free_energy(conc_new, conc_lap, dx, dy, nx, ny, nm, kappa, &energy);
 
 			start_time = GetTimer();
-			write_png(conc_new, nx, ny, step);
+			write_png(conc_new, nx, ny, dt * step);
 			watch.file += GetTimer() - start_time;
 
 			fprintf(output, "%i,%f,%f,%f,%f,%f,%f\n", step, elapsed, energy,
@@ -137,7 +137,7 @@ int main(int argc, char* argv[])
 		}
 	}
 
-	write_csv(conc_new, nx, ny, dx, dy, steps);
+	write_csv(conc_new, nx, ny, dx, dy, dt * steps);
 
 	/* clean up */
 	fclose(output);

@@ -162,7 +162,7 @@ void write_csv(fp_t** conc, const int nx, const int ny, const fp_t dx, const fp_
 	int i, j;
 
 	/* generate the filename */
-	sprintf(num, "%08i", step);
+	sprintf(num, "%07i", step);
 	strcpy(name, "spinodal.");
 	strcat(name, num);
 	strcat(name, ".csv");
@@ -209,7 +209,7 @@ void write_png(fp_t** conc, const int nx, const int ny, const int step)
 	h = ny - 2;
 
 	/* generate the filename */
-	sprintf(num, "%08i", step);
+	sprintf(num, "%07i", step);
 	strcpy(name, "spinodal.");
 	strcat(name, num);
 	strcat(name, ".png");

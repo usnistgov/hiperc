@@ -2,8 +2,8 @@ nx 202        # total mesh points along x-axis
 ny 202        # total mesh points along y-axis
 bx 7          # convolution block size along x-axis
 by 7          # convolution block size along y-axis
-ns 10000000   # number of timesteps to march
-nc 100000     # number of timesteps between checkpoint outputs
+ns 200000000  # number of timesteps to march
+nc 1000000    # number of timesteps between checkpoint outputs
 mc 5.0        # mobility, M
 kp 2.0        # gradient energy coefficient, kappa
 co 0.24       # linear stability constant (Courant/CFL condition)

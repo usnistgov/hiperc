@@ -85,7 +85,7 @@ for nx in sizes:
             plt.plot(sim_time, run_time, '-', color=colors[j], marker=markers[j])
             
             plt.figure(1)
-            plt.plot(sim_time, energy, '-', color=colors[j], marker=markers[j])
+            plt.loglog(sim_time, energy, '-', color=colors[j], marker=markers[j])
             
             plt.figure(2)
             plt.plot(sim_time, step_time, '-', color=colors[j], marker=markers[j])
@@ -94,7 +94,7 @@ for nx in sizes:
             plt.plot(sim_time, run_time, '-', color=colors[j], marker=markers[j], label=dirs[j])
             
             plt.figure(4)
-            plt.plot(sim_time, energy, '-', color=colors[j], marker=markers[j], label=dirs[j])
+            plt.loglog(sim_time, energy, '-', color=colors[j], marker=markers[j], label=dirs[j])
             
             plt.figure(5)
             plt.plot(sim_time, step_time, '-', color=colors[j], marker=markers[j], label=dirs[j])

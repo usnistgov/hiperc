@@ -98,8 +98,9 @@ __global__ void convolution_kernel(fp_t* d_conc_old, fp_t* d_conc_lap, const fp_
 			}
 		}
 		/* record value */
+        /* Note: tile is centered on [til_nx*(til_y+nm/2) + (til_x+nm/2)], NOT [til_nx*til_y + til_x] */
 		if (dst_y < ny && dst_x < nx) {
-          d_conc_lap[nx * dst_y + dst_x] = dfdc(d_conc_tile[til_nx * til_y + til_x])
+          d_conc_lap[nx * dst_y + dst_x] = dfdc(d_conc_tile[til_nx * (til_y+nm/2) + (til_x+nm/2)])
                                          - kappa * value;
 		}
 	}

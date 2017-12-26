@@ -51,16 +51,15 @@ int main(int argc, char* argv[])
 	const fp_t dx=1.0, dy=1.0;
 
 	/* declare default materials and numerical parameters */
-	fp_t M=5.0, kappa=2.0, linStab=0.25, dt=1., elapsed=0., energy=0.;
+	fp_t M=5.0, kappa=2.0, linStab=0.25, elapsed=0., energy=0.;
 	int step=0, steps=5000000, checks=100000;
-	double start_time=0.;
 	struct Stopwatch watch = {0., 0., 0., 0.};
 
 	StartTimer();
 
 	param_parser(argc, argv, &bx, &by, &checks, &code, &M, &kappa, &linStab, &nm, &nx, &ny, &steps);
 
-	dt = linStab / (24.0 * M * kappa);
+	const fp_t dt = linStab / (24.0 * M * kappa);
 
 	/* initialize memory */
 	make_arrays(&conc_old, &conc_new, &conc_lap, &conc_div, &mask_lap, nx, ny, nm);
@@ -68,7 +67,7 @@ int main(int argc, char* argv[])
 
 	print_progress(step, steps);
 
-	start_time = GetTimer();
+	double start_time = GetTimer();
 	apply_initial_conditions(conc_old, nx, ny, nm);
 	watch.step = GetTimer() - start_time;
 

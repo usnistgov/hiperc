@@ -54,9 +54,8 @@ void device_boundaries(struct OpenCLData* dev, const int flip,
 	const size_t grid_dim[2] = {bloc_dim[0]* tile_dim[0],
 	                            bloc_dim[1]* tile_dim[1]
 	                           };
-	cl_int status = CL_SUCCESS;
 
-	status |= clSetKernelArg(dev->boundary_kernel, 0, sizeof(cl_mem), (void*)&d_conc_old);
+	cl_int status = clSetKernelArg(dev->boundary_kernel, 0, sizeof(cl_mem), (void*)&d_conc_old);
 	status |= clSetKernelArg(dev->boundary_kernel, 1, sizeof(int), (void*)&nx);
 	status |= clSetKernelArg(dev->boundary_kernel, 2, sizeof(int), (void*)&ny);
 	status |= clSetKernelArg(dev->boundary_kernel, 3, sizeof(int), (void*)&nm);
@@ -131,8 +130,7 @@ void read_out_result(struct OpenCLData* dev, const int flip, fp_t** conc,
 {
 	const cl_mem d_conc = (flip == 0) ? dev->conc_new : dev->conc_old;
 	const int grid_size = nx * ny * sizeof(fp_t);
-	cl_int status = CL_SUCCESS;
 
-	status = clEnqueueReadBuffer(dev->commandQueue, d_conc, CL_TRUE, 0, grid_size, conc[0], 0, NULL, NULL);
+	cl_int status = clEnqueueReadBuffer(dev->commandQueue, d_conc, CL_TRUE, 0, grid_size, conc[0], 0, NULL, NULL);
 	report_error(status, "retrieving result from GPU");
 }

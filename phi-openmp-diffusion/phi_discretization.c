@@ -57,12 +57,10 @@ void solve_diffusion_equation(fp_t** conc_old, fp_t** conc_new, fp_t** conc_lap,
                               fp_t bc[2][2], fp_t D, fp_t dt, int checks,
                               fp_t* elapsed, struct Stopwatch* sw)
 {
-	double start_time=0.;
-
 	for (int check = 0; check < checks; check++) {
 		apply_boundary_conditions(conc_old, nx, ny, nm, bc);
 
-		start_time = GetTimer();
+		double start_time = GetTimer();
 		compute_convolution(conc_old, conc_lap, mask_lap, nx, ny, nm);
 		sw->conv += GetTimer() - start_time;
 

@@ -35,7 +35,7 @@ Accelerator Languages
 There are six mainstream approaches to shared-memory parallel programming,
 with varying coding complexity and hardware dependencies:
 
-POSIX_ threads
+`POSIX Threads`_
    MIMD_-capable threading for multi-core CPU
    architectures. Challenging to properly implement, but with ample opportunity
    to tune performance. Provided by all compilers and compatible with any
@@ -88,9 +88,9 @@ Most of the current generation of research supercomputers contain GPU or KNL
 accelerator hardware, including Argonne National Labs'
 Bebop_, NERSC Cori_, TACC Stampede2_, and XSEDE_.
 
-===============
-Basic Algorithm
-===============
+=======================
+Boundary Value Problems
+=======================
 
 Diffusion and phase-field problems depend extensively on the divergence of
 gradients, *e.g.*
@@ -103,14 +103,16 @@ When *D* is constant, this simplifies to
 .. math::
     \frac{\partial c}{\partial t} = D\nabla^2 c
 
-This equation can be discretized, *e.g.* in 1D:
+This equation can be discretized, *e.g.* in 1D with *i* representing the
+discrete 1D coordinate:
 
 .. math::
-    \frac{\Delta c}{\Delta t} \approx D\left[\frac{c_{+} - 2c_{\circ} + c_{-}}{\left(\Delta x\right)^2}\right]
+    \frac{\Delta c}{\Delta t} \approx D\left[\frac{c_{i+1} - 2c_{i} + c_{i-1}}{\left(\Delta x\right)^2}\right]
 
 This discretization is a special case of convolution_, wherein a
 constant kernel of weighting coefficients is applied to an input dataset to
-produce a transformed output.
+produce a transformed output. These coefficients can be re-written in a tabular
+or matrix form as follows:
 
 +----+----+----+
 | 1D Laplacian |
@@ -118,6 +120,17 @@ produce a transformed output.
 | 1  | -2 |  1 |
 +----+----+----+
 
+This form is often referred to as a "stencil," since these exact same
+coefficients are multiplied at every point in the simulation domain to compute
+the final answer. Extrapolation from 1D into 2D can be as simple as a linear
+combination of 1D discretizations, one for each orthogonal direction:
+
+.. math::
+    \frac{\Delta c}{\Delta t} \approx D\left[\frac{c_{i+1,j} - 2c_{i,j} + c_{i-1,j}}{\left(\Delta x\right)^2} + \frac{c_{i,j+1} - 2c_{i,j} + c_{i,j-1}}{\left(\Delta y\right)^2}\right]
+
+When :math:`\Delta x=\Delta y=h`, the stencil reduces to just five
+coefficients in a 3×3 matrix:
+   
 +-----+-----+-----+
 |   2D Laplacian  |
 +-----+-----+-----+
@@ -129,6 +142,11 @@ produce a transformed output.
 +-----+-----+-----+
 |  0  |   1 |   0 |
 +-----+-----+-----+
+
+Both the 1D and 5-point 2D stencils have truncation error on the order of
+:math:`h^2`. A more accurate 2D discretization uses the Taylor series expansion
+around :math:`c_{i,j}`, using all 9 points in the 3×3 matrix. This
+discretization yields truncation error :math:`\mathcal{O}(h^4)`:
 
 +-----+------+-----+
 |   2D Laplacian   |
@@ -147,7 +165,11 @@ produce a transformed output.
     and third-nearest neighbors, which is also implemented in the source code;
     it is less efficient than the canonical form.
 
-In addition, computing values for the next timestep given values from the
+===============
+Basic Algorithm
+===============
+
+Computing values for the next timestep given values from the
 previous timestep and the Laplacian values is a vector-add operation.
 Accelerators and coprocessors are well-suited to this type of computation.
 Therefore, to demonstrate the use of this hardware in materials science
@@ -279,8 +301,6 @@ Work in Progress
 ================
 
 - [ ] CPU
-    - [x] analytical
-        - [x] diffusion
     - [ ] serial
         - [x] diffusion
         - [ ] spinodal
@@ -288,7 +308,7 @@ Work in Progress
         - [ ] ripening
     - [ ] OpenMP
         - [x] diffusion
-        - [ ] spinodal
+        - [x] spinodal
         - [ ] dendrite
         - [ ] ripening
     - [ ] Threading Building Blocks
@@ -299,7 +319,7 @@ Work in Progress
 - [ ] GPU
     - [ ] CUDA
         - [x] diffusion
-        - [ ] spinodal
+        - [x] spinodal
         - [ ] dendrite
         - [ ] ripening
     - [ ] OpenACC
@@ -374,7 +394,7 @@ the best available for the purpose.
 .. _OpenCL: https://www.khronos.org/opencl/
 .. _OpenMP: http://www.openmp.org/
 .. _PGI: http://www.pgroup.com/
-.. _POSIX: http://www.opengroup.org/austin/papers/posix_faq.html
+.. _`POSIX Threads`: http://www.opengroup.org/austin/papers/posix_faq.html
 .. _radeontop: https://github.com/clbr/radeontop
 .. |readthedocs| image:: http://readthedocs.org/projects/hiperc/badge/?version=latest
 .. _readthedocs: http://hiperc.readthedocs.io/en/latest/?badge=latest

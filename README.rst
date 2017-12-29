@@ -173,27 +173,14 @@ Computing values for the next timestep given values from the
 previous timestep and the Laplacian values is a vector-add operation.
 Accelerators and coprocessors are well-suited to this type of computation.
 Therefore, to demonstrate the use of this hardware in materials science
-applications, these examples flow according to the following pseudocode:
+applications, these examples flow according to the following diagram:
 
-::
-
-    Start
-        Allocate arrays using CPU
-        Apply initial conditions to grid marked "old" using CPU
-        While elapsed time is less than final time
-        Do
-            Apply boundary conditions using CPU
-            Compute Laplacian using "old" values using accelerator
-            Solve for "new" values using "old" and Laplacian values using accelerator
-            Increment elapsed time by one timestep
-            If elapsed time is an even increment of a specified interval
-            Then
-                Write an image file to disk
-            Endif
-        Done
-        Write final values to disk in comma-separated value format
-        Free arrays
-    Finish
+.. image:: hiperc-diffusion-flowchart.png
+   :height: 1081px
+   :width: 640px
+   :scale: 50 %
+   :alt: "HiPerC Diffusion: Control and Data Flow"
+   :align: center
 
 -------------------------
 Source Code Documentation
@@ -211,7 +198,7 @@ browse the source code to your heart's content.
 Running the Demonstration Programs
 ==================================
 
-This repository has a flat structure. Code common to each problem type are
+This repository has a flat structure. Code common to each problem type is
 lumped together, *e.g.* in ``common-diffusion``. The remaining implementation
 folders have three-part names: ``architecture-threading-model``. To compile
 code for your setup of interest, ``cd`` into its directory and run ``make``
@@ -258,7 +245,7 @@ summary file, ``runlog.csv``, containing the following columns:
 - **soln_time**: cumulative real time spent computing the analytical solution
 - **run_time**: elapsed real time
 
-At timestep 10,000 the expected ``wrss=0.002895`` (0.2%) using the 5-point
+At timestep 10,000 the expected ``wrss=0.002895`` (0.29%) using the 5-point
 stencil; the rendered initial and final images should look like these
 (grayscale, ``0`` is black and ``1`` is white):
 
@@ -294,7 +281,21 @@ to another location (outside this repository). Then copy the contents of the
 common folder it depends upon, *e.g.* ``common-diffusion``, into the new
 folder location. Finally, edit the ``Makefile`` within the new folder to
 remove references to the old common folder. This should centralize everything
-you need to remix and get started in the new folder.
+you need to get started with your remix.
+
+HiPerC is in the public domain, so there is no license restricting your use.
+We would appreciate acknowledgment in your documentation, and a citation if you
+publish peer-reviewed research using HiPerC principles and source code.
+
+-------------
+Citing HiPerC
+-------------
+
+HiPerC will be published in `JOSS`_ as part of the 1.0 milestone. Until then,
+please cite this work as follows:
+
+    Keller, Trevor (2017). HiPerC: High Performance Computing Strategies for
+    Boundary Value Problems [Computer software]. Online: https://github.com/usnistgov/hiperc.
 
 ================
 Work in Progress

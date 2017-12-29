@@ -3,6 +3,9 @@
 all: cpu_diffusion gpu_diffusion
 .PHONY: all
 
+hiperc-diffusion-flowchart.png: hiperc-diffusion-flowchart.dot
+	dot -T png hiperc-diffusion-flowchart.dot -o hiperc-diffusion-flowchart.png
+
 cpu_diffusion_list := cpu-serial-diffusion \
                       cpu-openmp-diffusion \
                       cpu-tbb-diffusion

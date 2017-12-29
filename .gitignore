@@ -2,6 +2,8 @@
 
 .directory
 *~
+*#
+*.#*
 *.aux
 *.bak
 *.csv
@@ -14,7 +16,6 @@
 *.png
 *.swp
 *.txt
-*.#*
 
 
 # Executables

@@ -224,7 +224,8 @@ files_to_copy = (
     'README.rst',
     'LICENSE.md',
     'common-diffusion/diffusion.*.png',
-    'HiPerC.png'
+    'HiPerC.png',
+    'hiperc-diffusion-flowchart.png'
 )
 
 for fpath in files_to_copy:
@@ -238,18 +239,3 @@ for fpath in files_to_copy:
 breathe_projects = {"HiPerC": "xml"}
 
 breathe_default_project = "HiPerC"
-
-#breathe_domain_by_extension = {
-#    "h" : "c",
-#    "c" : "c",
-#    "cl" : "c",
-#    "cu" : "cpp",
-#    "cuh" : "cpp",
-#    "cpp" : "cpp",
-#}
-
-#breathe_domain_by_file_pattern = {
-#    "*/common-diffusion/*" : "c",
-#    "*/cpu-tbb-diffusion/*" : "cpp",
-#    "*/gpu-cuda-diffusion/*" : "cpp",
-#}

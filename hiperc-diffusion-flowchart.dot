@@ -1,0 +1,57 @@
+digraph cpu_serial {
+    labelloc = t;
+    label = < <U><B>HiPerC Diffusion: Control and Data Flow</B></U> >;
+
+    # === Control Flow ===
+    Start
+    -> param_parser
+    -> make_arrays
+    -> apply_initial_conditions
+    -> "step < nSteps"
+    [arrowhead=normal]
+    ;
+
+    "step < nSteps" -> apply_boundary_conditions [xlabel="yes"];
+    "step < nSteps" -> Finish [xlabel="no"];
+    swap_pointers -> "step < nSteps" [weight=2.5];
+
+    apply_boundary_conditions
+    -> compute_convolution
+    -> solve_diffusion_equation
+    -> swap_pointers
+    [arrowhead=normal]
+    ;
+
+    # === Data Flow ===
+    apply_initial_conditions -> "conc_old" [color=salmon style=dashed arrowhead=vee];
+    apply_boundary_conditions -> "conc_old" [color=salmon style=dashed arrowhead=vee];
+    "params.txt" -> param_parser [color=salmon style=dashed arrowhead=vee];
+    "conc_old" -> compute_convolution [color=salmon style=dashed arrowhead=vee];
+    "mask_lap" -> compute_convolution [color=salmon style=dashed arrowhead=vee];
+    compute_convolution -> "conc_lap" [color=salmon style=dashed arrowhead=vee];
+    "conc_old" -> solve_diffusion_equation [color=salmon style=dashed arrowhead=vee];
+    "conc_lap" -> solve_diffusion_equation [color=salmon style=dashed arrowhead=vee];
+    solve_diffusion_equation -> "conc_new" [color=salmon style=dashed arrowhead=vee];
+    swap_pointers -> "conc_old" [dir=both color=salmon style=dashed arrowhead=vee];
+    swap_pointers -> "conc_new" [dir=both color=salmon style=dashed arrowhead=vee];
+
+    # === Node Shapes ===
+    compute_convolution [penwidth=1];
+    solve_diffusion_equation [penwidth=1];
+    swap_pointers [penwidth=1];
+
+    Start [shape=circle color=green fillcolor=white penwidth=2];
+    param_parser [penwidth=1];
+    make_arrays [penwidth=1];
+    param_parser [penwidth=1];
+    apply_initial_conditions [penwidth=1];
+    apply_boundary_conditions [penwidth=1];
+    Finish [shape=octagon color=red fillcolor=white penwidth=2];
+
+    "step < nSteps" [shape=diamond style=filled color=blue fillcolor=white penwidth=1];
+    "params.txt" [shape=rectangle style=filled color=salmon fillcolor=white penwidth=1];
+    "mask_lap" [shape=rectangle style=filled color=salmon fillcolor=white penwidth=1];
+    "conc_lap" [shape=rectangle style=filled color=salmon fillcolor=white penwidth=1];
+    "conc_old" [shape=rectangle style=filled color=salmon fillcolor=white penwidth=1];
+    "conc_new" [shape=rectangle style=filled color=salmon fillcolor=white penwidth=1];
+}

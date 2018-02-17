@@ -18,32 +18,36 @@
  **********************************************************************************/
 
 /**
- \file  boundaries.h
- \brief Declaration of boundary condition function prototypes
+ \file  cuda_data.cu
+ \brief Implementation of functions to create and destroy CudaData struct
 */
 
-/** \cond SuppressGuard */
-#ifndef _BOUNDARIES_H_
-#define _BOUNDARIES_H_
-/** \endcond */
+extern "C" {
+#include "cuda_data.h"
+}
 
-#include "type.h"
+#include "cuda_kernels.cuh"
 
-/**
- \brief Initialize phase field, Equation 8
-*/
-void apply_initial_conditions(fp_t** conc_old,
-                              const int nx, const int ny, const int nm
-                              const fp_t dx, const fp_t dy,
-                              const fp_t A1, const fp_t A2,
-                              const fp_t B1, const fp_t B2,
-                              const fp_t C2, const fp_t kappa);
+void init_cuda(fp_t** conc_old, fp_t** mask_lap,
+               const int nx, const int ny, const int nm, struct CudaData* dev)
+{
+	/* allocate memory on device */
+	cudaMalloc((void**) &(dev->conc_old), nx * ny * sizeof(fp_t));
+	cudaMalloc((void**) &(dev->conc_lap), nx * ny * sizeof(fp_t));
+	cudaMalloc((void**) &(dev->conc_new), nx * ny * sizeof(fp_t));
 
-/**
- \brief Set fixed value \f$ (c_{hi}) \f$ along top and bottom, periodic elsewhere
-*/
-void apply_boundary_conditions(fp_t** conc_old, const int nx, const int ny, const int nm);
+	/* transfer mask and boundary conditions to protected memory on GPU */
+	cudaMemcpyToSymbol(d_mask, mask_lap[0], nm * nm * sizeof(fp_t));
 
-/** \cond SuppressGuard */
-#endif /* _BOUNDARIES_H_ */
-/** \endcond */
+	/* transfer data from host in to GPU */
+	cudaMemcpy(dev->conc_old, conc_old[0], nx * ny * sizeof(fp_t),
+	           cudaMemcpyHostToDevice);
+}
+
+void free_cuda(struct CudaData* dev)
+{
+	/* free memory on device */
+	cudaFree(dev->conc_old);
+	cudaFree(dev->conc_lap);
+	cudaFree(dev->conc_new);
+}

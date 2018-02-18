@@ -1,13 +1,12 @@
-nx 512     # total mesh points along x-axis
-ny 512     # total mesh points along y-axis
-dx 0.5     # mesh resolution along x-axis
-dy 0.5     # mesh resolution along y-axis
+nx 200     # total mesh points along x-axis
+ny 100     # total mesh points along y-axis
+dx 0.005   # mesh resolution along x-axis
+dy 0.005   # mesh resolution along y-axis
+ns 5120    # number of timesteps
 bx 32      # convolution block size along x-axis
 by 32      # convolution block size along y-axis
-ns 100000  # number of timesteps to march
-nc 10000   # number of timesteps between checkpoint outputs
 co 0.1     # linear stability constant (Courant/CFL condition)
-sc 3 53    # mask size and code (3 53 for five-point, 3 93 for nine-point Laplacian)
+sc 3 93    # mask size and code (3 53 for five-point, 3 93 for nine-point Laplacian)
 A1 0.0075
 A2 0.0300
 B1 8.0000  # multiplied by PI at runtime

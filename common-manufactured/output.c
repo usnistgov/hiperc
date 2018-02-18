@@ -31,14 +31,14 @@
 #include "numerics.h"
 #include "output.h"
 
-void param_parser(int argc, char* argv[],
-                  int* bx, int* by,
-                  int* checks, int* code, int* steps,
-                  fp_t* dx, fp_t* dy, fp_t* linStab,
-                  int* nx, int* ny, int* nm,
-                  fp_t* A1, fp_t* A2,
-                  fp_t* B1, fp_t* B2,
-                  fp_t* C2, fp_t* kappa)
+void param_parser(int argc,  char* argv[],
+                  int*  bx,  int*  by,
+                  int* code, int*  steps,
+                  fp_t* dx,  fp_t* dy, fp_t* linStab,
+                  int*  nx,  int*  ny, int*  nm,
+                  fp_t* A1,  fp_t* A2,
+                  fp_t* B1,  fp_t* B2,
+                  fp_t* C2,  fp_t* kappa)
 {
 	FILE * input;
 
@@ -53,7 +53,7 @@ void param_parser(int argc, char* argv[],
 	} else {
 		char buffer[256];
 		char* pch;
-		int ibx=0, iby=0, ico=0, idx=0, idy=0, inc=0, ins=0, inx=0, iny=0, isc=0, ia1=0, ia2=0, ib1=0, ib2=0, ic2=0, ikp=0;
+		int ibx=0, iby=0, ico=0, idx=0, idy=0, ins=0, inx=0, iny=0, isc=0, ia1=0, ia2=0, ib1=0, ib2=0, ic2=0, ikp=0;
 
 		/* read parameters */
 		while ( !feof(input))
@@ -83,10 +83,6 @@ void param_parser(int argc, char* argv[],
 					pch = strtok(NULL, " ");
 					*dy = atof(pch);
 					idy = 1;
-				} else if (strcmp(pch, "nc") == 0) {
-					pch = strtok(NULL, " ");
-					*checks = atoi(pch);
-					inc = 1;
 				} else if (strcmp(pch, "ns") == 0) {
 					pch = strtok(NULL, " ");
 					*steps = atoi(pch);
@@ -146,8 +142,6 @@ void param_parser(int argc, char* argv[],
 			printf("Warning: parameter %s undefined. Using default value, %f.\n", "dx", *dx);
 		else if (! idy)
 			printf("Warning: parameter %s undefined. Using default value, %f.\n", "dy", *dy);
-		else if (! inc)
-			printf("Warning: parameter %s undefined. Using default value, %i.\n", "nc", *checks);
 		else if (! ins)
 			printf("Warning: parameter %s undefined. Using default value, %i.\n", "ns", *steps);
 		else if (! inx)

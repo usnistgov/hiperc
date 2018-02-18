@@ -24,6 +24,7 @@
 
 /* system includes */
 #include <assert.h>
+#include <sys/stat.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -38,28 +39,37 @@
 /* specific includes */
 #include "cuda_data.h"
 
+int file_exist (char *filename)
+{
+	struct stat   buffer;
+	return (stat (filename, &buffer) == 0);
+}
+
 /**
  \brief Run simulation using input parameters specified on the command line
 */
 int main(int argc, char* argv[])
 {
 	FILE* output;
+	int newfile = 1;
 
 	/* declare default mesh size and resolution */
 	fp_t** conc_old, **conc_new, **conc_lap, **mask_lap;
-	int bx=32, by=32, nx=512, ny=512, nm=3, code=53;
-	fp_t dx=0.5, dy=0.5, h;
+	int bx=32, by=32, nx=200, ny=100, nm=3, code=93;
+	fp_t dx=0.005, dy=0.005, h;
 
 	/* declare default materials and numerical parameters */
 	fp_t kappa=0.0004, A1=0.0075, A2=0.03, B1=8.*M_PI, B2=22.*M_PI, C2=0.0625*M_PI;
-	fp_t linStab=0.1, dt=1., elapsed=0.,L2=0.;
-	int step=0, steps=100000, checks=10000;
+	fp_t linStab=0.1, dt=0.015625, elapsed=0., L2=0.;
+	int step=0, steps=512;
 	double start_time=0.;
 	struct Stopwatch watch = {0., 0., 0., 0.};
 
+	const fp_t epsilon=1.0e-14, final=8.;
+
 	StartTimer();
 
-	param_parser(argc, argv, &bx, &by, &checks, &code, &steps, &dx, &dy, &linStab, &nx, &ny, &nm,
+	param_parser(argc, argv, &bx, &by, &code, &steps, &dx, &dy, &linStab, &nx, &ny, &nm,
 		         &A1, &A2, &B1, &B2, &C2, &kappa);
 
 	h = (dx > dy) ? dy : dx;
@@ -83,22 +93,34 @@ int main(int argc, char* argv[])
 	start_time = GetTimer();
 	write_png(conc_old, nx, ny, 0);
 
+	if (file_exist("runlog.csv") == 1) {
+		/* file does not exist */
+		newfile = 0;
+	}
+
 	/* prepare to log comparison to analytical solution */
-	output = fopen("runlog.csv", "w");
+	output = fopen("runlog.csv", "a");
 	if (output == NULL) {
 		printf("Error: unable to %s for output. Check permissions.\n", "runlog.csv");
 		exit(-1);
 	}
 	watch.file = GetTimer() - start_time;
 
-	fprintf(output, "iter,sim_time,L2,conv_time,step_time,IO_time,soln_time,run_time\n");
-	fprintf(output, "%i,%f,%f,%f,%f,%f,%f,%f\n", step, elapsed, L2,
-	        watch.conv, watch.step, watch.file, watch.soln, GetTimer());
+	if (newfile == 1)
+		fprintf(output, "iter,sim_time,dt,dx,L2,conv_time,step_time,IO_time,soln_time,run_time\n");
+	/*
+	  fprintf(output, "%i,%f,%f,%f,%f,%f,%f,%f\n", step, elapsed, L2,
+	          watch.conv, watch.step, watch.file, watch.soln, GetTimer());
+	*/
 	fflush(output);
 
 	/* do the work */
 	for (step = 1; step < steps+1; step++) {
 		print_progress(step, steps);
+
+		/* Make sure we hit the endpoint exactly */
+		if (elapsed + dt > final + epsilon)
+			dt = final - elapsed + epsilon;
 
 		/* === Start Architecture-Specific Kernel === */
 		device_boundaries(dev.conc_old,
@@ -123,34 +145,33 @@ int main(int argc, char* argv[])
 		swap_pointers_1D(&(dev.conc_old), &(dev.conc_new));
 		/* === Finish Architecture-Specific Kernel === */
 
+		/* Note: There is no intermediate output, only the final answer */
+
 		elapsed += dt;
-
-		if (step % checks == 0) {
-			/* transfer result to host (conc_new) from device (dev.conc_old) */
-			start_time = GetTimer();
-			read_out_result(conc_new, dev.conc_old, nx, ny);
-			watch.file += GetTimer() - start_time;
-
-			start_time = GetTimer();
-			write_png(conc_new, nx, ny, step);
-			watch.file += GetTimer() - start_time;
-
-			start_time = GetTimer();
-			compute_L2_norm(conc_new, conc_lap,
-							dx, dy,
-							elapsed,
-							nx, ny, nm,
-							A1, A2,
-							B1, B2,
-							C2, kappa,
-							&L2);
-			watch.soln += GetTimer() - start_time;
-
-			fprintf(output, "%i,%f,%f,%f,%f,%f,%f,%f\n", step, elapsed, L2,
-			        watch.conv, watch.step, watch.file, watch.soln, GetTimer());
-			fflush(output);
-		}
 	}
+
+	/* transfer result to host (conc_new) from device (dev.conc_old) */
+	start_time = GetTimer();
+	read_out_result(conc_new, dev.conc_old, nx, ny);
+	watch.file += GetTimer() - start_time;
+
+	start_time = GetTimer();
+	write_png(conc_new, nx, ny, step);
+	watch.file += GetTimer() - start_time;
+
+	start_time = GetTimer();
+	compute_L2_norm(conc_new, conc_lap,
+					dx, dy,
+					elapsed,
+					nx, ny, nm,
+					A1, A2,
+					B1, B2,
+					C2, kappa,
+					&L2);
+	watch.soln += GetTimer() - start_time;
+
+	fprintf(output, "%i,%.2f,%.10f,%.10f,%f,%f,%f,%f,%f,%f\n", step-1, elapsed, dt, dx, L2,
+			watch.conv, watch.step, watch.file, watch.soln, GetTimer());
 
 	write_csv(conc_new, nx, ny, dx, dy, steps);
 

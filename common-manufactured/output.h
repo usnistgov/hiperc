@@ -32,14 +32,14 @@
 /**
  \brief Read parameters from file specified on the command line
 */
-void param_parser(int argc, char* argv[],
-                  int* bx, int* by,
-                  int* checks, int* code, int* steps,
-                  fp_t* dx, fp_t* dy, fp_t* linStab,
-                  int* nx, int* ny, int* nm,
-                  fp_t* A1, fp_t* A2,
-                  fp_t* B1, fp_t* B2,
-                  fp_t* C2, fp_t* kappa
+void param_parser(int argc,   char* argv[],
+                  int*  bx,   int* by,
+                  int*  code, int* steps,
+                  fp_t* dx,   fp_t* dy,   fp_t* linStab,
+                  int*  nx,   int*  ny,   int*  nm,
+                  fp_t* A1,   fp_t* A2,
+                  fp_t* B1,   fp_t* B2,
+                  fp_t* C2,   fp_t* kappa
     );
 
 /**

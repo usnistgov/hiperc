@@ -28,16 +28,17 @@
 #include <iso646.h>
 #include <math.h>
 #include <png.h>
+#include "numerics.h"
 #include "output.h"
 
-void param_parser(int argc,    char* argv[],
-				  int* bx,     int* by,
-				  fp_t* dx,    fp_t* dy,    fp_t* linStab,
-				  int* checks, int* code,   int* steps
-				  int* nx,     int* ny,     int* nm,
-				  fp_t* A1,    fp_t* A2,
-				  fp_t* B1,    fp_t* B2,
-				  fp_t* C2,    fp_t* kappa)
+void param_parser(int argc, char* argv[],
+                  int* bx, int* by,
+                  int* checks, int* code, int* steps,
+                  fp_t* dx, fp_t* dy, fp_t* linStab,
+                  int* nx, int* ny, int* nm,
+                  fp_t* A1, fp_t* A2,
+                  fp_t* B1, fp_t* B2,
+                  fp_t* C2, fp_t* kappa)
 {
 	FILE * input;
 
@@ -52,7 +53,7 @@ void param_parser(int argc,    char* argv[],
 	} else {
 		char buffer[256];
 		char* pch;
-		int ibx=0, iby=0, ico=0, idx=0, idy=0, inc=0, ins=0, inx=0, iny=0, isc=0, ia1=0, ia2=0, ab1=0, ib2=0, ic2=0, ikp=0;
+		int ibx=0, iby=0, ico=0, idx=0, idy=0, inc=0, ins=0, inx=0, iny=0, isc=0, ia1=0, ia2=0, ib1=0, ib2=0, ic2=0, ikp=0;
 
 		/* read parameters */
 		while ( !feof(input))
@@ -122,7 +123,7 @@ void param_parser(int argc,    char* argv[],
 					ib2 = 1;
 				} else if (strcmp(pch, "C2") == 0) {
 					pch = strtok(NULL, " ");
-					*C2 = atof(pch);
+					*C2 = M_PI * atof(pch);
 					ic2 = 1;
 				} else if (strcmp(pch, "kp") == 0) {
 					pch = strtok(NULL, " ");

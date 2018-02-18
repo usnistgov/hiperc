@@ -43,7 +43,9 @@ __constant__ extern fp_t d_mask[MAX_MASK_W * MAX_MASK_H];
  scalar composition field
 */
 __global__ void boundary_kernel(fp_t* conc,
-                                const int nx, const int ny, const int nm);
+                                const int nx,
+                                const int ny,
+                                const int nm);
 
 /**
  \brief Tiled convolution algorithm for execution on the GPU
@@ -75,14 +77,22 @@ __global__ void convolution_kernel(fp_t* conc_old,
  device kernels can be called in isolation without incurring the cost of data
  transfers and with reduced risk of memory leaks.
 */
-__global__ void diffusion_kernel(fp_t* conc_old,
+__global__ void evolution_kernel(fp_t* conc_old,
                                  fp_t* conc_new,
                                  fp_t* conc_lap,
-                                 const int nx,
-                                 const int ny,
-                                 const int nm,
-                                 const fp_t D,
-                                 const fp_t dt);
+                                 const fp_t dx,
+                                 const fp_t dy,
+                                 const fp_t dt,
+                                 const fp_t elapsed,
+                                 const int  nx,
+                                 const int  ny,
+                                 const int  nm,
+                                 const fp_t A1,
+                                 const fp_t A2,
+                                 const fp_t B1,
+                                 const fp_t B2,
+                                 const fp_t C2,
+                                 const fp_t kappa);
 
 /** \cond SuppressGuard */
 #endif /* _CUDA_KERNELS_H_ */

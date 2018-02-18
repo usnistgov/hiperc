@@ -26,6 +26,7 @@
 #include <math.h>
 #include <omp.h>
 #include <cuda.h>
+#include <cuda_runtime.h>
 
 extern "C" {
 #include "cuda_data.h"
@@ -38,6 +39,27 @@ extern "C" {
 #include "cuda_kernels.cuh"
 
 __constant__ fp_t d_mask[MAX_MASK_W * MAX_MASK_H];
+
+__device__ void device_manufactured_shift(const fp_t x,  const fp_t t,
+                                          const fp_t A1, const fp_t A2,
+                                          const fp_t B1, const fp_t B2,
+                                          const fp_t C2, fp_t* a)
+{
+	/* Equation 3 */
+	*a = 0.25 + A1 * t * sin(B1 * x) + A2 * sin(B2 * x + C2 * t);
+}
+
+__device__ void device_manufactured_solution(const fp_t x,  const fp_t y,  const fp_t t,
+                                             const fp_t A1, const fp_t A2,
+                                             const fp_t B1, const fp_t B2,
+                                             const fp_t C2, const fp_t kappa,
+                                             fp_t* eta)
+{
+	/* Equation 2 */
+	fp_t alpha = 0.0;
+	device_manufactured_shift(x, t, A1, A2, B1, B2, C2, &alpha);
+	*eta = 0.5 * (1. - tanh((y - alpha)/sqrt(2. * kappa)));
+}
 
 __global__ void convolution_kernel(fp_t* d_conc_old, fp_t* d_conc_lap,
                                    const int nx, const int ny, const int nm)
@@ -95,41 +117,48 @@ __global__ void convolution_kernel(fp_t* d_conc_old, fp_t* d_conc_lap,
 	__syncthreads();
 }
 
-__device__ void source_stvdwtt(const fp_t x,  const fp_t y,  const fp_t y,
-                               const fp_t A1, const fp_t A2, const fp_t B1, const fp_t B2,
-                               const fp_t C2, const fp_t kappa,
-                               fp_t* S)
+__device__ void source(const fp_t x,  const fp_t y, const fp_t t,
+                       const fp_t A1, const fp_t A2,
+                       const fp_t B1, const fp_t B2,
+                       const fp_t C2, const fp_t kappa,
+                       fp_t* S)
 {
     fp_t alpha = 0.;
-    manufactured_shift(x, t, A1, A2, B1, B2, C2, &alpha);
+    device_manufactured_shift(x, t, A1, A2, B1, B2, C2, &alpha);
     const fp_t dadx = A1 * B1 * t * cos(B1 * x) + A2 * B2 * cos(B2 * x + C2 * t);
     const fp_t d2adx2 = -A1 * B1 * B1 * t * sin(B1 * x) - A2 * B2 * B2 * sin(B2 * x + C2 * t);
     const fp_t dadt = A1 * sin(B1 * x) + A2 * C2 * cos(B2 * x + C2 * t);
-    const fp_t Q = (y - alpha) / sqrt(2. * kappa);
+    const fp_t Q = (y - alpha) / sqrtf(2. * kappa);
     const fp_t sech = 1.0 / cosh(Q);
-    const fp_t sum = -sqrt(4. * kappa) * tanh(Q) * dadx * dadx + sqrt(2.) * (dadt - kappa * d2adx2);
-    *S = sech * sech / sqrt(16. * kappa) * sum;
+    const fp_t sum = -sqrtf(4. * kappa) * tanhf(Q) * dadx * dadx + sqrtf(2.) * (dadt - kappa * d2adx2);
+    *S = sech * sech / sqrtf(16. * kappa) * sum;
 }
 
-__device__ void source_sympy(const fp_t x,  const fp_t y,  const fp_t y,
-                               const fp_t A1, const fp_t A2, const fp_t B1, const fp_t B2,
-                               const fp_t C2, const fp_t kappa,
-                               fp_t* S)
+__device__ void source_sympy(const fp_t x,  const fp_t y,  const fp_t t,
+                             const fp_t A1, const fp_t A2, const fp_t B1, const fp_t B2,
+                             const fp_t C2, const fp_t kappa,
+                             fp_t* S)
 {
-    const fp_t Q = tanh((1.0L/2.0L)*sqrt(2)*(A1*t*sin(B1*x) + A2*sin(B2*x + C2*t) - y + 0.25)/sqrt(kappa);
-    S_result = (  0.5  * sqrt(kappa)*tanh((1.0L/2.0L)*sqrt(2)*(A1*t*sin(B1*x) + A2*sin(B2*x + C2*t) - y + 0.25)/sqrt(kappa))
-                - 0.25 * sqrt(2)*(A1*sin(B1*x) + A2*C2*cos(B2*x + C2*t))
-               ) * (Q * Q - 1)/sqrt(kappa);
+    const fp_t Q = tanhf((1.0L/2.0L)*sqrtf(2)*(A1*t*sin(B1*x) + A2*sin(B2*x + C2*t) - y + 0.25)/sqrtf(kappa));
+    *S = (  0.5  * sqrtf(kappa)*tanhf((1.0L/2.0L)*sqrtf(2)*(A1*t*sin(B1*x) + A2*sin(B2*x + C2*t) - y + 0.25)/sqrtf(kappa))
+          - 0.25 * sqrtf(2)*(A1*sin(B1*x) + A2*C2*cos(B2*x + C2*t))
+         ) * (Q * Q - 1)/sqrtf(kappa);
 }
         
-
+__device__ void fprime(const fp_t eta, fp_t* f)
+{
+    *f = 4. * eta * (eta - 1.) * (eta - 0.5);
+}
 
 __global__ void evolution_kernel(fp_t* d_conc_old, fp_t* d_conc_new, fp_t* d_conc_lap,
-                                 const int nx, const int ny, const int nm, const fp_t dt,
+                                 const fp_t dx, const fp_t dy, const fp_t dt,
+                                 const fp_t elapsed,
+                                 const int  nx, const int  ny, const int  nm,
                                  const fp_t A1, const fp_t A2, const fp_t B1, const fp_t B2,
                                  const fp_t C2, const fp_t kappa)
 {
-	int thr_x, thr_y, x, y;
+	int thr_x, thr_y, x, y, xx, yy;
+    fp_t S, f;
 
 	/* determine indices on which to operate */
 	thr_x = threadIdx.x;
@@ -140,8 +169,13 @@ __global__ void evolution_kernel(fp_t* d_conc_old, fp_t* d_conc_new, fp_t* d_con
 
 	/* explicit Euler solution to the Allen-Cahn equation of motion */
 	if (x < nx && y < ny) {
+        xx = dx * (x - nm/2);
+        yy = dy * (y - nm/2);
+        const fp_t eta = d_conc_old[nx * y + x];
+        fprime(eta, &f);
+        source(xx, yy, elapsed, A1, A2, B1, B2, C2, kappa, &S);
 		d_conc_new[nx * y + x] = d_conc_old[nx * y + x]
-		              + dt * D * d_conc_lap[nx * y + x];
+                               + dt * (S - f + kappa * d_conc_lap[nx * y + x]);
 	}
 
 	/* wait for all threads to finish writing */
@@ -149,8 +183,8 @@ __global__ void evolution_kernel(fp_t* d_conc_old, fp_t* d_conc_new, fp_t* d_con
 }
 
 void device_boundaries(fp_t* conc,
-                       const int nx, const int ny, const int nm,
-                       const int bx, const int by)
+                       const int bx, const int by,
+                       const int nx, const int ny, const int nm)
 {
 	/* divide matrices into blocks of bx * by threads */
 	dim3 tile_size(bx, by, 1);
@@ -159,13 +193,13 @@ void device_boundaries(fp_t* conc,
 	               1);
 
 	boundary_kernel<<<num_tiles,tile_size>>> (
-	    conc, nx, ny, nm
+	    conc, nm, nx, ny
 	);
 }
 
 void device_convolution(fp_t* conc_old, fp_t* conc_lap,
-                        const int nx, const int ny, const int nm,
-                        const int bx, const int by)
+                        const int bx, const int by,
+                        const int nx, const int ny, const int nm)
 {
 	/* divide matrices into blocks of bx * by threads */
 	dim3 tile_size(bx, by, 1);
@@ -175,15 +209,19 @@ void device_convolution(fp_t* conc_old, fp_t* conc_lap,
 	size_t buf_size = (tile_size.x + nm) * (tile_size.y + nm) * sizeof(fp_t);
 
 	convolution_kernel<<<num_tiles,tile_size,buf_size>>> (
-	    conc_old, conc_lap, nx, ny, nm
+	    conc_old, conc_lap, nm, nx, ny
 	);
 
 }
 
 void device_evolution(fp_t* conc_old, fp_t* conc_new, fp_t* conc_lap,
-                        const int nx, const int ny, const int nm,
-                        const int bx, const int by,
-                        const fp_t D, const fp_t dt)
+                      const int  bx, const int  by,
+                      const fp_t dx, const fp_t dy, const fp_t dt,
+                      const fp_t elapsed,
+                      const int  nx, const int  ny, const int  nm,
+                      const fp_t A1, const fp_t A2, 
+                      const fp_t B1, const fp_t B2, 
+                      const fp_t C2, const fp_t kappa)
 {
 	/* divide matrices into blocks of bx * by threads */
 	dim3 tile_size(bx, by, 1);
@@ -191,7 +229,7 @@ void device_evolution(fp_t* conc_old, fp_t* conc_new, fp_t* conc_lap,
 	               ceil(float(ny) / (tile_size.y - nm + 1)),
 	               1);
 	evolution_kernel<<<num_tiles,tile_size>>> (
-	    conc_old, conc_new, conc_lap, nx, ny, nm, dt, A1, A2, B1, B2, C2, kappa
+	    conc_old, conc_new, conc_lap, dx, dy, dt, elapsed, nx, ny, nm, A1, A2, B1, B2, C2, kappa
 	);
 }
 
@@ -202,12 +240,14 @@ void read_out_result(fp_t** conc, fp_t* d_conc, const int nx, const int ny)
 }
 
 void cuda_evolution_solver(struct CudaData* dev, fp_t** conc_new,
-                           const int bx,  const int by,
-                           const int nm,  const int nx, const int ny,
+                           const int  bx, const int  by,
+                           const fp_t dx, const fp_t dy, const fp_t dt,
+                           const fp_t elapsed, 
+                           const int  nx, const int  ny, const int  nm,
 						   const fp_t A1, const fp_t A2,
 						   const fp_t B1, const fp_t B2,
 						   const fp_t C2, const fp_t kappa,
-                           const fp_t dt, struct Stopwatch* sw)
+                           struct Stopwatch* sw)
 {
 	double start_time;
 
@@ -232,8 +272,8 @@ void cuda_evolution_solver(struct CudaData* dev, fp_t** conc_new,
 
 	/* compute result */
 	start_time = GetTimer();
-	diffusion_kernel<<<num_tiles,tile_size>>> (
-	    dev->conc_old, dev->conc_new, dev->conc_lap, nx, ny, nm, D, dt
+	evolution_kernel<<<num_tiles,tile_size>>> (
+	    dev->conc_old, dev->conc_new, dev->conc_lap, dx, dy, dt, elapsed, nx, ny, nm, A1, A2, B1, B2, C2, kappa
 	);
 	sw->step += GetTimer() - start_time;
 }

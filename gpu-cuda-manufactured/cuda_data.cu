@@ -29,7 +29,8 @@ extern "C" {
 #include "cuda_kernels.cuh"
 
 void init_cuda(fp_t** conc_old, fp_t** mask_lap,
-               const int nx, const int ny, const int nm, struct CudaData* dev)
+               const int nx, const int ny, const int nm,
+               struct CudaData* dev)
 {
 	/* allocate memory on device */
 	cudaMalloc((void**) &(dev->conc_old), nx * ny * sizeof(fp_t));

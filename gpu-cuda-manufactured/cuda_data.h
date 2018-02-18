@@ -53,34 +53,40 @@ void free_cuda(struct CudaData* dev);
  \brief Apply boundary conditions on GPU
 */
 void device_boundaries(fp_t* conc,
-                      const int nx, const int ny, const int nm,
-                      const int bx, const int by);
+					   const int bx, const int by,
+					   const int nx, const int ny, const int nm);
 
 /**
  \brief Compute convolution on GPU
 */
 void device_convolution(fp_t* conc_old, fp_t* conc_lap,
-                         const int nx, const int ny, const int nm,
-                         const int bx, const int by);
+						const int bx, const int by,
+						const int nx, const int ny, const int nm);
 
 /**
  \brief Step Allen-Cahn equation on GPU
 */
 void device_evolution(fp_t* conc_old, fp_t* conc_new, fp_t* conc_lap,
-                        const int nx, const int ny, const int nm,
-                        const int bx, const int by,
-                        const fp_t D, const fp_t dt);
+                      const int  bx, const int  by,
+                      const fp_t dx, const fp_t dy, const fp_t dt,
+					  const fp_t elapsed,
+                      const int  nx, const int  ny, const int  nm,
+                      const fp_t A1,  const fp_t A2,
+                      const fp_t B1,  const fp_t B2,
+                      const fp_t C2,  const fp_t kappa);
 
 /**
  \brief Solve Allen-Cahn equation on the GPU
 */
 void cuda_evolution_solver(struct CudaData* dev, fp_t** conc_new,
-                           const int bx,  const int by,
-                           const int nm,  const int nx,  const int ny,
+                           const int  bx, const int  by,
+						   const fp_t dx, const fp_t dy, const fp_t dt,
+						   const fp_t elapsed,
+                           const int  nm, const int  nx, const int  ny,
 						   const fp_t A1, const fp_t A2,
 						   const fp_t B1, const fp_t B2,
 						   const fp_t C2, const fp_t kappa,
-                           const fp_t dt, struct Stopwatch* sw);
+                           struct Stopwatch* sw);
 
 /**
   \brief Read data from GPU

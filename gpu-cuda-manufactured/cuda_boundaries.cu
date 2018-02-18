@@ -32,8 +32,8 @@ extern "C" {
 #include "cuda_kernels.cuh"
 
 void apply_initial_conditions(fp_t** conc,
-                              const int nx,  const int ny, const int nm,
                               const fp_t dx, const fp_t dy,
+                              const int  nx, const int  ny, const int nm,
                               const fp_t A1, const fp_t A2,
                               const fp_t B1, const fp_t B2,
                               const fp_t C2, const fp_t kappa)
@@ -46,14 +46,16 @@ void apply_initial_conditions(fp_t** conc,
                 const fp_t x = dx * (i - nm/2);
                 const fp_t y = dy * (j - nm/2);
                 const fp_t t = 0.;
-				manufactured_solution(x, y, t, A1, A2, B1, B2, C2, kappa, conc[j][i]);
+				manufactured_solution(x, y, t, A1, A2, B1, B2, C2, kappa, &conc[j][i]);
             }
         }
 	}
 }
 
 __global__ void boundary_kernel(fp_t* d_conc,
-                                const int nx, const int ny, const int nm)
+                                const int nx,
+                                const int ny,
+                                const int nm)
 {
 	/* determine indices on which to operate */
 	const int tx = threadIdx.x;
@@ -80,7 +82,7 @@ __global__ void boundary_kernel(fp_t* d_conc,
 		if (ihi+offset+1 == col && row < ny)
 			d_conc[row * nx + col] = d_conc[row * nx + ihi + offset]; /* right condition: copy left boundary cell + offset */
 
-        /* apply Dirichlet conditions on y-axis boundaries
+        /* apply Dirichlet conditions on y-axis boundaries */
 		if (jlo-offset-1 == row && col < nx)
 			d_conc[row * nx + col] = nlo;                             /* bottom condition: constant */
 

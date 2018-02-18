@@ -113,16 +113,17 @@ void manufactured_solution(const fp_t x,  const fp_t y, const fp_t t,
 	/* Equation 2 */
 	fp_t alpha = 0.0;
 	manufactured_shift(x, t, A1, A2, B1, B2, C2, &alpha);
-	*eta = 0.5 * (1. - tanh((y - alpha)/sqrt(2. * kappa));
+	*eta = 0.5 * (1. - tanh((y - alpha)/sqrt(2. * kappa)));
 }
 
 void compute_L2_norm(fp_t** conc_new, fp_t** conc_lap,
-                    const int nx,    const int ny,     const int nm,
-					const fp_t dx,   const fp_t dy,    const fp_t elapsed,
-					const fp_t A1,   const fp_t A2,
-					const fp_t B1,   const fp_t B2,
-					const fp_t C2,   const fp_t kappa,
-					fp_t* L2)
+					 const fp_t dx, const fp_t dy,
+					 const fp_t elapsed,
+					 const int  nx, const int  ny, const int  nm,
+					 const fp_t A1, const fp_t A2,
+					 const fp_t B1, const fp_t B2,
+					 const fp_t C2, const fp_t kappa,
+					 fp_t* L2)
 {
 	/* Equation 9 */
 	fp_t sum = 0.;
@@ -163,5 +164,5 @@ void compute_L2_norm(fp_t** conc_new, fp_t** conc_lap,
 	}
 	#endif
 
-	*rss = sum;
+	*L2 = sum;
 }

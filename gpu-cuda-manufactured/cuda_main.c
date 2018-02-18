@@ -19,7 +19,7 @@
 
 /**
  \file  cuda_main.c
- \brief CUDA implementation of semi-infinite diffusion equation
+ \brief CUDA implementation of PFHub Benchmark 7: Method of Manufactured Solutions
 */
 
 /* system includes */
@@ -51,17 +51,19 @@ int main(int argc, char* argv[])
 	fp_t dx=0.5, dy=0.5, h;
 
 	/* declare default materials and numerical parameters */
-	fp_t D=0.00625, linStab=0.1, dt=1., elapsed=0., rss=0.;
+	fp_t kappa=0.0004, A1=0.0075, A2=0.03, B1=8.*M_PI, B2=22.*M_PI, C2=0.0625*M_PI;
+	fp_t linStab=0.1, dt=1., elapsed=0.,L2=0.;
 	int step=0, steps=100000, checks=10000;
 	double start_time=0.;
 	struct Stopwatch watch = {0., 0., 0., 0.};
 
 	StartTimer();
 
-	param_parser(argc, argv, &bx, &by, &checks, &code, &D, &dx, &dy, &linStab, &nm, &nx, &ny, &steps);
+	param_parser(argc, argv, &bx, &by, &checks, &code, &steps, &dx, &dy, &linStab, &nx, &ny, &nm,
+		         &A1, &A2, &B1, &B2, &C2, &kappa);
 
 	h = (dx > dy) ? dy : dx;
-	dt = (linStab * h * h) / (4.0 * D);
+	dt = (linStab * h * h) / (4.0 * kappa);
 
 	/* initialize memory */
 	make_arrays(&conc_old, &conc_new, &conc_lap, &mask_lap, nx, ny, nm);
@@ -70,7 +72,7 @@ int main(int argc, char* argv[])
 	print_progress(step, steps);
 
 	start_time = GetTimer();
-	apply_initial_conditions(conc_old, nx, ny, nm);
+	apply_initial_conditions(conc_old, dx, dy, nx, ny, nm, A1, A2, B1, B2, C2, kappa);
 	watch.step = GetTimer() - start_time;
 
 	/* initialize GPU */
@@ -89,8 +91,8 @@ int main(int argc, char* argv[])
 	}
 	watch.file = GetTimer() - start_time;
 
-	fprintf(output, "iter,sim_time,wrss,conv_time,step_time,IO_time,soln_time,run_time\n");
-	fprintf(output, "%i,%f,%f,%f,%f,%f,%f,%f\n", step, elapsed, rss,
+	fprintf(output, "iter,sim_time,L2,conv_time,step_time,IO_time,soln_time,run_time\n");
+	fprintf(output, "%i,%f,%f,%f,%f,%f,%f,%f\n", step, elapsed, L2,
 	        watch.conv, watch.step, watch.file, watch.soln, GetTimer());
 	fflush(output);
 
@@ -99,14 +101,23 @@ int main(int argc, char* argv[])
 		print_progress(step, steps);
 
 		/* === Start Architecture-Specific Kernel === */
-		device_boundaries(dev.conc_old, nx, ny, nm, bx, by);
+		device_boundaries(dev.conc_old,
+						  bx, by,
+						  nx, ny, nm);
 
 		start_time = GetTimer();
-		device_convolution(dev.conc_old, dev.conc_lap, nx, ny, nm, bx, by);
+		device_convolution(dev.conc_old, dev.conc_lap,
+						   bx, by,
+						   nx, ny, nm);
 		watch.conv += GetTimer() - start_time;
 
 		start_time = GetTimer();
-		device_composition(dev.conc_old, dev.conc_new, dev.conc_lap, nx, ny, nm, bx, by, D, dt);
+		device_evolution(dev.conc_old, dev.conc_new, dev.conc_lap,
+						 bx, by,
+						 dx, dy, dt,
+						 elapsed,
+						 nx, ny, nm,
+						 A1, A2, B1, B2, C2, kappa);
 		watch.conv += GetTimer() - start_time;
 
 		swap_pointers_1D(&(dev.conc_old), &(dev.conc_new));
@@ -125,10 +136,17 @@ int main(int argc, char* argv[])
 			watch.file += GetTimer() - start_time;
 
 			start_time = GetTimer();
-			check_solution(conc_new, conc_lap, nx, ny, dx, dy, nm, elapsed, D, &rss);
+			compute_L2_norm(conc_new, conc_lap,
+							dx, dy,
+							elapsed,
+							nx, ny, nm,
+							A1, A2,
+							B1, B2,
+							C2, kappa,
+							&L2);
 			watch.soln += GetTimer() - start_time;
 
-			fprintf(output, "%i,%f,%f,%f,%f,%f,%f,%f\n", step, elapsed, rss,
+			fprintf(output, "%i,%f,%f,%f,%f,%f,%f,%f\n", step, elapsed, L2,
 			        watch.conv, watch.step, watch.file, watch.soln, GetTimer());
 			fflush(output);
 		}

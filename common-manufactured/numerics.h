@@ -29,6 +29,10 @@
 
 #include "type.h"
 
+#ifndef M_PI
+#define M_PI (3.14159265358979323846)
+#endif
+
 /**
  \brief Maximum width of the convolution mask (Laplacian stencil) array
 */
@@ -96,13 +100,6 @@ void compute_convolution(fp_t** const conc_old, fp_t** conc_lap, fp_t** const ma
                          const int nx, const int ny, const int nm);
 
 /**
-   \brief Update composition field using explicit Euler discretization (forward-time centered space)
-*/
-void update_composition(fp_t** conc_old, fp_t** conc_lap, fp_t** conc_new,
-				   const int nx, const int ny, const int nm,
-				   const fp_t D, const fp_t dt);
-
-/**
    \brief Manufactured shift, Equation 3
 */
 void manufactured_shift(const fp_t x,  const fp_t t,
@@ -127,11 +124,12 @@ void manufactured_solution(const fp_t x,  const fp_t y,  const fp_t t,
    L2 is then computed as the root of the sum of the point-wise values.
 */
 void compute_L2_norm(fp_t** conc_new, fp_t** conc_lap,
-                     const int nx,    const int ny,   const int nm,
-                     const fp_t dx,   const fp_t dy,  const fp_t elapsed,
-                     const fp_t A1,   const fp_t A2,
-                     const fp_t B1,   const fp_t B2,
-                     const fp_t C2,   const fp_t kappa,
+                     const fp_t dx, const fp_t dy,
+                     const fp_t elapsed,
+                     const int  nx, const int  ny, const int  nm,
+                     const fp_t A1, const fp_t A2,
+                     const fp_t B1, const fp_t B2,
+                     const fp_t C2, const fp_t kappa,
                      fp_t* L2);
 
 /** \cond SuppressGuard */

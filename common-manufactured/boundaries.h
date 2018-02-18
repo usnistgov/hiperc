@@ -33,16 +33,25 @@
  \brief Initialize phase field, Equation 8
 */
 void apply_initial_conditions(fp_t** conc_old,
-                              const int nx, const int ny, const int nm
-                              const fp_t dx, const fp_t dy,
-                              const fp_t A1, const fp_t A2,
-                              const fp_t B1, const fp_t B2,
-                              const fp_t C2, const fp_t kappa);
+                              const fp_t dx,
+                              const fp_t dy,
+                              const int  nx,
+                              const int  ny,
+                              const int  nm,
+                              const fp_t A1,
+                              const fp_t A2,
+                              const fp_t B1,
+                              const fp_t B2,
+                              const fp_t C2,
+                              const fp_t kappa);
 
 /**
  \brief Set fixed value \f$ (c_{hi}) \f$ along top and bottom, periodic elsewhere
 */
-void apply_boundary_conditions(fp_t** conc_old, const int nx, const int ny, const int nm);
+void apply_boundary_conditions(fp_t** conc_old,
+                               const int nx,
+                               const int ny,
+                               const int nm);
 
 /** \cond SuppressGuard */
 #endif /* _BOUNDARIES_H_ */

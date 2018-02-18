@@ -12,5 +12,5 @@ A1 0.0075
 A2 0.0300
 B1 8.0000  # multiplied by PI at runtime
 B2 22.000  # multiplied by PI at runtime
-C2 0.0625
+C2 0.0625 # multiplied by PI at runtime
 kp 0.0004

@@ -1,68 +1,81 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-## Sympy code to generate expressions for PFHub Problem 7 (MMS)
+# Sympy code to generate expressions for PFHub Problem 7 (MMS)
 
 from sympy import Symbol, symbols, simplify
-from sympy import Eq, sin, cos, cosh, sinh, tanh, sqrt
-from sympy.physics.vector import divergence, gradient, dynamicsymbols, ReferenceFrame, time_derivative
+from sympy import cos, diff, Eq, expand, factor, sin, sqrt, tanh
+from sympy.vector import divergence, gradient, CoordSys3D
+from sympy.physics.vector import time_derivative, ReferenceFrame
 from sympy.printing import ccode, pprint
-from sympy.abc import kappa, S, t
+from sympy.abc import kappa, S, t, X
 import string
 
-# Spatial coordinates: x=R[0], y=R[1], z=R[2]
-R = ReferenceFrame('R')
+# Spatial coordinates: x=x[0], y=x[1], etc.
+x = CoordSys3D('x')
 
 # sinusoid amplitudes
 A1, A2 = symbols('A1 A2')
 B1, B2 = symbols('B1 B2')
 C2 = symbols('C2')
 
-# Define interface offset (alpha)
-alpha = 0.25 + A1 * t * sin(B1 * R[0]) \
-             + A2     * sin(B2 * R[0] + C2 * t)
 print("\nInterface displacement:")
+alpha = 4**-1 + A1 * t * sin(B1 * x.x) + A2 * sin(B2 * x.x + C2 * t)
 pprint(Eq(symbols('alpha'), alpha))
 
-# Define the solution equation (eta)
-eta = 0.5 * (1 - tanh((R[1] - alpha) / sqrt(2*kappa)))
 print("\nManufactured Solution:")
+Z = (x.y - alpha) / sqrt(2*kappa)
+eta = (1 - tanh(Z)) / 2
 pprint(Eq(symbols('eta'), eta))
 
-# Compute the initial condition
 print("\nInitial condition:")
 pprint(Eq(symbols('eta0'), eta.subs(t, 0)))
 
-# Compute the source term from the equation of motion
-S = simplify(time_derivative(eta, R) + 4 * eta * (eta - 1) * (eta - 1/2) - kappa * divergence(gradient(eta, R), R))
 print("\nSource term:")
+fprime = diff(X**2 * (X - 1)**2, X).subs(X, eta)
+laplacian = divergence(gradient(eta))
+dedt = time_derivative(eta, ReferenceFrame('x'))
+S = simplify(dedt + fprime - kappa * laplacian)
 pprint(Eq(symbols('S'), S))
 
-
-# === Check Results against @stvdwtt ===
-dadx = A1 * B1 * t * cos(B1 * R[0]) + A2 * B2 * cos(B2*R[0] + C2*t)
-dadt = A1 * sin(B1*R[0])            + A2 * C2 * cos(B2*R[0] + C2*t)
-d2adx2 = -A1 * B1**2 * t * sin(B1*R[0]) - A2 * B2**2 * sin(B2*R[0] + C2*t)
-sech = 1 / cosh((R[1]-alpha)/sqrt(2*kappa))
-Sdw = sech**2 / sqrt(16*kappa) * (-2*sqrt(kappa)*tanh((R[1]-alpha)/sqrt(2*kappa)) \
-                                  * (dadx)**2 + sqrt(2)*(dadt - kappa*d2adx2))
-
-print("@tkphd and @stvdwtt agree?")
+print("CAS agrees with human source term?")
+dadt   =  A1 * sin(B1*x.x)             + A2 * C2 * cos(B2*x.x + C2*t)
+dadx   =  A1 * B1 * t * cos(B1 * x.x)  + A2 * B2 * cos(B2*x.x + C2*t)
+d2adx2 = -A1 * B1**2 * t * sin(B1*x.x) - A2 * B2**2 * sin(B2*x.x + C2*t)
+Sdw = (1 - tanh(Z)**2) / sqrt(16*kappa) * (  sqrt(2)*dadt
+                                           - 2*sqrt(kappa) * tanh(Z) * dadx**2
+                                           - sqrt(2)*kappa*d2adx2)
 notZero = Sdw - S
-pprint("True" if (not notZero) else notZero)
+pprint("True" if (not notZero) else "False")
 
 print("\nC codes (without types):")
-CA = ccode(alpha).replace('R_x','x').replace('R_y','y')
-CH = ccode(eta).replace('R_x','x').replace('R_y','y')
-C0 = ccode(eta.subs(t, 0)).replace('R_x','x').replace('R_y','y')
-CS = ccode(S).replace('R_x','x').replace('R_y','y')
-
-print("\nalpha(x, y, t) {")
-pprint(CA)
+print("\nalpha(x, t) {")
+pprint(ccode(alpha).replace('x.x','x').replace('x.y','y'))
 print("}\n\nmanufacturedSolution(x, y, t) {")
-pprint(CH)
+pprint(ccode(eta).replace('x.x','x').replace('x.y','y'))
 print("}\n\ninitialCondition(x, y, t) {")
-pprint(C0)
+pprint(ccode(eta.subs(t, 0)).replace('x.x','x').replace('x.y','y'))
 print("}\n\nsourceTerm(x, y, t) {")
-pprint(CS)
-print("}")
+pprint(ccode(S).replace('x.x','x').replace('x.y','y'))
+#print("}\nlaplacian(x,y,t) {")
+#pprint(ccode(laplacian).replace('x.x','x').replace('x.y','y'))
+print("}\ndedt(x,y,t) {")
+pprint(ccode(dedt).replace('x.x','x').replace('x.y','y'))
+print("}\n")
+
+'''
+dadx   = A1*B1*t*cos(x*B1) + A2*B2*cos(x*B2 + C2*t)
+d2adx2 = -A1*B1**2*t*sin(x*B1) - A2*B2**2*sin(x*B2 + C2*t)
+alpha  = A1*t*sin(x*B1) + A2*sin(x*B2 + C2*t) + 0.25
+dadt   = A1*sin(x*B1) + A2*C2*cos(x*B2 + C2*t)
+Z      = 0.5*sqrt(2)*(-y + alpha)/sqrt(kappa)
+
+Sdw = (1-tanh(Z)**2)/sqrt(16*kappa)*(sqrt(2)*dadt
+                                     - 2*sqrt(kappa) * tanh(Z) * dadx**2
+                                     - sqrt(2)*kappa*d2adx2
+)
+Spy = (1-tanh(Z)**2)/sqrt(16*kappa)*(sqrt(2)*(dadt)
+                                     + 2*sqrt(kappa)*dadx**2*tanh(Z)
+                                     + sqrt(2)*kappa*d2adx2
+)
+'''

@@ -30,21 +30,24 @@ cd `dirname "${DATADIR}"`
 cp -a common-manufactured/params.txt analysis-manufactured/params.bak
 rm -f gpu-cuda-manufactured/runlog.csv
 
-for i in {1..6}
+for i in {0..16}
 do
+    BX=8
     kp=0.0004
-    DT=0.0002
-	NX=$(echo "print int(2+200*${i})"  | python2)
-	NY=$(echo "print int(2+100*${i})"  | python2)
-    NS=$(echo "print int(8.0/${DT})" | python2)
-	DX=$(echo "print 0.01/${i}"      | python2)
-    CO=$(echo "print (4.0*${kp}*${DT})/(${DX}**2)" | python2)
-	sed -e "s/CFL/${CO}/" \
+    DT=0.0001
+	NY=$(echo "print 2+100+25*${i}"  | python2)
+	NX=$(echo "print 2+2*(${NY}-2)"  | python2)
+	DX=$(echo "print 1.0/(${NX}-2)"  | python2)
+    NS=$(echo -e "import math\nprint int(math.ceil(8.0/${DT}))" | python2)
+	NU=$(echo "print 4.*${kp}*${DT}" | python2)
+    CO=$(echo "print ${NU}/${DX}**2" | python2)
+	sed -e "s/BXY/${BX}/g" \
+        -e "s/CFL/${CO}/"  \
         -e "s/dXY/${DX}/g" \
-        -e "s/KP/${kp}/" \
-        -e "s/NS/${NS}/" \
-        -e "s/NX/${NX}/" \
-        -e "s/NY/${NY}/" \
+        -e "s/KP/${kp}/"   \
+        -e "s/NS/${NS}/"   \
+        -e "s/NX/${NX}/"   \
+        -e "s/NY/${NY}/"   \
         analysis-manufactured/params.in > common-manufactured/params.txt
 	echo "Running with resolution h=${DX}:"
 	make run_gpu_manufactured

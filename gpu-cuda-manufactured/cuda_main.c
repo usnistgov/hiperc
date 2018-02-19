@@ -171,8 +171,9 @@ int main(int argc, char* argv[])
 					&L2);
 	watch.soln += GetTimer() - start_time;
 
-	fprintf(output, "%i,%.2f,%.4f,%.10f,%.10f,%f,%f,%f,%f,%f,%f\n",
-	                steps, elapsed, linStab, dt, dx, L2,
+	fprintf(output, "%i,%f,%f,%.12f,%.12f,%.12f,%f,%f,%f,%f,%f\n",
+	                steps, elapsed, linStab,
+			        dt, dx, L2,
 	                watch.conv, watch.step, watch.file, watch.soln, GetTimer());
 
 	write_csv(conc_new, dx, dy, elapsed, nx, ny, steps, A1, A2, B1, B2, C2, kappa);

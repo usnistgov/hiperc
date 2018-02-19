@@ -38,7 +38,7 @@ fit_fn = np.poly1d(fit)
 print("Fitting parameters: {0}".format(fit))
 
 # Plot line of best fit, report slope
-#plt.plot(dx, L2, 'yo', label="m={0}".format(fit[1]))
-plt.plot(x, y, marker="o", color="black", label="m={0}".format(fit[1]))
+#plt.plot(dx, L2, marker="o", color="black", label="m={0:.3f}".format(fit[1]))
+plt.plot(x, y, marker="o", color="black", label="m={0:.3f}".format(fit[1]))
 plt.legend(loc='best')
 plt.savefig("spatial-convergence.png", dpi=400, bbox_inches='tight')

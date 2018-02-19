@@ -3,8 +3,8 @@ ny NY      # total mesh points along y-axis
 dx dXY     # mesh resolution along x-axis
 dy dXY     # mesh resolution along y-axis
 ns NS      # number of timesteps
-bx 8       # convolution block size along x-axis
-by 8       # convolution block size along y-axis
+bx BXY     # convolution block size along x-axis
+by BXY     # convolution block size along y-axis
 co CFL     # linear stability constant (Courant/CFL condition)
 sc 3 93    # mask size and code (3 53 for five-point, 3 93 for nine-point Laplacian)
 A1 0.0075

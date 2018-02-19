@@ -41,12 +41,12 @@ void apply_initial_conditions(fp_t** conc,
 	#pragma omp parallel
 	{
 		#pragma omp for collapse(2)
-		for (int j = nm/2; j < ny-nm/2; j++) {
-			for (int i = nm/2; i < nx-nm/2; i++) {
+		for (int j = nm/2; j < ny - nm/2; j++) {
+			for (int i = nm/2; i < nx - nm/2; i++) {
                 const fp_t x = dx * (i - nm/2);
                 const fp_t y = dy * (j - nm/2);
-                const fp_t t = 0.;
-				manufactured_solution(x, y, t, A1, A2, B1, B2, C2, kappa, &conc[j][i]);
+                const fp_t alpha = 0.25 + A2 * sin(B2 * x);
+                conc[j][i] = 0.5 * (1. - tanh((y - alpha)/sqrt(2. * kappa)));
             }
         }
 	}
@@ -73,8 +73,8 @@ __global__ void boundary_kernel(fp_t* d_conc,
     const int jhi = ny - 1 - nm/2; /* top row */
 
     /* set values for Dirichlet boundaries */
-    const fp_t nlo = 0.;
-    const fp_t nhi = 1.;
+    const fp_t nlo = 1.;
+    const fp_t nhi = 0.;
 
     for (int offset = 0; offset < nm/2; offset++) {
         /* apply periodic conditions on x-axis boundaries */

@@ -108,7 +108,7 @@ __global__ void convolution_kernel(fp_t* d_conc_old, fp_t* d_conc_lap,
 	__syncthreads();
 }
 
-__device__ void source_dwtt(const fp_t x,  const fp_t y, const fp_t t,
+__device__ void source(const fp_t x,  const fp_t y, const fp_t t,
                        const fp_t A1, const fp_t A2,
                        const fp_t B1, const fp_t B2,
                        const fp_t C2, const fp_t kappa,
@@ -126,7 +126,7 @@ __device__ void source_dwtt(const fp_t x,  const fp_t y, const fp_t t,
     *S = sech * sech / sqrt(16. * kappa) * sum;
 }
 
-__device__ void source(const fp_t x,  const fp_t y,  const fp_t t,
+__device__ void source_sympy(const fp_t x,  const fp_t y,  const fp_t t,
                              const fp_t A1, const fp_t A2, const fp_t B1, const fp_t B2,
                              const fp_t C2, const fp_t kappa,
                              fp_t* S)

@@ -1,0 +1,15 @@
+nx NX      # total mesh points along x-axis
+ny NY      # total mesh points along y-axis
+dx dXY     # mesh resolution along x-axis
+dy dXY     # mesh resolution along y-axis
+ns NS      # number of timesteps
+bx 8       # convolution block size along x-axis
+by 8       # convolution block size along y-axis
+co CFL     # linear stability constant (Courant/CFL condition)
+sc 3 93    # mask size and code (3 53 for five-point, 3 93 for nine-point Laplacian)
+A1 0.0075
+A2 0.0300
+B1 8.0000  # multiplied by PI at runtime
+B2 22.000  # multiplied by PI at runtime
+C2 0.0625  # multiplied by PI at runtime
+kp KP

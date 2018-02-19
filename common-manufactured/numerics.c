@@ -95,15 +95,6 @@ void slow_nine_point_Laplacian_stencil(const fp_t dx, const fp_t dy, fp_t** mask
 	mask_lap[4][2] = -1. / (12. * dy * dy); /* lower-lower-middle */
 }
 
-void manufactured_shift(const fp_t x,  const fp_t t,
-                        const fp_t A1, const fp_t A2,
-                        const fp_t B1, const fp_t B2,
-                        const fp_t C2, fp_t* a)
-{
-	/* Equation 3 */
-	*a = 0.25 + A1 * t * sin(B1 * x) + A2 * sin(B2 * x + C2 * t);
-}
-
 void manufactured_solution(const fp_t x,  const fp_t y, const fp_t t,
                            const fp_t A1, const fp_t A2,
                            const fp_t B1, const fp_t B2,
@@ -111,8 +102,7 @@ void manufactured_solution(const fp_t x,  const fp_t y, const fp_t t,
                            fp_t* eta)
 {
 	/* Equation 2 */
-	fp_t alpha = 0.0;
-	manufactured_shift(x, t, A1, A2, B1, B2, C2, &alpha);
+	fp_t alpha = 0.25 + A1 * t * sin(B1 * x) + A2 * sin(B2 * x + C2 * t);
 	*eta = 0.5 * (1. - tanh((y - alpha)/sqrt(2. * kappa)));
 }
 
@@ -143,12 +133,11 @@ void compute_L2_norm(fp_t** conc_new, fp_t** conc_lap,
 				const fp_t etaN = conc_new[j][i];
 
 				/* manufactured solution */
-				fp_t etaM = 0.;
+				fp_t etaM;
 				manufactured_solution(x, y, elapsed, A1, A2, B1, B2, C2, kappa, &etaM);
 
 				/* error */
-				conc_lap[j][i] = (etaN - etaM) * dx
-					           * (etaN - etaM) * dy;
+				conc_lap[j][i] = (etaN - etaM) * (etaN - etaM);
 			}
 		}
 
@@ -164,5 +153,5 @@ void compute_L2_norm(fp_t** conc_new, fp_t** conc_lap,
 	}
 	#endif
 
-	*L2 = sum;
+	*L2 = sqrt(dx * dy * sum);
 }

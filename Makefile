@@ -1,12 +1,13 @@
 # Makefile for HiPerC code
 
-all: cpu_diffusion cpu_spinodal gpu_diffusion gpu_spinodal
+all: cpu_diffusion cpu_spinodal gpu_diffusion gpu_spinodal gpu_manufactured
 .PHONY: all
 
 .PHONY: run
 run: run_cpu_diffusion \
      run_cpu_spinodal  \
      run_gpu_diffusion \
+     run_gpu_manufactured \
      run_gpu_spinodal
 
 
@@ -43,6 +44,8 @@ gpu_diffusion_list := gpu-cuda-diffusion \
 
 gpu_spinodal_list := gpu-cuda-spinodal
 
+gpu_manufactured_list := gpu-cuda-manufactured
+
 .PHONY: gpu_diffusion
 gpu_diffusion:
 	@$(foreach dir, $(gpu_diffusion_list), $(MAKE) -C $(dir);)
@@ -58,6 +61,14 @@ gpu_spinodal:
 .PHONY: run_gpu_spinodal
 run_gpu_spinodal:
 	@$(foreach dir, $(gpu_spinodal_list), $(MAKE) -C $(dir) run;)
+
+.PHONY: gpu_manufactured
+gpu_manufactured:
+	@$(foreach dir, $(gpu_manufactured_list), $(MAKE) -C $(dir);)
+
+.PHONY: run_gpu_manufactured
+run_gpu_manufactured:
+	@$(foreach dir, $(gpu_manufactured_list), $(MAKE) -C $(dir) run;)
 
 
 # KNL codes
@@ -80,6 +91,7 @@ clean:
 	@$(foreach dir, $(cpu_diffusion_list), $(MAKE) -C $(dir) clean;)
 	@$(foreach dir, $(cpu_spinodal_list),  $(MAKE) -C $(dir) clean;)
 	@$(foreach dir, $(gpu_diffusion_list), $(MAKE) -C $(dir) clean;)
+	@$(foreach dir, $(gpu_manufactured_list),  $(MAKE) -C $(dir) clean;)
 	@$(foreach dir, $(gpu_spinodal_list),  $(MAKE) -C $(dir) clean;)
 	$(MAKE) -C doc clean
 
@@ -88,4 +100,5 @@ cleanall:
 	@$(foreach dir, $(cpu_diffusion_list), $(MAKE) -C $(dir) cleanall;)
 	@$(foreach dir, $(cpu_spinodal_list),  $(MAKE) -C $(dir) cleanall;)
 	@$(foreach dir, $(gpu_diffusion_list), $(MAKE) -C $(dir) cleanall;)
+	@$(foreach dir, $(gpu_manufactured_list), $(MAKE) -C $(dir) cleanall;)
 	@$(foreach dir, $(gpu_spinodal_list),  $(MAKE) -C $(dir) cleanall;)

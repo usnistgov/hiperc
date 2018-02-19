@@ -59,12 +59,19 @@ void print_progress(const int step, const int steps);
 /**
  \brief Writes scalar composition field to manufactured.???????.csv
 */
-void write_csv(fp_t** conc, const int nx, const int ny, const fp_t dx, const fp_t dy, const int step);
+void write_csv(fp_t** conc,
+               const fp_t dx, const fp_t dy,
+               const fp_t elapsed,
+               const int nx, const int ny,
+               const int step,
+               const fp_t A1, const fp_t A2,
+               const fp_t B1, const fp_t B2,
+               const fp_t C2, const fp_t kappa);
 
 /**
  \brief Writes scalar composition field to manufactured.???????.png
 */
-void write_png(fp_t** conc, const int nx, const int ny, const int step);
+void write_png(fp_t** conc, const int nx, const int ny, const int nm, const int step);
 
 /** \cond SuppressGuard */
 #endif /* _OUTPUT_H_ */

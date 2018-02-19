@@ -41,8 +41,8 @@ void apply_initial_conditions(fp_t** conc,
 	#pragma omp parallel
 	{
 		#pragma omp for collapse(2)
-		for (int j = 0; j < ny; j++) {
-			for (int i = 0; i < nx; i++) {
+		for (int j = nm/2; j < ny-nm/2; j++) {
+			for (int i = nm/2; i < nx-nm/2; i++) {
                 const fp_t x = dx * (i - nm/2);
                 const fp_t y = dy * (j - nm/2);
                 const fp_t t = 0.;
@@ -57,6 +57,8 @@ __global__ void boundary_kernel(fp_t* d_conc,
                                 const int ny,
                                 const int nm)
 {
+    const int w = nx - nm + 1; /* domain width, without halo cells */
+
 	/* determine indices on which to operate */
 	const int tx = threadIdx.x;
 	const int ty = threadIdx.y;
@@ -76,19 +78,17 @@ __global__ void boundary_kernel(fp_t* d_conc,
 
     for (int offset = 0; offset < nm/2; offset++) {
         /* apply periodic conditions on x-axis boundaries */
-		if (ilo-offset-1 == col && row < ny)
-			d_conc[row * nx + col] = d_conc[row * nx + ilo - offset]; /* left condition: copy right boundary cell - offset */
-
-		if (ihi+offset+1 == col && row < ny)
-			d_conc[row * nx + col] = d_conc[row * nx + ihi + offset]; /* right condition: copy left boundary cell + offset */
+		if (ilo-offset-1 == col && row > -1+nm/2 && row < ny)
+			d_conc[row * nx + col] = d_conc[row * nx + col + w];   /* left condition: copy right boundary cell - offset */
+		if (ihi+offset+1 == col && row > -1+nm/2 && row < ny)
+			d_conc[row * nx + col] = d_conc[row * nx + col - w];   /* right condition: copy left boundary cell + offset */
 
         /* apply Dirichlet conditions on y-axis boundaries */
-		if (jlo-offset-1 == row && col < nx)
-			d_conc[row * nx + col] = nlo;                             /* bottom condition: constant */
-
-		if (jhi+offset+1 == row && col < nx)
-			d_conc[row * nx + col] = nhi;                             /* top condition: constant */
-	}
+        if (jlo-offset-1 == row && col > -1+nm/2 && col < nx)
+			d_conc[row * nx + col] = nlo;                          /* bottom condition: constant */
+        if (jhi+offset+1 == row && col > -1+nm/2 && col < nx)
+			d_conc[row * nx + col] = nhi;                          /* top condition: constant */
+    }
 
     __syncthreads();    
 }

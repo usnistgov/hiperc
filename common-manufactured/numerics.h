@@ -100,14 +100,6 @@ void compute_convolution(fp_t** const conc_old, fp_t** conc_lap, fp_t** const ma
                          const int nx, const int ny, const int nm);
 
 /**
-   \brief Manufactured shift, Equation 3
-*/
-void manufactured_shift(const fp_t x,  const fp_t t,
-                        const fp_t A1, const fp_t A2,
-                        const fp_t B1, const fp_t B2,
-                        const fp_t C2, fp_t* alpha);
-
-/**
    \brief Manufactured solution, Equation 2
 */
 void manufactured_solution(const fp_t x,  const fp_t y,  const fp_t t,

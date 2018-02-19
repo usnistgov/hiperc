@@ -40,24 +40,15 @@ extern "C" {
 
 __constant__ fp_t d_mask[MAX_MASK_W * MAX_MASK_H];
 
-__device__ void device_manufactured_shift(const fp_t x,  const fp_t t,
-                                          const fp_t A1, const fp_t A2,
-                                          const fp_t B1, const fp_t B2,
-                                          const fp_t C2, fp_t* a)
-{
-	/* Equation 3 */
-	*a = 0.25 + A1 * t * sin(B1 * x) + A2 * sin(B2 * x + C2 * t);
-}
-
 __device__ void device_manufactured_solution(const fp_t x,  const fp_t y,  const fp_t t,
                                              const fp_t A1, const fp_t A2,
                                              const fp_t B1, const fp_t B2,
                                              const fp_t C2, const fp_t kappa,
                                              fp_t* eta)
 {
-	/* Equation 2 */
-	fp_t alpha = 0.0;
-	device_manufactured_shift(x, t, A1, A2, B1, B2, C2, &alpha);
+	/* Equation 3 */
+	const fp_t alpha = 0.25 + A1 * t * sin(B1 * x) + A2 * sin(B2 * x + C2 * t);
+    /* Equation 2 */
 	*eta = 0.5 * (1. - tanh((y - alpha)/sqrt(2. * kappa)));
 }
 
@@ -117,32 +108,36 @@ __global__ void convolution_kernel(fp_t* d_conc_old, fp_t* d_conc_lap,
 	__syncthreads();
 }
 
-__device__ void source(const fp_t x,  const fp_t y, const fp_t t,
+__device__ void source_dwtt(const fp_t x,  const fp_t y, const fp_t t,
                        const fp_t A1, const fp_t A2,
                        const fp_t B1, const fp_t B2,
                        const fp_t C2, const fp_t kappa,
                        fp_t* S)
 {
-    fp_t alpha = 0.;
-    device_manufactured_shift(x, t, A1, A2, B1, B2, C2, &alpha);
+	/* Equation 3 */
+	const fp_t alpha = 0.25 + A1 * t * sin(B1 * x) + A2 * sin(B2 * x + C2 * t);
+    /* Equation 4 */
     const fp_t dadx = A1 * B1 * t * cos(B1 * x) + A2 * B2 * cos(B2 * x + C2 * t);
     const fp_t d2adx2 = -A1 * B1 * B1 * t * sin(B1 * x) - A2 * B2 * B2 * sin(B2 * x + C2 * t);
     const fp_t dadt = A1 * sin(B1 * x) + A2 * C2 * cos(B2 * x + C2 * t);
-    const fp_t Q = (y - alpha) / sqrtf(2. * kappa);
-    const fp_t sech = 1.0 / cosh(Q);
-    const fp_t sum = -sqrtf(4. * kappa) * tanhf(Q) * dadx * dadx + sqrtf(2.) * (dadt - kappa * d2adx2);
-    *S = sech * sech / sqrtf(16. * kappa) * sum;
+    const fp_t Q = (y - alpha) / sqrt(2. * kappa);
+    const fp_t sech = 1. / cosh(Q);
+    const fp_t sum = -sqrt(4. * kappa) * tanh(Q) * dadx * dadx + sqrt(2.) * (dadt - kappa * d2adx2);
+    *S = sech * sech / sqrt(16. * kappa) * sum;
 }
 
-__device__ void source_sympy(const fp_t x,  const fp_t y,  const fp_t t,
+__device__ void source(const fp_t x,  const fp_t y,  const fp_t t,
                              const fp_t A1, const fp_t A2, const fp_t B1, const fp_t B2,
                              const fp_t C2, const fp_t kappa,
                              fp_t* S)
 {
-    const fp_t Q = tanhf((1.0L/2.0L)*sqrtf(2)*(A1*t*sin(B1*x) + A2*sin(B2*x + C2*t) - y + 0.25)/sqrtf(kappa));
-    *S = (  0.5  * sqrtf(kappa)*tanhf((1.0L/2.0L)*sqrtf(2)*(A1*t*sin(B1*x) + A2*sin(B2*x + C2*t) - y + 0.25)/sqrtf(kappa))
-          - 0.25 * sqrtf(2)*(A1*sin(B1*x) + A2*C2*cos(B2*x + C2*t))
-         ) * (Q * Q - 1)/sqrtf(kappa);
+    const fp_t sq2 = sqrt(2.);
+    const fp_t sqK = sqrt(kappa);
+    const fp_t Q = 0.5*sq2*(-y + A1*t*sin(B1*x) + A2*sin(B2*x + C2*t) + 0.25)/sqK;
+    const fp_t sech2 = 1. - tanh(Q)*tanh(Q);
+    *S = (1. - tanh(Q)*tanh(Q))/sqrt(16.*kappa) * (2.0*sqK*pow(A1*B1*t*cos(B1*x) + A2*B2*cos(B2*x + C2*t), 2)*(-sech2)*tanh(Q)
+                                                   + sq2*kappa*(A1*pow(B1, 2)*t*sin(B1*x) + A2*pow(B2, 2)*sin(B2*x + C2*t))*(-sech2)
+                                                   + sq2*(A1*sin(B1*x) + A2*C2*cos(B2*x + C2*t)));
 }
         
 __device__ void fprime(const fp_t eta, fp_t* f)
@@ -157,7 +152,8 @@ __global__ void evolution_kernel(fp_t* d_conc_old, fp_t* d_conc_new, fp_t* d_con
                                  const fp_t A1, const fp_t A2, const fp_t B1, const fp_t B2,
                                  const fp_t C2, const fp_t kappa)
 {
-	int thr_x, thr_y, x, y, xx, yy;
+	int thr_x, thr_y, x, y;
+    fp_t xx, yy;
     fp_t S, f;
 
 	/* determine indices on which to operate */
@@ -169,13 +165,15 @@ __global__ void evolution_kernel(fp_t* d_conc_old, fp_t* d_conc_new, fp_t* d_con
 
 	/* explicit Euler solution to the Allen-Cahn equation of motion */
 	if (x < nx && y < ny) {
-        xx = dx * (x - nm/2);
-        yy = dy * (y - nm/2);
-        const fp_t eta = d_conc_old[nx * y + x];
-        fprime(eta, &f);
-        source(xx, yy, elapsed, A1, A2, B1, B2, C2, kappa, &S);
-		d_conc_new[nx * y + x] = d_conc_old[nx * y + x]
-                               + dt * (S - f + kappa * d_conc_lap[nx * y + x]);
+    	xx = dx * (x - nm/2);
+    	yy = dy * (y - nm/2);
+    	const fp_t eta = d_conc_old[nx * y + x];
+        const fp_t lap = d_conc_lap[nx * y + x];
+    	fprime(eta, &f);
+    	source(xx, yy, elapsed, A1, A2, B1, B2, C2, kappa, &S);
+		d_conc_new[nx * y + x] = eta
+                               - dt * (f - kappa * lap)
+                               + dt * S;
 	}
 
 	/* wait for all threads to finish writing */
@@ -193,7 +191,7 @@ void device_boundaries(fp_t* conc,
 	               1);
 
 	boundary_kernel<<<num_tiles,tile_size>>> (
-	    conc, nm, nx, ny
+	    conc, nx, ny, nm
 	);
 }
 
@@ -209,9 +207,8 @@ void device_convolution(fp_t* conc_old, fp_t* conc_lap,
 	size_t buf_size = (tile_size.x + nm) * (tile_size.y + nm) * sizeof(fp_t);
 
 	convolution_kernel<<<num_tiles,tile_size,buf_size>>> (
-	    conc_old, conc_lap, nm, nx, ny
+	    conc_old, conc_lap, nx, ny, nm
 	);
-
 }
 
 void device_evolution(fp_t* conc_old, fp_t* conc_new, fp_t* conc_lap,

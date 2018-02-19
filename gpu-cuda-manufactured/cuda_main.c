@@ -56,11 +56,11 @@ int main(int argc, char* argv[])
 	/* declare default mesh size and resolution */
 	fp_t** conc_old, **conc_new, **conc_lap, **mask_lap;
 	int bx=32, by=32, nx=200, ny=100, nm=3, code=93;
-	fp_t dx=0.005, dy=0.005, h;
+	fp_t dx=0.01, dy=0.01, h;
 
 	/* declare default materials and numerical parameters */
 	fp_t kappa=0.0004, A1=0.0075, A2=0.03, B1=8.*M_PI, B2=22.*M_PI, C2=0.0625*M_PI;
-	fp_t linStab=0.1, dt=0.015625, elapsed=0., L2=0.;
+	fp_t linStab=0.01, dt=2.0e-4, elapsed=0., L2=0.;
 	int step=0, steps=512;
 	double start_time=0.;
 	struct Stopwatch watch = {0., 0., 0., 0.};
@@ -71,6 +71,11 @@ int main(int argc, char* argv[])
 
 	param_parser(argc, argv, &bx, &by, &code, &steps, &dx, &dy, &linStab, &nx, &ny, &nm,
 		         &A1, &A2, &B1, &B2, &C2, &kappa);
+
+	if (linStab > 1.0 - epsilon) {
+		printf("Error: CFL condition is %.2f. Fix your numerics.\n", linStab);
+		return 1;
+	}
 
 	h = (dx > dy) ? dy : dx;
 	dt = (linStab * h * h) / (4.0 * kappa);
@@ -91,7 +96,7 @@ int main(int argc, char* argv[])
 
 	/* write initial condition data */
 	start_time = GetTimer();
-	write_png(conc_old, nx, ny, 0);
+	write_png(conc_old, nx, ny, nm, 0);
 
 	if (file_exist("runlog.csv") == 1) {
 		/* file does not exist */
@@ -107,7 +112,7 @@ int main(int argc, char* argv[])
 	watch.file = GetTimer() - start_time;
 
 	if (newfile == 1)
-		fprintf(output, "iter,sim_time,dt,dx,L2,conv_time,step_time,IO_time,soln_time,run_time\n");
+		fprintf(output, "iter,sim_time,CFL,dt,dx,L2,conv_time,step_time,IO_time,soln_time,run_time\n");
 	/*
 	  fprintf(output, "%i,%f,%f,%f,%f,%f,%f,%f\n", step, elapsed, L2,
 	          watch.conv, watch.step, watch.file, watch.soln, GetTimer());
@@ -156,10 +161,6 @@ int main(int argc, char* argv[])
 	watch.file += GetTimer() - start_time;
 
 	start_time = GetTimer();
-	write_png(conc_new, nx, ny, step);
-	watch.file += GetTimer() - start_time;
-
-	start_time = GetTimer();
 	compute_L2_norm(conc_new, conc_lap,
 					dx, dy,
 					elapsed,
@@ -170,10 +171,15 @@ int main(int argc, char* argv[])
 					&L2);
 	watch.soln += GetTimer() - start_time;
 
-	fprintf(output, "%i,%.2f,%.10f,%.10f,%f,%f,%f,%f,%f,%f\n", step-1, elapsed, dt, dx, L2,
-			watch.conv, watch.step, watch.file, watch.soln, GetTimer());
+	fprintf(output, "%i,%.2f,%.4f,%.10f,%.10f,%f,%f,%f,%f,%f,%f\n",
+	                steps, elapsed, linStab, dt, dx, L2,
+	                watch.conv, watch.step, watch.file, watch.soln, GetTimer());
 
-	write_csv(conc_new, nx, ny, dx, dy, steps);
+	write_csv(conc_new, dx, dy, elapsed, nx, ny, steps, A1, A2, B1, B2, C2, kappa);
+
+	start_time = GetTimer();
+	write_png(conc_new, nx, ny, nm, steps);
+	watch.file += GetTimer() - start_time;
 
 	/* clean up */
 	fclose(output);

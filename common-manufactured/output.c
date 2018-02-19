@@ -190,16 +190,24 @@ void print_progress(const int step, const int steps)
 	}
 }
 
-void write_csv(fp_t** conc, const int nx, const int ny, const fp_t dx, const fp_t dy, const int step)
+void write_csv(fp_t** conc,
+			   const fp_t dx, const fp_t dy,
+			   const fp_t elapsed,
+			   const int  nx, const int  ny,
+			   const int step,
+			   const fp_t A1, const fp_t A2,
+			   const fp_t B1, const fp_t B2,
+			   const fp_t C2, const fp_t kappa)
 {
 	FILE* output;
 	char name[256];
 	char num[20];
 	int i, j;
+	fp_t x, y, s;
 
 	/* generate the filename */
 	sprintf(num, "%07i", step);
-	strcpy(name, "diffusion.");
+	strcpy(name, "manufactured.");
 	strcat(name, num);
 	strcat(name, ".csv");
 
@@ -213,17 +221,18 @@ void write_csv(fp_t** conc, const int nx, const int ny, const fp_t dx, const fp_
 	/* write csv data */
 	fprintf(output, "x,y,eta\n");
 	for (j = 1; j < ny-1; j++) {
-		fp_t y = dy * (j - 1);
+		y = dy * (j - 1);
 		for (i = 1; i < nx-1; i++)	{
-			fp_t x = dx * (i - 1);
-			fprintf(output, "%f,%f,%f\n", x, y, conc[j][i]);
+			x = dx * (i - 1);
+			manufactured_solution(x, y, elapsed, A1, A2, B1, B2, C2, kappa, &s);
+			fprintf(output, "%f,%f,%f,%f\n", x, y, conc[j][i], s);
 		}
 	}
 
 	fclose(output);
 }
 
-void write_png(fp_t** conc, const int nx, const int ny, const int step)
+void write_png(fp_t** conc, const int nx, const int ny, const int nm, const int step)
 {
 	/* After "A simple libpng example program," http://zarb.org/~gc/html/libpng.html
 	   and the libpng manual, http://www.libpng.org/pub/png */
@@ -241,8 +250,8 @@ void write_png(fp_t** conc, const int nx, const int ny, const int step)
 	png_byte color_type = PNG_COLOR_TYPE_GRAY;
 	png_byte bit_depth = 8;
 
-	w = nx - 2;
-	h = ny - 2;
+	w = nx - nm + 1;
+	h = ny - nm + 1;
 
 	/* generate the filename */
 	sprintf(num, "%07i", step);
@@ -266,8 +275,8 @@ void write_png(fp_t** conc, const int nx, const int ny, const int step)
 	/* determine data range */
 	min = 0.0;
 	max = 1.0;
-	for (j = ny-2; j > 0; j--) {
-		for (i = 1; i < nx-1; i++) {
+	for (j = nm/2; j < ny - nm/2; j++) {
+		for (i = nm/2; i < nx - nm/2; i++) {
 			c = &conc[j][i];
 			if (*c < min)
 				min = *c;
@@ -276,10 +285,12 @@ void write_png(fp_t** conc, const int nx, const int ny, const int step)
 		}
 	}
 
+	/* printf("Data spans [%.2e, %.2e]\n", min, max); */
+
 	/* rescale data into buffer */
 	n = 0;
-	for (j = ny-2; j > 0; j--) {
-		for (i = 1; i < nx-1; i++) {
+	for (j = ny - nm/2 - 1; j > nm/2 - 1; j--) {
+		for (i = nm/2; i < nx - nm/2; i++) {
 			buffer[n] = (unsigned char) 255 * (min + (conc[j][i] - min) / (max - min));
 			n++;
 		}

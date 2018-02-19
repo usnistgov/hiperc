@@ -32,7 +32,7 @@
 /**
  \brief Initialize phase field, Equation 8
 */
-void apply_initial_conditions(fp_t** conc_old,
+void apply_initial_conditions(fp_t** conc,
                               const fp_t dx,
                               const fp_t dy,
                               const int  nx,
@@ -48,7 +48,7 @@ void apply_initial_conditions(fp_t** conc_old,
 /**
  \brief Set fixed value \f$ (c_{hi}) \f$ along top and bottom, periodic elsewhere
 */
-void apply_boundary_conditions(fp_t** conc_old,
+void apply_boundary_conditions(fp_t** conc,
                                const int nx,
                                const int ny,
                                const int nm);

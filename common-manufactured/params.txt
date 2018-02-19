@@ -1,5 +1,5 @@
-nx 200     # total mesh points along x-axis
-ny 100     # total mesh points along y-axis
+nx 202     # total mesh points along x-axis
+ny 102     # total mesh points along y-axis
 dx 0.005   # mesh resolution along x-axis
 dy 0.005   # mesh resolution along y-axis
 ns 5120    # number of timesteps

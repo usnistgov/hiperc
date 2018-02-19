@@ -24,7 +24,7 @@ from sys import argv
 from os import path
 import matplotlib.pylab as plt
 
-# Load data from convergence study
+# Load data from spatial convergence study
 step,sim_time,cfl,dt,dx,L2,conv_time,step_time,IO_time,soln_time,run_time = np.loadtxt("spatial-convergence.csv", skiprows=1, delimiter=',', unpack=True)
 
 # Convert to log-log space
@@ -43,3 +43,24 @@ plt.plot(x, y, marker="o", color="black", label=r"$\mathcal{{O}}\left(h^{{{0:.3f
 plt.axis('equal')
 plt.legend(loc='best')
 plt.savefig("spatial-convergence.png", dpi=400, bbox_inches='tight')
+plt.close()
+
+# Load data from temporal convergence study
+step,sim_time,cfl,dt,dx,L2,conv_time,step_time,IO_time,soln_time,run_time = np.loadtxt("temporal-convergence.csv", skiprows=1, delimiter=',', unpack=True)
+
+# Convert to log-log space
+x = np.log10(dt)
+y = np.log10(L2)
+
+# Perform linear regression on log-log data
+fit = np.polyfit(x, y, 1)
+fit_fn = np.poly1d(fit)
+
+print("Fitting parameters: {0}".format(fit))
+
+# Plot line of best fit, report slope
+plt.plot(x, y, marker="o", color="black", label=r"$\mathcal{{O}}\left(k^{{{0:.3f}}}\right)$".format(fit[0]))
+plt.axis('equal')
+plt.legend(loc='best')
+plt.savefig("temporal-convergence.png", dpi=400, bbox_inches='tight')
+plt.close()

@@ -23,6 +23,7 @@
 # Launch from the analysis-manufactured directory.
 
 # Move to HiPerC root directory
+
 DATADIR=$(pwd)
 cd `dirname "${DATADIR}"`
 
@@ -41,10 +42,12 @@ do
     NS=$(echo -e "import math\nprint int(math.ceil(8.0/${DT}))" | python2)
 	NU=$(echo "print 4.*${kp}*${DT}" | python2)
     CO=$(echo "print ${NU}/${DX}**2" | python2)
-	sed -e "s/BXY/${BX}/g" \
+	sed -e "s/BX/${BX}/" \
+        -e "s/BY/${BY}/" \
         -e "s/CFL/${CO}/"  \
-        -e "s/dXY/${DX}/g" \
-        -e "s/KP/${kp}/"   \
+        -e "s/dX/${DX}/" \
+        -e "s/dY/${DX}/" \
+        -e "s/KP/${KP}/"   \
         -e "s/NS/${NS}/"   \
         -e "s/NX/${NX}/"   \
         -e "s/NY/${NY}/"   \
@@ -54,7 +57,6 @@ do
 	sleep 1
 	echo
 done
-
 
 mv analysis-manufactured/params.bak common-manufactured/params.txt
 

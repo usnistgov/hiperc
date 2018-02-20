@@ -30,21 +30,21 @@ cd `dirname "${DATADIR}"`
 cp -a common-manufactured/params.txt analysis-manufactured/params.bak
 rm -f gpu-cuda-manufactured/runlog.csv
 
-for i in {1..8}
+for i in {0..9}
 do
     BX=8
     kp=0.0004
-	NX=252
-    CO=$(echo "print 0.7/${i}" | python2)
-	NL=$(echo "print 4.*${kp}" | python2)
+	NX=202
+    NS=$(echo "print 10000+10000*${i}" | python2)
+    DT=$(echo "print 8.0/${NS}" | python2)
 	DX=$(echo "print 1.0/(${NX}-2)"  | python2)
-    DT=$(echo "print ${CO}*${DX}**2/${NL}" | python2)
-    NS=$(echo "print int(8.0/${DT})" | python2)
+	NU=$(echo "print 4.*${kp}*${DT}" | python2)
+    CO=$(echo "print ${NU}/${DX}**2" | python2)
 	NY=$(echo "print 2+(${NX}-2)/2"  | python2)
 	sed -e "s/BXY/${BX}/g" \
         -e "s/CFL/${CO}/"  \
         -e "s/dXY/${DX}/g" \
-        -e "s/KP/${kp}/"   \
+        -e "s/KP/${KP}/"   \
         -e "s/NS/${NS}/"   \
         -e "s/NX/${NX}/"   \
         -e "s/NY/${NY}/"   \

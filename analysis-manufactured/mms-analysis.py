@@ -59,7 +59,7 @@ fit_fn = np.poly1d(fit)
 print("Fitting parameters: {0}".format(fit))
 
 # Plot line of best fit, report slope
-plt.plot(x, y, marker="o", color="black", label=r"$\mathcal{{O}}\left(k^{{{0:.3f}}}\right)$".format(fit[0]))
+plt.plot(dt, L2, marker="o", color="black", label=r"$\mathcal{{O}}\left(k^{{{0:.3f}}}\right)$".format(fit[0]))
 plt.axis('equal')
 plt.legend(loc='best')
 plt.savefig("temporal-convergence.png", dpi=400, bbox_inches='tight')

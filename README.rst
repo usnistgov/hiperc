@@ -339,7 +339,7 @@ the `National Institute of Standards and Technology`_, nor is it
 intended to imply that the entities, materials, or equipment are necessarily
 the best available for the purpose.
 
-.. _`Trevor Keller`: mailto::trevor.keller@nist.gov
+.. _`Trevor Keller`: mailto:trevor.keller@nist.gov
 .. _Bebop: http://www.lcrc.anl.gov/systems/resources/bebop/
 .. _ccNUMA: https://en.wikipedia.org/wiki/Non-uniform_memory_access#Cache_coherent_NUMA
 .. |Codacy| image:: https://api.codacy.com/project/badge/Grade/651feab686bc400b9aadc180fe0a167f

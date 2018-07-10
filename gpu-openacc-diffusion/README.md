@@ -63,7 +63,7 @@ the [National Institute of Standards and Technology (NIST)](http://www.nist.gov)
 nor is it intended to imply that the entities, materials, or equipment are
 necessarily the best available for the purpose.
 
-[_amdcl]:  http://developer.amd.com/tools-and-sdks/opencl-zone/
+[_amdcl]:  https://www.amd.com/en-us/solutions/professional/hpc/opencl
 [_aws]:    https://aws.amazon.com/ec2/Elastic-GPUs/
 [_cuda]:   https://developer.nvidia.com/cuda-toolkit
 [_icl]:    https://software.intel.com/en-us/articles/opencl-drivers

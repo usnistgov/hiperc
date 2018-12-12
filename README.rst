@@ -349,7 +349,7 @@ the best available for the purpose.
 .. _Cori: http://www.nersc.gov/users/computational-systems/cori/
 .. _Cray: http://www.cray.com/
 .. _CUDA: https://developer.nvidia.com/cuda-zone
-.. _Doxygen: http://www.stack.nl/~dimitri/doxygen/
+.. _Doxygen: http://www.doxygen.nl
 .. _EC2: https://aws.amazon.com/ec2/Elastic-GPUs/
 .. _`file an issue`: https://github.com/usnistgov/hiperc/issues
 .. |`final conc`| image:: common-diffusion/diffusion.10000.png

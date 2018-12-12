@@ -74,7 +74,7 @@ which we typically conduct using [reviewable][_review].
 [_hiperc]:    https://github.com/usnistgov/hiperc
 [_branch]:  http://nvie.com/posts/a-successful-git-branching-model/
 [_conduct]: https://github.com/usnistgov/hiperc/blob/master/CODE_OF_CONDUCT.md
-[_doxy]:    https://www.stack.nl/~dimitri/doxygen/manual/docblocks.html
+[_doxy]:    http://www.doxygen.nl/manual/docblocks.html
 [_gcc]:     https://gcc.gnu.org/
 [_ghhelp]:  https://help.github.com/
 [_ghkey]:   https://help.github.com/articles/closing-issues-using-keywords/

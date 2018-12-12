@@ -38,7 +38,7 @@ This directory contains a makefile with two important invocations:
     build directories.
 
 [_breathe]: https://breathe.readthedocs.io
-[_doxygen]: http://www.stack.nl/~dimitri/doxygen
+[_doxygen]: http://www.doxygen.nl
 [_make]:    https://www.gnu.org/software/make
 [_pypi]:    https://pypi.python.org/pypi
 [_rtd]:     https://hiperc.readthedocs.io

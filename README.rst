@@ -353,7 +353,7 @@ the best available for the purpose.
 .. _EC2: https://aws.amazon.com/ec2/Elastic-GPUs/
 .. _`file an issue`: https://github.com/usnistgov/hiperc/issues
 .. |`final conc`| image:: common-diffusion/diffusion.10000.png
-.. |GitHub| image:: https://assets-cdn.github.com/favicon.ico
+.. |GitHub| image:: .github/favicon.ico
 .. _GitHub: https://github.com/usnistgov/hiperc
 .. |Gitter| image:: https://badges.gitter.im/usnistgov/hiperc.svg
 .. _Gitter: https://gitter.im/usnistgov/hiperc?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=body_badge

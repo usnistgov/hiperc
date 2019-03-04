@@ -274,50 +274,32 @@ folder location. Finally, edit the ``Makefile`` within the new folder to
 remove references to the old common folder. This should centralize everything
 you need to remix and get started in the new folder.
 
-================
-Work in Progress
-================
+==================
+Completed Examples
+==================
 
-- [ ] CPU
-    - [x] analytical
-        - [x] diffusion
-    - [ ] serial
-        - [x] diffusion
-        - [ ] spinodal
-        - [ ] dendrite
-        - [ ] ripening
-    - [ ] OpenMP
-        - [x] diffusion
-        - [ ] spinodal
-        - [ ] dendrite
-        - [ ] ripening
-    - [ ] Threading Building Blocks
-        - [x] diffusion
-        - [ ] spinodal
-        - [ ] dendrite
-        - [ ] ripening
-- [ ] GPU
-    - [ ] CUDA
-        - [x] diffusion
-        - [ ] spinodal
-        - [ ] dendrite
-        - [ ] ripening
-    - [ ] OpenACC
-        - [x] diffusion
-        - [ ] spinodal
-        - [ ] dendrite
-        - [ ] ripening
-    - [ ] OpenCL
-        - [x] diffusion
-        - [ ] spinodal
-        - [ ] dendrite
-        - [ ] ripening
-- [ ] KNL
-    - [ ] OpenMP
-        - [x] diffusion
-        - [ ] spinodal
-        - [ ] dendrite
-        - [ ] ripening
+------------------
+Diffusion Equation
+------------------
+
+- CPU
+  - analytical
+  - serial
+  - OpenMP
+  - TBB
+- GPU
+  - CUDA
+  - OpenAcc
+  - OpenCL
+
+----------------------
+Spinodal Decomposition
+----------------------
+
+- CPU
+  - OpenMP
+- GPU
+  - CUDA
 
 =========================
 Contributions and Contact
@@ -353,7 +335,7 @@ the best available for the purpose.
 .. _EC2: https://aws.amazon.com/ec2/Elastic-GPUs/
 .. _`file an issue`: https://github.com/usnistgov/hiperc/issues
 .. |`final conc`| image:: common-diffusion/diffusion.10000.png
-.. |GitHub| image:: .github/favicon.ico
+.. |GitHub| image:: .github/github.png
 .. _GitHub: https://github.com/usnistgov/hiperc
 .. |Gitter| image:: https://badges.gitter.im/usnistgov/hiperc.svg
 .. _Gitter: https://gitter.im/usnistgov/hiperc?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=body_badge

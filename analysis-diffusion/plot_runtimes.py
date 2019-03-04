@@ -28,12 +28,10 @@ import matplotlib.pylab as plt
 cpuBase = ("serial", "openmp", "tbb")
 gpuBase = ("cuda", "openacc", "opencl")
 
-# sizes = (256, 512, 768, 1024, 1280, 1536, 1792, 2048)
 sizes = (256, 512, 768, 1024)
 
 dirset = (["cpu-{0}-diffusion".format(c) for c in cpuBase],
           ["gpu-{0}-diffusion".format(g) for g in gpuBase])
-
 dirs = [s for sublist in dirset for s in sublist]
 
 colors = ['black'] + [plt.cm.cool(i) for i in np.linspace(0, 1, len(dirs)-1)]
@@ -108,17 +106,17 @@ for nx in sizes:
 
     plt.figure(3)
     plt.legend(loc='best')
-    plt.savefig("runtime_{0}.png".format(nx), dpi=300, bbox_inches='tight')
+    plt.savefig("all-runtime-{0}.png".format(nx), dpi=300, bbox_inches='tight')
     plt.close()
 
     plt.figure(4)
     plt.legend(loc='best')
-    plt.savefig("residual_{0}.png".format(nx), dpi=300, bbox_inches='tight')
+    plt.savefig("all-residual-{0}.png".format(nx), dpi=300, bbox_inches='tight')
     plt.close()
 
     plt.figure(5)
     plt.legend(loc='best')
-    plt.savefig("diffusion_{0}.png".format(nx), dpi=300, bbox_inches='tight')
+    plt.savefig("all-diffusion-{0}.png".format(nx), dpi=300, bbox_inches='tight')
     plt.close()
 
     plt.figure(6)
@@ -127,13 +125,13 @@ for nx in sizes:
     plt.close()
 
 plt.figure(0)
-plt.savefig("runtimes.png", dpi=300, bbox_inches='tight')
+plt.savefig("all-runtimes.png", dpi=300, bbox_inches='tight')
 plt.close()
 
 plt.figure(1)
-plt.savefig("residuals.png", dpi=300, bbox_inches='tight')
+plt.savefig("all-residuals.png", dpi=300, bbox_inches='tight')
 plt.close()
 
 plt.figure(2)
-plt.savefig("diffusions.png", dpi=300, bbox_inches='tight')
+plt.savefig("all-diffusions.png", dpi=300, bbox_inches='tight')
 plt.close()

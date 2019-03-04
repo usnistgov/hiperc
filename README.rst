@@ -9,7 +9,7 @@
 High Performance Computing Strategies for Boundary Value Problems
 *****************************************************************
 
-|GitHub|_ |readthedocs|_ |Gitter|_ |Codacy|_
+|GitHub|_ |readthedocs|_ |Gitter|_ |Codacy|_ |Zenodo|_
 
 Ever wonder if a GPU or Xeon Phi accelerator card would make your code faster?
 Fast enough to justify the expense to your manager, adviser, or funding agency?
@@ -366,4 +366,5 @@ the best available for the purpose.
 .. _`Threading Building Blocks`: https://www.threadingbuildingblocks.org/
 .. _`Xeon Phi`: https://www.intel.com/content/www/us/en/products/processors/xeon-phi/xeon-phi-processors.html
 .. _XSEDE: https://www.xsede.org/ecosystem/resources
-
+.. |Zenodo| image:: https://zenodo.org/badge/99600531.svg
+.. _Zenodo: https://zenodo.org/badge/latestdoi/99600531

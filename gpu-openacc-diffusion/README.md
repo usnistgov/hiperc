@@ -25,7 +25,7 @@ To build this code, you must have installed
  * [GNU make][_make]
  * [PNG library][_png]
  * [PGI compiler][_pgi]
- * OpenCL runtime for [AMD][_amdcl], [NVIDIA][_nvcl], or [Intel][_icl]
+ * OpenCL for [AMD][_amdcl], [NVIDIA][_nvcl], or [Intel][_icl]
 
 ```make``` and ```libpng``` can be installed through your operating
 system's package manager, *e.g.* ```apt-get install make libpng12-dev```.
@@ -63,7 +63,7 @@ the [National Institute of Standards and Technology (NIST)](http://www.nist.gov)
 nor is it intended to imply that the entities, materials, or equipment are
 necessarily the best available for the purpose.
 
-[_amdcl]:  https://www.amd.com/en-us/solutions/professional/hpc/opencl
+[_amdcl]:  https://github.com/RadeonOpenCompute/ROCm
 [_aws]:    https://aws.amazon.com/ec2/Elastic-GPUs/
 [_cuda]:   https://developer.nvidia.com/cuda-toolkit
 [_icl]:    https://software.intel.com/en-us/articles/opencl-drivers

@@ -11,9 +11,9 @@ High Performance Computing Strategies for Boundary Value Problems
 
 |GitHub|_ |readthedocs|_ |Gitter|_ |Codacy|_ |Zenodo|_
 
-Ever wonder if a GPU or Xeon Phi accelerator card would make your code faster?
-Fast enough to justify the expense to your manager, adviser, or funding agency?
-This project can help answer your questions!
+Ever wonder if a GPU would make your code faster? Fast enough to justify the
+expense to your manager, adviser, or funding agency? This project can help
+answer your questions!
 
 The example codes in this repository implement the same basic algorithm using
 whichever of the mainstream accelerator programming methods apply. Running the
@@ -69,16 +69,8 @@ CUDA_
    opportunity for performance tuning. Requires a purpose-built compiler (nvcc,
    gpucc), libraries, and a compatible graphics card or accelerator.
 
-`Xeon Phi`_
-   Low-level and loop-level massive parallelism for ccNUMA_ many-integrated-core
-   CPU architectures supporting AVX-512 vectorized instructions. First-gen
-   Knights Corner (KNC_) cards were coprocessors, but second-gen Knights
-   Landing (KNL_) devices can run code natively. Programmed like threaded CPU
-   code, but with more opportunities for tuning and much greater performance.
-   Only available through the Intel compiler, and requires Xeon Phi hardware.
-
 Generically speaking, OpenMP_ and OpenACC_ provide low barriers
-for entry into acceleration; CUDA_ and `Xeon Phi`_ require high
+for entry into acceleration; CUDA_ and OpenCL_ require high
 investments for hardware and compilers, but offer the greatest capabilities for
 performance and optimization of a specific application. CUDA hardware can be
 emulated on the CPU using the MCUDA_ framework. Proof-of-concept
@@ -364,7 +356,6 @@ the best available for the purpose.
 .. _SIMD: https://en.wikipedia.org/wiki/SIMD
 .. _Stampede2: https://www.tacc.utexas.edu/systems/stampede2
 .. _`Threading Building Blocks`: https://www.threadingbuildingblocks.org/
-.. _`Xeon Phi`: https://www.intel.com/content/www/us/en/products/processors/xeon-phi/xeon-phi-processors.html
 .. _XSEDE: https://www.xsede.org/ecosystem/resources
 .. |Zenodo| image:: https://zenodo.org/badge/99600531.svg
 .. _Zenodo: https://zenodo.org/badge/latestdoi/99600531

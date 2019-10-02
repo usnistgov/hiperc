@@ -60,19 +60,6 @@ run_gpu_spinodal:
 	@$(foreach dir, $(gpu_spinodal_list), $(MAKE) -C $(dir) run;)
 
 
-# KNL codes
-
-phi_diffusion_list := phi-openmp-diffusion
-
-.PHONY: phi_diffusion
-phi_diffusion:
-	@$(foreach dir, $(phi_diffusion_list), $(MAKE) -C $(dir);)
-
-.PHONY: run_phi_diffusion
-run_phi_diffusion:
-	@$(foreach dir, $(phi_diffusion_list), $(MAKE) -C $(dir) run;)
-
-
 # Cleanup
 
 .PHONY: clean

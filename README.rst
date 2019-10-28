@@ -320,7 +320,7 @@ the best available for the purpose.
 .. _Codacy: https://www.codacy.com/app/trevor.keller/hiperc?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=usnistgov/hiperc&amp;utm_campaign=Badge_Grade
 .. _`Contributing Guidelines`: CONTRIBUTING.md
 .. _convolution: https://en.wikipedia.org/wiki/Discrete_Laplace_operator#Image_Processing
-.. _Cori: http://www.nersc.gov/users/computational-systems/cori/
+.. _Cori: http://www.nersc.gov/systems/cori/
 .. _Cray: http://www.cray.com/
 .. _CUDA: https://developer.nvidia.com/cuda-zone
 .. _Doxygen: http://www.doxygen.nl

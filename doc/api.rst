@@ -13,12 +13,6 @@ boundaries.h
 .. doxygenfile:: boundaries.h
    :project: HiPerC
 
-discretization.h
-----------------
-
-.. doxygenfile:: discretization.h
-   :project: HiPerC
-
 mesh.h
 ------
 

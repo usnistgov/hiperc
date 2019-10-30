@@ -34,14 +34,14 @@ This software can be installed through your operating system's package manager,
 Proof-of-concept trials on GPU hardware can be run on [Amazon's EC2][_aws] and
 equivalent HPC cloud computing platforms.
 
-If you read the ```Makefile```s, you will see that this GPU code also invokes
-OpenMP (via compiler flag ```-fopenmp```). This is because some operations
-&mdash; namely array allocation and application of boundary conditions &mdash;
-cannot be performed efficiently on the GPU, due to the high expense of
-transferring data in and out compared to the small amount of work to be done.
-This program therefore implements an "OpenMP + OpenCL" programming model,
-where CPU threading is used to modify a few values and GPU processing is used
-to perform the real work.
+If you read the ```Makefile```s, you will see that this GPU code also depends on
+OpenMP (provided by the compiler and invoked with the ```-fopenmp``` flag). This
+is because some operations &mdash; namely array allocation and application of
+boundary conditions &mdash; cannot be performed efficiently on the GPU, due to
+the high expense of transferring data in and out compared to the small amount of
+work to be done. This program therefore implements an "OpenMP + OpenCL"
+programming model, where CPU threading is used to modify a few values and GPU
+processing is used to perform the real work.
 
 ## Customization
 

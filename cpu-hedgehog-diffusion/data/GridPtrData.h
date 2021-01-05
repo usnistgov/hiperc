@@ -1,5 +1,5 @@
 //
-// Created by tjb3 on 12/27/17.
+// Created by Timothy Blattner on 12/27/17.
 //
 
 #ifndef HIPERC_HEDGEHOG_GRIDPTRDATA_H

@@ -1,0 +1,14 @@
+# Publish documentation to the NIST server
+# instead of ReadTheDocs
+---
+name: "Publish Documentation"
+on: [push, pull_request, delete]
+jobs:
+  docs:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: usnistgov/NISTtheDocs2Death@0.2
+        with:
+          docs-folder: doc/
+          formats: |-
+            pdf

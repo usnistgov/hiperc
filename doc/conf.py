@@ -21,7 +21,6 @@ import os
 import shutil
 import subprocess
 import sys
-import recommonmark
 from recommonmark.parser import CommonMarkParser
 from recommonmark.transform import AutoStructify
 
@@ -35,12 +34,17 @@ if os.environ.get("READTHEDOCS", None) == "True":
 
 # If your documentation needs a minimal Sphinx version, state it here.
 #
-needs_sphinx = "1.8"
+needs_sphinx = "2.3"
 
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
-extensions = ["sphinx.ext.graphviz", "sphinx.ext.mathjax", "sphinx.ext.todo", "breathe"]
+extensions = [
+    "sphinx.ext.graphviz",
+    "sphinx.ext.mathjax",
+    "sphinx.ext.todo",
+    "breathe"
+]
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["_templates"]

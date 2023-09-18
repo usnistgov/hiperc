@@ -3,14 +3,18 @@
 PROJECT_NAME          = HiPerC
 PROJECT_BRIEF         = High Performance Computing Strategies for Boundary Value Problems
 OUTPUT_DIRECTORY      = .
-PROJECT_NUMBER        = pre-alpha
+PROJECT_NUMBER        = alpha
 FULL_PATH_NAMES       = NO
 HIDE_UNDOC_MEMBERS    = YES
 HIDE_UNDOC_CLASSES    = NO
 SOURCE_BROWSER        = YES
-INPUT                 = ../common-diffusion/ \
-                        ../cpu-serial-diffusion/ ../cpu-openmp-diffusion/ ../cpu-tbb-diffusion/ \
-                        ../gpu-cuda-diffusion/ ../gpu-openacc-diffusion/ ../gpu-opencl-diffusion/
+INPUT                 = ../common-diffusion/      \
+                        ../cpu-serial-diffusion/  \
+                        ../cpu-openmp-diffusion/  \
+                        ../cpu-tbb-diffusion/     \
+                        ../gpu-cuda-diffusion/    \
+                        ../gpu-openacc-diffusion/ \
+                        ../gpu-opencl-diffusion/
 RECURSIVE             = YES
 FILE_PATTERNS         = *.c *.cl *.cpp *.cu *.cuh *.h
 EXCLUDE_PATTERNS      = *.git doc

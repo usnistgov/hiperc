@@ -10,5 +10,6 @@ jobs:
       - uses: usnistgov/NISTtheDocs2Death@main
         with:
           docs-folder: doc/
+          pip-requirements: doc/requirements.txt
           formats: |-
             pdf

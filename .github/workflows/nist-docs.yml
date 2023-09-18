@@ -9,7 +9,9 @@ jobs:
     steps:
       - uses: usnistgov/NISTtheDocs2Death@main
         with:
+          apt-packages: |-
+             doxygen
           docs-folder: doc/
-          pip-requirements: doc/requirements.txt
           formats: |-
             pdf
+          pip-requirements: doc/requirements.txt

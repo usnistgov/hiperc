@@ -13,11 +13,14 @@ dox:
 
 .PHONY: tex
 tex: dox
-	$(MAKE) -C latex && cd latex && $(LATEX) refman.tex
+	$(MAKE) -C latex && \
+	cd latex && \
+	cp refman.tex hiperc.tex && \
+	$(LATEX) hiperc.tex
 
 .PHONY: pdf
 pdf: tex
-	cp latex/refman.pdf hiperc_guide.pdf
+	cp latex/hiperc.pdf hiperc_guide.pdf
 
 .PHONY: html
 html: dox
@@ -25,4 +28,4 @@ html: dox
 
 .PHONY: clean
 clean:
-	rm -rf _build/* _static/* latex xml rst/*
+	rm -rf _build/* _static/* html latex xml rst/*

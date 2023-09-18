@@ -11,6 +11,7 @@ jobs:
         with:
           apt-packages: |-
              doxygen
+             latexmk
           build-pdf-command: make pdf
           docs-folder: doc/
           formats: |-

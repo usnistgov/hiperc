@@ -1,22 +1,18 @@
 # Makefile for HiPerC documentation
 
-LATEX = pdflatex
-SPHINX = sphinx-build
-DOXYGEN = doxygen
-
 all: pdf
 .PHONY: all
 
 .PHONY: dox
 dox:
-	$(DOXYGEN)
+	doxygen
 
 .PHONY: tex
 tex: dox
 	$(MAKE) -C latex && \
 	cd latex && \
 	cp refman.tex hiperc.tex && \
-	$(LATEX) hiperc.tex
+	latexmk hiperc.tex
 
 .PHONY: pdf
 pdf: tex
@@ -24,7 +20,7 @@ pdf: tex
 
 .PHONY: html
 html: dox
-	$(SPHINX) -b html . _build
+	sphinx-build -b html . _build
 
 .PHONY: clean
 clean:

@@ -1,19 +1,19 @@
 # Makefile for HiPerC documentation
 
-all: html/index.html
+all: _build/html/index.html
 .PHONY: all
 
-latex/hiperc.tex:
-	doxygen && mv latex/refman.tex $@
+_build/latex/hiperc.tex:
+	doxygen && mv _build/latex/refman.tex $@
 
-latex/hiperc.pdf: latex/hiperc.tex
+_build/latex/hiperc.pdf: _build/latex/hiperc.tex
 	latexmk -cd $<
 
-html/index.html: latex/hiperc.tex
+_build/html/index.html: _build/latex/hiperc.tex
 	sphinx-build -b html . _build
 
 .PHONY: clean html pdf
 clean:
 	rm -rf _build _static html latex rst
-html: html/index.html
-pdf:  latex/hiperc.pdf
+html: _build/html/index.html
+pdf:  _build/latex/hiperc.pdf

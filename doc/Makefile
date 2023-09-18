@@ -19,8 +19,8 @@ tex: dox
 pdf: tex
 	cp latex/refman.pdf hiperc_guide.pdf
 
-.PHONY: sphinx
-sphinx: dox
+.PHONY: html
+html: dox
 	$(SPHINX) -b html . _build
 
 .PHONY: clean

@@ -22,7 +22,6 @@ import shutil
 import subprocess
 import sys
 from recommonmark.parser import CommonMarkParser
-from recommonmark.transform import AutoStructify
 
 sys.path.insert(0, os.path.abspath(".."))
 
@@ -84,8 +83,8 @@ language = "en"
 # directories to ignore when looking for source files.
 # This patterns also effect to html_static_path and html_extra_path
 exclude_patterns = [
-    ".github",
     "_build",
+    "_build/*",
     "Thumbs.db",
     ".DS_Store",
     "README.md"
@@ -123,7 +122,7 @@ html_theme = "alabaster"
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
-html_static_path = ["_static"]
+# html_static_path = ["_static"]
 
 # Custom sidebar templates, must be a dictionary that maps document names
 # to template names.
@@ -199,42 +198,23 @@ texinfo_documents = [
 
 # Copy Markdown files, after https://github.com/materialsinnovation/pymks/blob/master/doc/conf.py
 
-
-def url_resolver(url):
-    """Resolve url for both documentation and Github online.
-    If the url is an IPython notebook links to the correct path.
-    Args:
-      url: the path to the link (not always a full url)
-    Returns:
-      a local url to either the documentation or the Github
-    """
-    if url[-6:] == ".ipynb":
-        return url[4:-6] + ".html"
-    else:
-        return url
-
-
-def setup(app):
-    app.add_config_value(
-        "recommonmark_config",
-        {"url_resolver": url_resolver, "auto_toc_tree_section": "Contents"},
-        True,
-    )
-    app.add_transform(AutoStructify)
-
-
 rst_directory = "rst"
-img_directory = os.path.join(rst_directory, "common-diffusion")
+rst_directories = [
+    rst_directory,
+    os.path.join(rst_directory, "common-diffusion"),
+    os.path.join(rst_directory, ".github")
+]
 
-for directory in [rst_directory, img_directory]:
+for directory in rst_directories:
     if not os.path.exists(directory):
         os.makedirs(directory)
 
 files_to_copy = (
     "README.rst",
-    "LICENSE.md",
+    "LICENSE.rst",
     "common-diffusion/diffusion.*.png",
     "HiPerC.png",
+    ".github/github.png",
 )
 
 for fpath in files_to_copy:

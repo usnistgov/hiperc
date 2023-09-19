@@ -9,11 +9,11 @@ _build/latex/hiperc.tex:
 _build/latex/hiperc.pdf: _build/latex/hiperc.tex
 	latexmk -cd $<
 
-_build/html/index.html: _build/latex/hiperc.tex
+_build/html/index.html: _build/latex/hiperc.pdf
 	sphinx-build -b html . _build
 
 .PHONY: clean html pdf
 clean:
-	rm -rf _build _static html latex rst
+	rm -rf _build rst
 html: _build/html/index.html
 pdf:  _build/latex/hiperc.pdf

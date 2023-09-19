@@ -83,7 +83,13 @@ language = "en"
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
 # This patterns also effect to html_static_path and html_extra_path
-exclude_patterns = ["_build", "Thumbs.db", ".DS_Store", "README.md"]
+exclude_patterns = [
+    ".github",
+    "_build",
+    "Thumbs.db",
+    ".DS_Store",
+    "README.md"
+]
 
 # The reST default role (used for this markup: `text`) to use for all documents.
 default_role = "cpp:any"
@@ -239,7 +245,7 @@ for fpath in files_to_copy:
 
 # -- Options for Breathe output ---------------------------------------------
 
-breathe_projects = {"HiPerC": "xml"}
+breathe_projects = {"HiPerC": "_build/xml"}
 
 breathe_default_project = "HiPerC"
 

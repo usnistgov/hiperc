@@ -1,0 +1,4 @@
+<map id="device_diffusion" name="device_diffusion">
+<area shape="rect" id="node1" title="Solve diffusion equation on OpenCL device." alt="" coords="104,5,219,32"/>
+<area shape="rect" id="node2" href="$opencl__main_8c.html#a0ddf1224851353fc92bfbff6f499fa97" title="Run simulation using input parameters specified on the command line." alt="" coords="5,5,56,32"/>
+</map>

@@ -1,0 +1,4 @@
+<map id="boundary_kernel" name="boundary_kernel">
+<area shape="rect" id="node1" title="Boundary condition kernel for execution on the GPU." alt="" coords="104,5,220,32"/>
+<area shape="rect" id="node2" href="$openacc__main_8c.html#a0ddf1224851353fc92bfbff6f499fa97" title="Run simulation using input parameters specified on the command line." alt="" coords="5,5,56,32"/>
+</map>

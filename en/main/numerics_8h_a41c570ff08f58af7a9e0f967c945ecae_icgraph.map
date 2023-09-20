@@ -1,0 +1,5 @@
+<map id="slow_nine_point_Laplacian_stencil" name="slow_nine_point_Laplacian_stencil">
+<area shape="rect" id="node1" title="Write 9&#45;point Laplacian stencil into convolution mask." alt="" coords="231,5,409,47"/>
+<area shape="rect" id="node2" href="$numerics_8c.html#a64ca0af918853ad6ef8edd23f8ec7d24" title="Specify which stencil (mask) to use for the Laplacian (convolution)" alt="" coords="104,13,183,39"/>
+<area shape="rect" id="node3" href="$cuda__main_8c.html#a0ddf1224851353fc92bfbff6f499fa97" title="Run simulation using input parameters specified on the command line." alt="" coords="5,13,56,39"/>
+</map>

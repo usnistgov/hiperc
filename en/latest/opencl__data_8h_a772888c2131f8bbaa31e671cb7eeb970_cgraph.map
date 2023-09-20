@@ -1,0 +1,4 @@
+<map id="build_program" name="build_program">
+<area shape="rect" id="node1" title="Build kernel program from text input." alt="" coords="5,5,108,32"/>
+<area shape="rect" id="node2" href="$opencl__data_8c.html#acdd07580b3996e0d07a1a23269d3997f" title="Report error code when status is not CL_SUCCESS." alt="" coords="156,5,244,32"/>
+</map>

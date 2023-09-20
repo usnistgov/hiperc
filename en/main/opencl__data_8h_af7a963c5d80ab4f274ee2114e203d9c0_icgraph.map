@@ -1,0 +1,8 @@
+<map id="report_error" name="report_error">
+<area shape="rect" id="node1" title="Report error code when status is not CL_SUCCESS." alt="" coords="425,81,513,108"/>
+<area shape="rect" id="node2" href="$opencl__data_8c.html#a772888c2131f8bbaa31e671cb7eeb970" title="Build kernel program from text input." alt="" coords="271,5,373,32"/>
+<area shape="rect" id="node3" href="$opencl__data_8c.html#a9db2a524fc87cc32b90527d2bbb2f4e4" title="Initialize OpenCL device memory before marching." alt="" coords="119,56,203,83"/>
+<area shape="rect" id="node5" href="$opencl__data_8h.html#a8001ac0b493b224e22750a423a65524a" title="Solve diffusion equation on OpenCL device." alt="" coords="104,107,219,133"/>
+<area shape="rect" id="node6" href="$opencl__data_8h.html#ae91f108396136ed581aecd8ab92358df" title="Copy data out of OpenCL device." alt="" coords="267,157,377,184"/>
+<area shape="rect" id="node4" href="$opencl__main_8c.html#a0ddf1224851353fc92bfbff6f499fa97" title="Run simulation using input parameters specified on the command line." alt="" coords="5,81,56,108"/>
+</map>

@@ -1,0 +1,10 @@
+<map id="openacc_discretization.c" name="openacc_discretization.c">
+<area shape="rect" id="node1" title="Implementation of boundary condition functions with OpenACC threading." alt="" coords="131,5,295,32"/>
+<area shape="rect" id="node2" title=" " alt="" coords="5,80,67,107"/>
+<area shape="rect" id="node3" title=" " alt="" coords="91,80,149,107"/>
+<area shape="rect" id="node4" title=" " alt="" coords="173,80,254,107"/>
+<area shape="rect" id="node5" href="$mesh_8h.html" title="Declaration of mesh function prototypes for diffusion benchmarks." alt="" coords="261,155,325,181"/>
+<area shape="rect" id="node7" href="$openacc__kernels_8h.html" title="Declaration of functions to execute on the GPU (OpenACC kernels)" alt="" coords="329,80,460,107"/>
+<area shape="rect" id="node6" href="$type_8h.html" title="Definition of scalar data type and Doxygen diffusion group." alt="" coords="315,229,371,256"/>
+<area shape="rect" id="node8" href="$numerics_8h.html" title="Declaration of Laplacian operator and analytical solution functions." alt="" coords="351,155,436,181"/>
+</map>

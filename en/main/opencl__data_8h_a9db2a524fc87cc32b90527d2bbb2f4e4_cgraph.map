@@ -1,0 +1,5 @@
+<map id="init_opencl" name="init_opencl">
+<area shape="rect" id="node1" title="Initialize OpenCL device memory before marching." alt="" coords="5,31,89,57"/>
+<area shape="rect" id="node2" href="$opencl__data_8c.html#a772888c2131f8bbaa31e671cb7eeb970" title="Build kernel program from text input." alt="" coords="137,5,240,32"/>
+<area shape="rect" id="node3" href="$opencl__data_8c.html#acdd07580b3996e0d07a1a23269d3997f" title="Report error code when status is not CL_SUCCESS." alt="" coords="288,31,376,57"/>
+</map>

@@ -1,0 +1,16 @@
+<map id="mesh.h" name="mesh.h">
+<area shape="rect" id="node1" title="Declaration of mesh function prototypes for diffusion benchmarks." alt="" coords="892,5,956,32"/>
+<area shape="rect" id="node2" href="$mesh_8c.html" title="Implemenatation of mesh handling functions for diffusion benchmarks." alt="" coords="5,80,69,107"/>
+<area shape="rect" id="node3" href="$serial__discretization_8c.html" title="Implementation of boundary condition functions without threading." alt="" coords="93,80,240,107"/>
+<area shape="rect" id="node4" href="$serial__main_8c.html" title="Serial implementation of semi&#45;infinite diffusion equation." alt="" coords="264,80,363,107"/>
+<area shape="rect" id="node5" href="$openmp__discretization_8c.html" title="Implementation of boundary condition functions with OpenMP threading." alt="" coords="387,80,549,107"/>
+<area shape="rect" id="node6" href="$openmp__main_8c.html" title="OpenMP implementation of semi&#45;infinite diffusion equation." alt="" coords="573,80,686,107"/>
+<area shape="rect" id="node7" href="$tbb__discretization_8cpp.html" title="Implementation of boundary condition functions with TBB threading." alt="" coords="711,80,857,107"/>
+<area shape="rect" id="node8" href="$tbb__main_8c.html" title="Threading Building Blocks implementation of semi&#45;infinite diffusion equation." alt="" coords="881,80,967,107"/>
+<area shape="rect" id="node9" href="$cuda__discretization_8cu.html" title="Implementation of boundary condition functions with CUDA acceleration." alt="" coords="991,80,1142,107"/>
+<area shape="rect" id="node10" href="$cuda__main_8c.html" title="CUDA implementation of semi&#45;infinite diffusion equation." alt="" coords="1166,80,1261,107"/>
+<area shape="rect" id="node11" href="$openacc__discretization_8c.html" title="Implementation of boundary condition functions with OpenACC threading." alt="" coords="1285,80,1449,107"/>
+<area shape="rect" id="node12" href="$openacc__main_8c.html" title="OpenACC implementation of semi&#45;infinite diffusion equation." alt="" coords="1473,80,1589,107"/>
+<area shape="rect" id="node13" href="$opencl__discretization_8c.html" title="Implementation of boundary condition functions with OpenCL acceleration." alt="" coords="1613,80,1766,107"/>
+<area shape="rect" id="node14" href="$opencl__main_8c.html" title="OpenCL implementation of semi&#45;infinite diffusion equation." alt="" coords="1790,80,1895,107"/>
+</map>

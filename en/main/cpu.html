@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>CPU Specifics &#8212; HiPerC 0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="_static/ntd2d.css?v=88d0a8bc" />
+    <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=eafc0fe6" />
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js?v=e43216b9"></script>
+    <script src="_static/doctools.js?v=888ff710"></script>
+    <script src="_static/sphinx_highlight.js?v=4825356b"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="GPU Specifics" href="gpu.html" />
+    <link rel="prev" title="API Reference" href="api.html" />
+  
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+
+  <link rel="stylesheet" href="https://pages.nist.gov/nist-header-footer/css/nist-combined.css">
+  <script src="https://code.jquery.com/jquery-3.6.2.min.js" type="text/javascript" defer="defer"></script>
+  <script src="https://pages.nist.gov/nist-header-footer/js/nist-header-footer.js" type="text/javascript" defer="defer"></script>
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="cpu-specifics">
+<span id="string-formatting-cpu"></span><h1>CPU Specifics<a class="headerlink" href="#cpu-specifics" title="Permalink to this heading">¶</a></h1>
+<section id="cpu-analytic-diffusion">
+<h2>cpu-analytic-diffusion<a class="headerlink" href="#cpu-analytic-diffusion" title="Permalink to this heading">¶</a></h2>
+<section id="analytic-main-c">
+<h3>analytic_main.c<a class="headerlink" href="#analytic-main-c" title="Permalink to this heading">¶</a></h3>
+</section>
+</section>
+<section id="cpu-serial-diffusion">
+<h2>cpu-serial-diffusion<a class="headerlink" href="#cpu-serial-diffusion" title="Permalink to this heading">¶</a></h2>
+<section id="serial-boundaries-c">
+<h3>serial_boundaries.c<a class="headerlink" href="#serial-boundaries-c" title="Permalink to this heading">¶</a></h3>
+</section>
+<section id="serial-discretization-c">
+<h3>serial_discretization.c<a class="headerlink" href="#serial-discretization-c" title="Permalink to this heading">¶</a></h3>
+</section>
+</section>
+<section id="cpu-openmp-diffusion">
+<h2>cpu-openmp-diffusion<a class="headerlink" href="#cpu-openmp-diffusion" title="Permalink to this heading">¶</a></h2>
+<section id="openmp-boundaries-c">
+<h3>openmp_boundaries.c<a class="headerlink" href="#openmp-boundaries-c" title="Permalink to this heading">¶</a></h3>
+</section>
+<section id="openmp-discretization-c">
+<h3>openmp_discretization.c<a class="headerlink" href="#openmp-discretization-c" title="Permalink to this heading">¶</a></h3>
+</section>
+</section>
+<section id="cpu-tbb-diffusion">
+<h2>cpu-tbb-diffusion<a class="headerlink" href="#cpu-tbb-diffusion" title="Permalink to this heading">¶</a></h2>
+<section id="tbb-boundaries-cpp">
+<h3>tbb_boundaries.cpp<a class="headerlink" href="#tbb-boundaries-cpp" title="Permalink to this heading">¶</a></h3>
+</section>
+<section id="tbb-discretization-cpp">
+<h3>tbb_discretization.cpp<a class="headerlink" href="#tbb-discretization-cpp" title="Permalink to this heading">¶</a></h3>
+<section id="looking-for-something-specific">
+<h4>Looking for something specific?<a class="headerlink" href="#looking-for-something-specific" title="Permalink to this heading">¶</a></h4>
+<ul class="simple">
+<li><p><a class="reference internal" href="genindex.html"><span class="std std-ref">Index</span></a></p></li>
+<li><p><a class="reference internal" href="search.html"><span class="std std-ref">Search Page</span></a></p></li>
+</ul>
+</section>
+</section>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="contents.html">HiPerC</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="rst/README.html">High Performance Computing Strategies for Boundary Value Problems</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api.html">API Reference</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">CPU Specifics</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#cpu-analytic-diffusion">cpu-analytic-diffusion</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#analytic-main-c">analytic_main.c</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#cpu-serial-diffusion">cpu-serial-diffusion</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#serial-boundaries-c">serial_boundaries.c</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#serial-discretization-c">serial_discretization.c</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#cpu-openmp-diffusion">cpu-openmp-diffusion</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#openmp-boundaries-c">openmp_boundaries.c</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#openmp-discretization-c">openmp_discretization.c</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#cpu-tbb-diffusion">cpu-tbb-diffusion</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#tbb-boundaries-cpp">tbb_boundaries.cpp</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tbb-discretization-cpp">tbb_discretization.cpp</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="gpu.html">GPU Specifics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="rst/LICENSE.html">Terms of Use</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="contents.html">Documentation overview</a><ul>
+      <li>Previous: <a href="api.html" title="previous chapter">API Reference</a></li>
+      <li>Next: <a href="gpu.html" title="next chapter">GPU Specifics</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+
+  
+    <div class="footer">
+      
+      
+      
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 7.1.2</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.13</a>
+      
+      |
+      <a href="_sources/cpu.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+
+  <!-- Taken from https://www.filamentgroup.com/lab/html-includes/#another-demo%3A-including-another-html-file -->
+  <iframe src="_static/ntd2d_menu.html" onload="this.before((this.contentDocument.body||this.contentDocument).children[0]);this.remove()"></iframe>
+  </body>
+</html>

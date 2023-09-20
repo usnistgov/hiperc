@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>High Performance Computing Strategies for Boundary Value Problems &#8212; HiPerC 0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="../_static/ntd2d.css?v=88d0a8bc" />
+    <link rel="stylesheet" type="text/css" href="../_static/graphviz.css?v=eafc0fe6" />
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js?v=e43216b9"></script>
+    <script src="../_static/doctools.js?v=888ff710"></script>
+    <script src="../_static/sphinx_highlight.js?v=4825356b"></script>
+    <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="API Reference" href="../api.html" />
+    <link rel="prev" title="Welcome to HiPerC’s documentation!" href="../contents.html" />
+  
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+
+  <link rel="stylesheet" href="https://pages.nist.gov/nist-header-footer/css/nist-combined.css">
+  <script src="https://code.jquery.com/jquery-3.6.2.min.js" type="text/javascript" defer="defer"></script>
+  <script src="https://pages.nist.gov/nist-header-footer/js/nist-header-footer.js" type="text/javascript" defer="defer"></script>
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <a class="reference internal image-reference" href="../_images/HiPerC.png"><img alt="HiPerC" class="align-center" src="../_images/HiPerC.png" style="width: 200.0px; height: 200.0px;" /></a>
+<section id="high-performance-computing-strategies-for-boundary-value-problems">
+<h1>High Performance Computing Strategies for Boundary Value Problems<a class="headerlink" href="#high-performance-computing-strategies-for-boundary-value-problems" title="Permalink to this heading">¶</a></h1>
+<p><a class="reference external" href="https://github.com/usnistgov/hiperc"><img alt="GitHub" src="../_images/github.png" /></a> <a class="reference external" href="http://hiperc.readthedocs.io/en/latest/?badge=latest"><img alt="readthedocs" src="http://readthedocs.org/projects/hiperc/badge/?version=latest" /></a> <a class="reference external" href="https://gitter.im/usnistgov/hiperc?utm_source=badge&amp;utm_medium=badge&amp;utm_campaign=pr-badge&amp;utm_content=body_badge"><img alt="Gitter" src="https://badges.gitter.im/usnistgov/hiperc.svg" /></a> <a class="reference external" href="https://www.codacy.com/app/trevor.keller/hiperc?utm_source=github.com&amp;amp;utm_medium=referral&amp;amp;utm_content=usnistgov/hiperc&amp;amp;utm_campaign=Badge_Grade"><img alt="Codacy" src="https://api.codacy.com/project/badge/Grade/651feab686bc400b9aadc180fe0a167f" /></a> <a class="reference external" href="https://zenodo.org/badge/latestdoi/99600531"><img alt="Zenodo" src="https://zenodo.org/badge/99600531.svg" /></a></p>
+<p>Ever wonder if a GPU would make your code faster? Fast enough to justify the
+expense to your manager, adviser, or funding agency? This project can help
+answer your questions!</p>
+<p>The example codes in this repository implement the same basic algorithm using
+whichever of the mainstream accelerator programming methods apply. Running the
+code on different parallel hardware configurations — CPU threading, GPU
+offloading, and CPU coprocessing — provides a benchmark of these tools
+using common computational materials science workloads. Comparing performance
+against the serial baseline will help you make informed decisions about which
+development pathways are appropriate for your scientific computing projects.
+Note that the examples do not depend on a particular simulation framework:
+dependencies are kept minimal, and the C functions are kept as simple as
+possible to enhance readability for study and reusability in other codes.
+The goal here is to learn how to use accelerators for materials science
+simulations, not to enhance or promote any particular software package.</p>
+<section id="accelerator-languages">
+<h2>Accelerator Languages<a class="headerlink" href="#accelerator-languages" title="Permalink to this heading">¶</a></h2>
+<p>There are six mainstream approaches to shared-memory parallel programming,
+with varying coding complexity and hardware dependencies:</p>
+<dl class="simple">
+<dt><a class="reference external" href="http://www.opengroup.org/austin/papers/posix_faq.html">POSIX</a> threads</dt><dd><p><a class="reference external" href="https://en.wikipedia.org/wiki/MIMD">MIMD</a>-capable threading for multi-core CPU
+architectures. Challenging to properly implement, but with ample opportunity
+to tune performance. Provided by all compilers and compatible with any
+hardware configuration.</p>
+</dd>
+<dt><a class="reference external" href="http://www.openmp.org/">OpenMP</a></dt><dd><p>Loop-level parallelism for multi-core CPU architectures.
+Simple to implement for <a class="reference external" href="https://en.wikipedia.org/wiki/SIMD">SIMD</a> programs, but with little opportunity
+for performance tuning. Implementation simply requires prefixing target
+loops with <code class="docutils literal notranslate"><span class="pre">#pragma</span></code> directives. Provided by all compilers and
+compatible with any hardware configuration.</p>
+</dd>
+<dt><a class="reference external" href="https://www.threadingbuildingblocks.org/">Threading Building Blocks</a></dt><dd><p>Loop-level parallelism for multi-core
+CPU architectures using C++. Similar to <a class="reference external" href="http://www.openmp.org/">OpenMP</a>, but requires a
+wrapper around parallel regions that is more complicated than a one-line
+<code class="docutils literal notranslate"><span class="pre">#pragma</span></code>. This provides more direct opportunities for performance
+tuning. Available as an open-source library.</p>
+</dd>
+<dt><a class="reference external" href="https://www.openacc.org/">OpenACC</a></dt><dd><p>Loop-level massive parallelism for GPU architectures.
+Like <a class="reference external" href="http://www.openmp.org/">OpenMP</a>, implementation requires prefixing target code with
+<code class="docutils literal notranslate"><span class="pre">#pragma</span></code> directives, with little opportunity for performance tuning.
+Provided in compilers from <a class="reference external" href="http://www.cray.com/">Cray</a>, <a class="reference external" href="http://www.pgroup.com/">PGI</a>, and <a class="reference external" href="https://gcc.gnu.org/">GNU</a>;
+depends on a compatible graphics card, drivers, and <a class="reference external" href="https://developer.nvidia.com/cuda-zone">CUDA</a> or
+<a class="reference external" href="https://www.khronos.org/opencl/">OpenCL</a> library installation.</p>
+</dd>
+<dt><a class="reference external" href="https://developer.nvidia.com/cuda-zone">CUDA</a></dt><dd><p>General-purpose massive parallelism for GPU architectures.
+Like POSIX threading but for GPUs, provides low-level capabilities and ample
+opportunity for performance tuning. Requires a purpose-built compiler (nvcc,
+gpucc), libraries, and a compatible graphics card or accelerator.</p>
+</dd>
+</dl>
+<p>Generically speaking, <a class="reference external" href="http://www.openmp.org/">OpenMP</a> and <a class="reference external" href="https://www.openacc.org/">OpenACC</a> provide low barriers
+for entry into acceleration; <a class="reference external" href="https://developer.nvidia.com/cuda-zone">CUDA</a> and <a class="reference external" href="https://www.khronos.org/opencl/">OpenCL</a> require high
+investments for hardware and compilers, but offer the greatest capabilities for
+performance and optimization of a specific application. CUDA hardware can be
+emulated on the CPU using the <a class="reference external" href="http://impact.crhc.illinois.edu/mcuda.aspx">MCUDA</a> framework. Proof-of-concept
+trials on GPU and KNL hardware can be run on Amazon’s <a class="reference external" href="https://aws.amazon.com/ec2/Elastic-GPUs/">EC2</a>,
+Rescale’s <a class="reference external" href="http://www.rescale.com/products/">ScaleX</a>, and equivalent HPC cloud computing platforms.
+Most of the current generation of research supercomputers contain GPU or KNL
+accelerator hardware, including Argonne National Labs’
+<a class="reference external" href="http://www.lcrc.anl.gov/systems/resources/bebop/">Bebop</a>, NERSC <a class="reference external" href="http://www.nersc.gov/systems/cori/">Cori</a>, TACC <a class="reference external" href="https://www.tacc.utexas.edu/systems/stampede2">Stampede2</a>, and <a class="reference external" href="https://www.xsede.org/ecosystem/resources">XSEDE</a>.</p>
+</section>
+<section id="basic-algorithm">
+<h2>Basic Algorithm<a class="headerlink" href="#basic-algorithm" title="Permalink to this heading">¶</a></h2>
+<p>Diffusion and phase-field problems depend extensively on the divergence of
+gradients, <em>e.g.</em></p>
+<div class="math notranslate nohighlight">
+\[\frac{\partial c}{\partial t} = \nabla\cdot D\nabla c\]</div>
+<p>When <em>D</em> is constant, this simplifies to</p>
+<div class="math notranslate nohighlight">
+\[\frac{\partial c}{\partial t} = D\nabla^2 c\]</div>
+<p>This equation can be discretized, <em>e.g.</em> in 1D:</p>
+<div class="math notranslate nohighlight">
+\[\frac{\Delta c}{\Delta t} \approx D\left[\frac{c_{+} - 2c_{\circ} + c_{-}}{\left(\Delta x\right)^2}\right]\]</div>
+<p>This discretization is a special case of <a class="reference external" href="https://en.wikipedia.org/wiki/Discrete_Laplace_operator#Image_Processing">convolution</a>, wherein a
+constant kernel of weighting coefficients is applied to an input dataset to
+produce a transformed output.</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head" colspan="3"><p>1D Laplacian</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>1</p></td>
+<td><p>-2</p></td>
+<td><p>1</p></td>
+</tr>
+</tbody>
+</table>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head" colspan="3"><p>2D Laplacian</p></th>
+</tr>
+<tr class="row-even"><th class="head" colspan="3"><p>5-point stencil</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-odd"><td><p>0</p></td>
+<td><p>1</p></td>
+<td><p>0</p></td>
+</tr>
+<tr class="row-even"><td><p>1</p></td>
+<td><p>-4</p></td>
+<td><p>1</p></td>
+</tr>
+<tr class="row-odd"><td><p>0</p></td>
+<td><p>1</p></td>
+<td><p>0</p></td>
+</tr>
+</tbody>
+</table>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head" colspan="3"><p>2D Laplacian</p></th>
+</tr>
+<tr class="row-even"><th class="head" colspan="3"><p>9-point stencil*</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-odd"><td><p>1</p></td>
+<td><p>4</p></td>
+<td><p>1</p></td>
+</tr>
+<tr class="row-even"><td><p>4</p></td>
+<td><p>-20</p></td>
+<td><p>4</p></td>
+</tr>
+<tr class="row-odd"><td><p>1</p></td>
+<td><p>4</p></td>
+<td><p>1</p></td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<div><p>* This canonical 9-point (3×3) stencil uses first- and
+second-nearest neighbors. There is a 9-point (4×4) form that uses first-
+and third-nearest neighbors, which is also implemented in the source code;
+it is less efficient than the canonical form.</p>
+</div></blockquote>
+<p>In addition, computing values for the next timestep given values from the
+previous timestep and the Laplacian values is a vector-add operation.
+Accelerators and coprocessors are well-suited to this type of computation.
+Therefore, to demonstrate the use of this hardware in materials science
+applications, these examples flow according to the following pseudocode:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">Start</span>
+<span class="w">    </span><span class="n">Allocate</span><span class="w"> </span><span class="n">arrays</span><span class="w"> </span><span class="k">using</span><span class="w"> </span><span class="n">CPU</span>
+<span class="w">    </span><span class="n">Apply</span><span class="w"> </span><span class="n">initial</span><span class="w"> </span><span class="n">conditions</span><span class="w"> </span><span class="n">to</span><span class="w"> </span><span class="n">grid</span><span class="w"> </span><span class="n">marked</span><span class="w"> </span><span class="s">&quot;old&quot;</span><span class="w"> </span><span class="k">using</span><span class="w"> </span><span class="n">CPU</span>
+<span class="w">    </span><span class="n">While</span><span class="w"> </span><span class="n">elapsed</span><span class="w"> </span><span class="n">time</span><span class="w"> </span><span class="n">is</span><span class="w"> </span><span class="n">less</span><span class="w"> </span><span class="n">than</span><span class="w"> </span><span class="k">final</span><span class="w"> </span><span class="n">time</span>
+<span class="w">    </span><span class="n">Do</span>
+<span class="w">        </span><span class="n">Apply</span><span class="w"> </span><span class="n">boundary</span><span class="w"> </span><span class="n">conditions</span><span class="w"> </span><span class="k">using</span><span class="w"> </span><span class="n">CPU</span>
+<span class="w">        </span><span class="n">Compute</span><span class="w"> </span><span class="n">Laplacian</span><span class="w"> </span><span class="k">using</span><span class="w"> </span><span class="s">&quot;old&quot;</span><span class="w"> </span><span class="n">values</span><span class="w"> </span><span class="k">using</span><span class="w"> </span><span class="n">accelerator</span>
+<span class="w">        </span><span class="n">Solve</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="s">&quot;new&quot;</span><span class="w"> </span><span class="n">values</span><span class="w"> </span><span class="k">using</span><span class="w"> </span><span class="s">&quot;old&quot;</span><span class="w"> </span><span class="k">and</span><span class="w"> </span><span class="n">Laplacian</span><span class="w"> </span><span class="n">values</span><span class="w"> </span><span class="k">using</span><span class="w"> </span><span class="n">accelerator</span>
+<span class="w">        </span><span class="n">Increment</span><span class="w"> </span><span class="n">elapsed</span><span class="w"> </span><span class="n">time</span><span class="w"> </span><span class="n">by</span><span class="w"> </span><span class="n">one</span><span class="w"> </span><span class="n">timestep</span>
+<span class="w">        </span><span class="n">If</span><span class="w"> </span><span class="n">elapsed</span><span class="w"> </span><span class="n">time</span><span class="w"> </span><span class="n">is</span><span class="w"> </span><span class="n">an</span><span class="w"> </span><span class="n">even</span><span class="w"> </span><span class="n">increment</span><span class="w"> </span><span class="n">of</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="n">specified</span><span class="w"> </span><span class="n">interval</span>
+<span class="w">        </span><span class="n">Then</span>
+<span class="w">            </span><span class="n">Write</span><span class="w"> </span><span class="n">an</span><span class="w"> </span><span class="n">image</span><span class="w"> </span><span class="n">file</span><span class="w"> </span><span class="n">to</span><span class="w"> </span><span class="n">disk</span>
+<span class="w">        </span><span class="n">Endif</span>
+<span class="w">    </span><span class="n">Done</span>
+<span class="w">    </span><span class="n">Write</span><span class="w"> </span><span class="k">final</span><span class="w"> </span><span class="n">values</span><span class="w"> </span><span class="n">to</span><span class="w"> </span><span class="n">disk</span><span class="w"> </span><span class="n">in</span><span class="w"> </span><span class="n">comma</span><span class="o">-</span><span class="n">separated</span><span class="w"> </span><span class="n">value</span><span class="w"> </span><span class="n">format</span>
+<span class="w">    </span><span class="n">Free</span><span class="w"> </span><span class="n">arrays</span>
+<span class="n">Finish</span>
+</pre></div>
+</div>
+<section id="source-code-documentation">
+<h3>Source Code Documentation<a class="headerlink" href="#source-code-documentation" title="Permalink to this heading">¶</a></h3>
+<p>You are encouraged to browse the source for this project to see how it works.
+This project is documented using <a class="reference external" href="http://www.doxygen.nl">Doxygen</a>, which can help guide you
+through the source code layout and intent. This guide is included as
+<a class="reference external" href="doc/hiperc_guide.pdf">hiperc_guide.pdf</a>. To build the
+documentation yourself, with <a class="reference external" href="http://www.doxygen.nl">Doxygen</a>, <a class="reference external" href="https://www.latex-project.org/">LaTeX</a>, and
+<a class="reference external" href="https://www.gnu.org/software/make/">Make</a> installed, <code class="docutils literal notranslate"><span class="pre">cd</span></code> into <code class="docutils literal notranslate"><span class="pre">doc</span></code> and run <code class="docutils literal notranslate"><span class="pre">make</span></code>. Then
+browse the source code to your heart’s content.</p>
+</section>
+</section>
+<section id="running-the-demonstration-programs">
+<h2>Running the Demonstration Programs<a class="headerlink" href="#running-the-demonstration-programs" title="Permalink to this heading">¶</a></h2>
+<p>This repository has a flat structure. Code common to each problem type are
+lumped together, <em>e.g.</em> in <code class="docutils literal notranslate"><span class="pre">common-diffusion</span></code>. The remaining implementation
+folders have three-part names: <code class="docutils literal notranslate"><span class="pre">architecture-threading-model</span></code>. To compile
+code for your setup of interest, <code class="docutils literal notranslate"><span class="pre">cd</span></code> into its directory and run <code class="docutils literal notranslate"><span class="pre">make</span></code>
+(note that this will not work in the <code class="docutils literal notranslate"><span class="pre">common</span></code> folders). If the executable
+builds, <em>i.e.</em> <code class="docutils literal notranslate"><span class="pre">make</span></code> returns without errors, you can <code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">run</span></code>
+to execute the program and gather timing data. If you wish to attempt building
+or running all the example codes, execute <code class="docutils literal notranslate"><span class="pre">make</span></code> or <code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">run</span></code> from
+this top-level directory: it will recursively call the corresponding <code class="docutils literal notranslate"><span class="pre">make</span></code>
+command in every sub-directory.</p>
+<section id="what-to-expect">
+<h3>What to Expect<a class="headerlink" href="#what-to-expect" title="Permalink to this heading">¶</a></h3>
+<p>As the solver marches along, an indicator will display the start time, progress,
+and runtime in your terminal, <em>e.g.</em></p>
+<blockquote>
+<div><p>Fri Aug 18 21:05:47 2017 [• • • • • • • • • • • • • • • • • • • •]  0h: 7m:15s</p>
+</div></blockquote>
+<p>If the progress bar is not moving, or to check that the machine is working hard,
+use a hardware monitoring tool. Here is a brief, definitely not comprehensive
+list of options:</p>
+<ul class="simple">
+<li><p><strong>CPU</strong>: any system monitor provided by your operating system will work. Look
+for CPU utilization greater than 100%, but moderate memory consumption. On
+GNU/Linux systems, <a class="reference external" href="http://hisham.hm/htop/">htop</a> provides a rich interface
+to running processes in the terminal, which is helpful if you’re running remotely.</p></li>
+<li><p><strong>GPU</strong>: use a GPU monitor designed for your hardware. Some options include
+<a class="reference external" href="https://developer.nvidia.com/nvidia-system-management-interface">nvidia-smi</a>, <a class="reference external" href="https://github.com/clbr/radeontop">radeontop</a>, and <a class="reference external" href="https://github.com/ChrisCummins/intel-gpu-tools">intel_gpu_top</a>.</p></li>
+<li><p><strong>KNL</strong>: the same monitor used for the CPU should also report load on the
+Knights Landing processor.</p></li>
+</ul>
+<p>As it runs, the code will write a series of PNG image files (<code class="docutils literal notranslate"><span class="pre">diffusion.00?0000.png</span></code>)
+in the same directory as the running executable resides; at the end, it will
+write the final values to <code class="docutils literal notranslate"><span class="pre">diffusion.0100000.csv</span></code>. It will also write a
+summary file, <code class="docutils literal notranslate"><span class="pre">runlog.csv</span></code>, containing the following columns:</p>
+<ul class="simple">
+<li><p><strong>iter</strong>: number of completed iterations</p></li>
+<li><p><strong>sim_time</strong>: elapsed simulation time (with <span class="math notranslate nohighlight">\(\Delta t=1\)</span>, the first two columns are equal)</p></li>
+<li><p><strong>wrss</strong>: weighted sum-of-squares residual between the numerical values and analytical solution</p></li>
+<li><p><strong>conv_time</strong>: cumulative real time spent computing the Laplacian (convolution)</p></li>
+<li><p><strong>step_time</strong>: cumulative real time spent updating the composition (time-stepping)</p></li>
+<li><p><strong>IO_time</strong>: cumulative real time spent writing PNG files</p></li>
+<li><p><strong>soln_time</strong>: cumulative real time spent computing the analytical solution</p></li>
+<li><p><strong>run_time</strong>: elapsed real time</p></li>
+</ul>
+<p>At timestep 10,000 the expected <code class="docutils literal notranslate"><span class="pre">wrss=0.002895</span></code> (0.2%) using the 5-point
+stencil; the rendered initial and final images should look like these
+(grayscale, <code class="docutils literal notranslate"><span class="pre">0</span></code> is black and <code class="docutils literal notranslate"><span class="pre">1</span></code> is white):</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p><span class="math notranslate nohighlight">\(t=0\cdot\Delta t\)</span></p></th>
+<th class="head"><p><span class="math notranslate nohighlight">\(t=10000\cdot\Delta t\)</span></p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><img alt="`initial conc`" src="../_images/diffusion.00000.png" /></p></td>
+<td><p><img alt="`final conc`" src="../_images/diffusion.10000.png" /></p></td>
+</tr>
+</tbody>
+</table>
+<p>The boundary conditions are fixed values of <code class="docutils literal notranslate"><span class="pre">1</span></code> along the lower-left half
+and upper-right half walls, no flux everywhere else, with an initial value of
+<code class="docutils literal notranslate"><span class="pre">0</span></code> everywhere. These conditions represent a carburizing process, with
+partial exposure (rather than the entire left and right walls) to produce an
+inhomogeneous workload and highlight numerical errors at the boundaries.</p>
+<p>If your compiler returns warnings or errors, your simulation results do not look
+like this, or if <code class="docutils literal notranslate"><span class="pre">wrss</span></code> at <span class="math notranslate nohighlight">\(t=10000\cdot\Delta t\)</span> is greater than 0.5%
+or so, something may be wrong with the installation, hardware, or implementation.
+Please <a class="reference external" href="https://github.com/usnistgov/hiperc/issues">file an issue</a> and share what happened. You probably found a bug!</p>
+<blockquote>
+<div><p>Note that a flat field of zeros at <span class="math notranslate nohighlight">\(t=10000\cdot\Delta t\)</span>, about as wrong
+an answer as possible, gives <code class="docutils literal notranslate"><span class="pre">wrss=0.07493</span></code> (7.5%) relative to the
+analytical solution. Small differences in <code class="docutils literal notranslate"><span class="pre">wrss</span></code> indicate large errors.</p>
+</div></blockquote>
+</section>
+</section>
+<section id="reusing-the-demonstration-code">
+<h2>Reusing the Demonstration Code<a class="headerlink" href="#reusing-the-demonstration-code" title="Permalink to this heading">¶</a></h2>
+<p>The flat file structure is intended to make it easy for you to extract code
+for modification and reuse in your research code. To do so, copy the three-part
+folder corresponding to your setup of interest, <em>e.g.</em> <code class="docutils literal notranslate"><span class="pre">gpu-cuda-diffusion</span></code>,
+to another location (outside this repository). Then copy the contents of the
+common folder it depends upon, <em>e.g.</em> <code class="docutils literal notranslate"><span class="pre">common-diffusion</span></code>, into the new
+folder location. Finally, edit the <code class="docutils literal notranslate"><span class="pre">Makefile</span></code> within the new folder to
+remove references to the old common folder. This should centralize everything
+you need to remix and get started in the new folder.</p>
+</section>
+<section id="completed-examples">
+<h2>Completed Examples<a class="headerlink" href="#completed-examples" title="Permalink to this heading">¶</a></h2>
+<section id="diffusion-equation">
+<h3>Diffusion Equation<a class="headerlink" href="#diffusion-equation" title="Permalink to this heading">¶</a></h3>
+<ul class="simple">
+<li><p>CPU
+- analytical
+- serial
+- OpenMP
+- TBB</p></li>
+<li><p>GPU
+- CUDA
+- OpenAcc
+- OpenCL</p></li>
+</ul>
+</section>
+<section id="spinodal-decomposition">
+<h3>Spinodal Decomposition<a class="headerlink" href="#spinodal-decomposition" title="Permalink to this heading">¶</a></h3>
+<ul class="simple">
+<li><p>CPU
+- OpenMP</p></li>
+<li><p>GPU
+- CUDA</p></li>
+</ul>
+</section>
+</section>
+<section id="contributions-and-contact">
+<h2>Contributions and Contact<a class="headerlink" href="#contributions-and-contact" title="Permalink to this heading">¶</a></h2>
+<p>Forks of this git repository are encouraged, and pull requests providing patches
+or implementations are more than welcome. Please review the <a class="reference external" href="CONTRIBUTING.md">Contributing Guidelines</a>.
+Questions, concerns, and feedback regarding this source code should be addressed
+to the community on <a class="reference external" href="https://gitter.im/usnistgov/hiperc?utm_source=badge&amp;utm_medium=badge&amp;utm_campaign=pr-badge&amp;utm_content=body_badge">Gitter</a>, or directly to the developer (<a class="reference external" href="mailto:trevor&#46;keller&#37;&#52;&#48;nist&#46;gov">Trevor Keller</a>).</p>
+</section>
+<section id="disclaimer">
+<h2>Disclaimer<a class="headerlink" href="#disclaimer" title="Permalink to this heading">¶</a></h2>
+<p>Certain commercial entities, equipment, or materials may be identified in this
+document in order to describe an experimental procedure or concept adequately.
+Such identification is not intended to imply recommendation or endorsement by
+the <a class="reference external" href="http://www.nist.gov">National Institute of Standards and Technology</a>, nor is it
+intended to imply that the entities, materials, or equipment are necessarily
+the best available for the purpose.</p>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../contents.html">HiPerC</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">High Performance Computing Strategies for Boundary Value Problems</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#accelerator-languages">Accelerator Languages</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#basic-algorithm">Basic Algorithm</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#source-code-documentation">Source Code Documentation</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#running-the-demonstration-programs">Running the Demonstration Programs</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#what-to-expect">What to Expect</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#reusing-the-demonstration-code">Reusing the Demonstration Code</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#completed-examples">Completed Examples</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#diffusion-equation">Diffusion Equation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#spinodal-decomposition">Spinodal Decomposition</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#contributions-and-contact">Contributions and Contact</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#disclaimer">Disclaimer</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../api.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../cpu.html">CPU Specifics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../gpu.html">GPU Specifics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="LICENSE.html">Terms of Use</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../contents.html">Documentation overview</a><ul>
+      <li>Previous: <a href="../contents.html" title="previous chapter">Welcome to HiPerC’s documentation!</a></li>
+      <li>Next: <a href="../api.html" title="next chapter">API Reference</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+
+  
+    <div class="footer">
+      
+      
+      
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 7.1.2</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.13</a>
+      
+      |
+      <a href="../_sources/rst/README.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+
+  <!-- Taken from https://www.filamentgroup.com/lab/html-includes/#another-demo%3A-including-another-html-file -->
+  <iframe src="../_static/ntd2d_menu.html" onload="this.before((this.contentDocument.body||this.contentDocument).children[0]);this.remove()"></iframe>
+  </body>
+</html>

@@ -9,10 +9,7 @@ _build/latex/hiperc.tex:
 _build/latex/hiperc.pdf: _build/latex/hiperc.tex
 	latexmk -cd $<
 
-_build/html/indexy.html: _build/latex/hiperc.pdf
-	sphinx-build -M html . _build
-
-_build/html/index.html:
+_build/html/index.html: _build/latex/hiperc.pdf
 	sphinx-build -M html . _build
 
 .PHONY: clean html pdf

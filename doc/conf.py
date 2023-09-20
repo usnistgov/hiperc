@@ -42,7 +42,7 @@ extensions = [
     "sphinx.ext.graphviz",
     "sphinx.ext.mathjax",
     "sphinx.ext.todo",
-    # "breathe"
+    "breathe"
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -225,9 +225,9 @@ for fpath in files_to_copy:
 
 # -- Options for Breathe output ---------------------------------------------
 
-# breathe_projects = {"HiPerC": "_build/xml"}
+breathe_projects = {"HiPerC": "_build/xml"}
 
-# breathe_default_project = "HiPerC"
+breathe_default_project = "HiPerC"
 
 # breathe_domain_by_extension = {
 #    "h" : "c",

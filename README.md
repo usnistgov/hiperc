@@ -3,5 +3,9 @@
 Welcome to the HiPerC repository.
 
 This stub branch (`nist-pages`) is only used to generate and serve
-documentation: you're probably looking for
-[`main`](https://github.com/usnistgov/hiperc/tree/main).
+[the HiPerC Docs][hiperc-docs]:
+you're probably looking for [`main`][hiperc-code].
+
+<!-- links -->
+[hiperc-docs]: https://pages.nist.gov/hiperc/en/latest/rst/README.html
+[hiperc-code]: https://github.com/usnistgov/hiperc/tree/main

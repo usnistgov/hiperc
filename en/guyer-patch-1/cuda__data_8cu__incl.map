@@ -1,7 +1,0 @@
-<map id="cuda_data.cu" name="cuda_data.cu">
-<area shape="rect" id="node1" title="Implementation of functions to create and destroy CudaData struct." alt="" coords="58,5,157,32"/>
-<area shape="rect" id="node2" href="$cuda__data_8h.html" title="Declaration of CUDA data container." alt="" coords="5,155,97,181"/>
-<area shape="rect" id="node4" href="$cuda__kernels_8cuh.html" title="Declaration of functions to execute on the GPU (CUDA kernels)" alt="" coords="99,80,222,107"/>
-<area shape="rect" id="node3" href="$type_8h.html" title="Definition of scalar data type and Doxygen diffusion group." alt="" coords="79,229,135,256"/>
-<area shape="rect" id="node5" href="$numerics_8h.html" title="Declaration of Laplacian operator and analytical solution functions." alt="" coords="122,155,207,181"/>
-</map>

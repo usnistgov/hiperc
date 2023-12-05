@@ -1,6 +1,0 @@
-<map id="check_solution" name="check_solution">
-<area shape="rect" id="node1" title="Compare numerical and analytical solutions of the diffusion equation." alt="" coords="5,31,115,57"/>
-<area shape="rect" id="node2" href="$numerics_8c.html#a71935851817e36d4acd28ac84a3af38b" title="Analytical solution of the diffusion equation for a carburizing process." alt="" coords="196,5,311,32"/>
-<area shape="rect" id="node3" href="$numerics_8c.html#a3b729f468a5b9aa3c677ffd14591c6e7" title="Compute minimum distance from point p to a line segment bounded by points a and b." alt="" coords="163,56,344,83"/>
-<area shape="rect" id="node4" href="$numerics_8c.html#a1695c2bbde3aca43954a8c8b445eee88" title="Compute Euclidean distance between two points, a and b." alt="" coords="392,56,525,83"/>
-</map>

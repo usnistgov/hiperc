@@ -1,6 +1,0 @@
-<map id="cuda_kernels.cuh" name="cuda_kernels.cuh">
-<area shape="rect" id="node1" title="Declaration of functions to execute on the GPU (CUDA kernels)" alt="" coords="155,5,278,32"/>
-<area shape="rect" id="node2" href="$cuda__boundaries_8cu.html" title="Implementation of boundary condition functions with OpenMP threading." alt="" coords="5,80,143,107"/>
-<area shape="rect" id="node3" href="$cuda__data_8cu.html" title="Implementation of functions to create and destroy CudaData struct." alt="" coords="167,80,266,107"/>
-<area shape="rect" id="node4" href="$cuda__discretization_8cu.html" title="Implementation of boundary condition functions with CUDA acceleration." alt="" coords="291,80,441,107"/>
-</map>

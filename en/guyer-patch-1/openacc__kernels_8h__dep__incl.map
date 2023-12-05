@@ -1,5 +1,0 @@
-<map id="openacc_kernels.h" name="openacc_kernels.h">
-<area shape="rect" id="node1" title="Declaration of functions to execute on the GPU (OpenACC kernels)" alt="" coords="106,5,237,32"/>
-<area shape="rect" id="node2" href="$openacc__boundaries_8c.html" title="Implementation of boundary condition functions with OpenMP threading." alt="" coords="5,80,156,107"/>
-<area shape="rect" id="node3" href="$openacc__discretization_8c.html" title="Implementation of boundary condition functions with OpenACC threading." alt="" coords="180,80,344,107"/>
-</map>

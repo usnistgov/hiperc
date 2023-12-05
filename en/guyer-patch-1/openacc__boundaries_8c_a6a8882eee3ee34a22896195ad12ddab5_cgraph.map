@@ -1,4 +1,0 @@
-<map id="apply_boundary_conditions" name="apply_boundary_conditions">
-<area shape="rect" id="node1" title="Set fixed value &#160;along left and bottom, zero&#45;flux elsewhere." alt="" coords="5,5,183,32"/>
-<area shape="rect" id="node2" href="$openacc__boundaries_8c.html#ab45bda569a6014095eb6eb0101451aa8" title=" " alt="" coords="231,5,347,32"/>
-</map>

@@ -1,5 +1,0 @@
-<map id="GetTimer" name="GetTimer">
-<area shape="rect" id="node1" title="Return elapsed time in seconds." alt="" coords="200,31,276,57"/>
-<area shape="rect" id="node2" href="$cuda__data_8h.html#af31dc39a15aeea9f35ea67eb945e83d1" title="Solve diffusion equation on the GPU." alt="" coords="5,5,152,32"/>
-<area shape="rect" id="node3" href="$cuda__main_8c.html#a0ddf1224851353fc92bfbff6f499fa97" title="Run simulation using input parameters specified on the command line." alt="" coords="53,56,104,83"/>
-</map>

@@ -1,6 +1,0 @@
-<map id="opencl_data.h" name="opencl_data.h">
-<area shape="rect" id="node1" title="Declaration of OpenCL data container." alt="" coords="157,5,260,32"/>
-<area shape="rect" id="node2" href="$opencl__data_8c.html" title="Implementation of functions to create and destroy OpenCLData struct." alt="" coords="5,80,108,107"/>
-<area shape="rect" id="node3" href="$opencl__discretization_8c.html" title="Implementation of boundary condition functions with OpenCL acceleration." alt="" coords="132,80,285,107"/>
-<area shape="rect" id="node4" href="$opencl__main_8c.html" title="OpenCL implementation of semi&#45;infinite diffusion equation." alt="" coords="309,80,415,107"/>
-</map>

@@ -1,5 +1,0 @@
-<map id="cuda_kernels.cuh" name="cuda_kernels.cuh">
-<area shape="rect" id="node1" title="Declaration of functions to execute on the GPU (CUDA kernels)" alt="" coords="5,5,128,32"/>
-<area shape="rect" id="node2" href="$numerics_8h.html" title="Declaration of Laplacian operator and analytical solution functions." alt="" coords="24,80,109,107"/>
-<area shape="rect" id="node3" href="$type_8h.html" title="Definition of scalar data type and Doxygen diffusion group." alt="" coords="39,155,95,181"/>
-</map>

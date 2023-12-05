@@ -1,5 +1,0 @@
-<map id="analytical_value" name="analytical_value">
-<area shape="rect" id="node1" title="Analytical solution of the diffusion equation for a carburizing process." alt="" coords="261,5,376,32"/>
-<area shape="rect" id="node2" href="$numerics_8c.html#a992f2e2605e0472a57b16c2768ca1cc5" title="Compare numerical and analytical solutions of the diffusion equation." alt="" coords="104,5,213,32"/>
-<area shape="rect" id="node3" href="$cuda__main_8c.html#a0ddf1224851353fc92bfbff6f499fa97" title="Run simulation using input parameters specified on the command line." alt="" coords="5,5,56,32"/>
-</map>

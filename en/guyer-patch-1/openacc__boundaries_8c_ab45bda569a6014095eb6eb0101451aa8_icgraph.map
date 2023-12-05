@@ -1,5 +1,0 @@
-<map id="boundary_kernel" name="boundary_kernel">
-<area shape="rect" id="node1" title=" " alt="" coords="329,5,445,32"/>
-<area shape="rect" id="node2" href="$openacc__boundaries_8c.html#a6a8882eee3ee34a22896195ad12ddab5" title="Set fixed value &#160;along left and bottom, zero&#45;flux elsewhere." alt="" coords="104,5,281,32"/>
-<area shape="rect" id="node3" href="$openmp__main_8c.html#a0ddf1224851353fc92bfbff6f499fa97" title="Run simulation using input parameters specified on the command line." alt="" coords="5,5,56,32"/>
-</map>

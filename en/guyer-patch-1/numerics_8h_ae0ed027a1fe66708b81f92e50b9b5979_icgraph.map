@@ -1,4 +1,0 @@
-<map id="update_composition" name="update_composition">
-<area shape="rect" id="node1" title="Update composition field using explicit Euler discretization (forward&#45;time centered space)" alt="" coords="104,5,243,32"/>
-<area shape="rect" id="node2" href="$openmp__main_8c.html#a0ddf1224851353fc92bfbff6f499fa97" title="Run simulation using input parameters specified on the command line." alt="" coords="5,5,56,32"/>
-</map>

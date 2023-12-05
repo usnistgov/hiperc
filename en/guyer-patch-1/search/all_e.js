@@ -1,5 +1,0 @@
-var searchData=
-[
-  ['read_5fout_5fresult_77',['read_out_result',['../cuda__data_8h.html#aeef5f0ae518af3a2b8f28a6600567f13',1,'read_out_result(fp_t **conc, fp_t *d_conc, const int nx, const int ny):&#160;cuda_discretization.cu'],['../cuda__discretization_8cu.html#aeef5f0ae518af3a2b8f28a6600567f13',1,'read_out_result(fp_t **conc, fp_t *d_conc, const int nx, const int ny):&#160;cuda_discretization.cu'],['../opencl__data_8h.html#ae91f108396136ed581aecd8ab92358df',1,'read_out_result(struct OpenCLData *dev, const int flip, fp_t **conc_new, const int nx, const int ny):&#160;opencl_discretization.c'],['../opencl__discretization_8c.html#a7898fb7f7fe64969df7c8c0fa7b01c40',1,'read_out_result(struct OpenCLData *dev, const int flip, fp_t **conc, const int nx, const int ny):&#160;opencl_discretization.c']]],
-  ['report_5ferror_78',['report_error',['../opencl__data_8c.html#acdd07580b3996e0d07a1a23269d3997f',1,'report_error(cl_int status, const char *message):&#160;opencl_data.c'],['../opencl__data_8h.html#af7a963c5d80ab4f274ee2114e203d9c0',1,'report_error(cl_int error, const char *message):&#160;opencl_data.c']]]
-];

@@ -1,4 +1,0 @@
-<map id="cuda_diffusion_solver" name="cuda_diffusion_solver">
-<area shape="rect" id="node1" title="Reference optimized code for solving the diffusion equation." alt="" coords="5,5,152,32"/>
-<area shape="rect" id="node2" href="$timer_8c.html#ab9a9e5a3142f8bbd781192e032d74c66" title="Return elapsed time in seconds." alt="" coords="200,5,276,32"/>
-</map>

@@ -1,0 +1,15 @@
+<map id="timer.h" name="timer.h">
+<area shape="rect" id="node1" title="Declaration of timer function prototypes for diffusion benchmarks." alt="" coords="820,5,881,32"/>
+<area shape="rect" id="node2" href="$timer_8c.html" title="High&#45;resolution cross&#45;platform machine time reader." alt="" coords="5,80,67,107"/>
+<area shape="rect" id="node3" href="$serial__discretization_8c.html" title="Implementation of boundary condition functions without threading." alt="" coords="91,80,237,107"/>
+<area shape="rect" id="node4" href="$serial__main_8c.html" title="Serial implementation of semi&#45;infinite diffusion equation." alt="" coords="261,80,360,107"/>
+<area shape="rect" id="node5" href="$openmp__discretization_8c.html" title="Implementation of boundary condition functions with OpenMP threading." alt="" coords="385,80,546,107"/>
+<area shape="rect" id="node6" href="$openmp__main_8c.html" title="OpenMP implementation of semi&#45;infinite diffusion equation." alt="" coords="570,80,683,107"/>
+<area shape="rect" id="node7" href="$tbb__discretization_8cpp.html" title="Implementation of boundary condition functions with TBB threading." alt="" coords="708,80,855,107"/>
+<area shape="rect" id="node8" href="$tbb__main_8c.html" title="Threading Building Blocks implementation of semi&#45;infinite diffusion equation." alt="" coords="879,80,964,107"/>
+<area shape="rect" id="node9" href="$cuda__discretization_8cu.html" title="Implementation of boundary condition functions with CUDA acceleration." alt="" coords="989,80,1139,107"/>
+<area shape="rect" id="node10" href="$cuda__main_8c.html" title="CUDA implementation of semi&#45;infinite diffusion equation." alt="" coords="1163,80,1258,107"/>
+<area shape="rect" id="node11" href="$openacc__main_8c.html" title="OpenACC implementation of semi&#45;infinite diffusion equation." alt="" coords="1282,80,1398,107"/>
+<area shape="rect" id="node12" href="$opencl__discretization_8c.html" title="Implementation of boundary condition functions with OpenCL acceleration." alt="" coords="1422,80,1575,107"/>
+<area shape="rect" id="node13" href="$opencl__main_8c.html" title="OpenCL implementation of semi&#45;infinite diffusion equation." alt="" coords="1599,80,1705,107"/>
+</map>

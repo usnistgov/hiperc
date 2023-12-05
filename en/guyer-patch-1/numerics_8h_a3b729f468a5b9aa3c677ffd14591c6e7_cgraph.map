@@ -1,0 +1,4 @@
+<map id="distance_point_to_segment" name="distance_point_to_segment">
+<area shape="rect" id="node1" title="Compute minimum distance from point p to a line segment bounded by points a and b." alt="" coords="5,5,187,32"/>
+<area shape="rect" id="node2" href="$numerics_8c.html#a1695c2bbde3aca43954a8c8b445eee88" title="Compute Euclidean distance between two points, a and b." alt="" coords="235,5,368,32"/>
+</map>

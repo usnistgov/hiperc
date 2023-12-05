@@ -1,0 +1,6 @@
+<map id="set_mask" name="set_mask">
+<area shape="rect" id="node1" title="Specify which stencil (mask) to use for the Laplacian (convolution)" alt="" coords="5,78,84,105"/>
+<area shape="rect" id="node2" href="$numerics_8c.html#a5f8773af808ead7ab1379acfbee13c84" title="Write 5&#45;point Laplacian stencil into convolution mask." alt="" coords="151,5,291,47"/>
+<area shape="rect" id="node3" href="$numerics_8c.html#ae475c0ace9d262d3860319653542f219" title="Write 9&#45;point Laplacian stencil into convolution mask." alt="" coords="149,71,293,112"/>
+<area shape="rect" id="node4" href="$numerics_8c.html#a41c570ff08f58af7a9e0f967c945ecae" title="Write 9&#45;point Laplacian stencil into convolution mask." alt="" coords="132,136,311,177"/>
+</map>

@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>GPU Specifics &#8212; HiPerC 0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="_static/ntd2d.css?v=88d0a8bc" />
+    <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=eafc0fe6" />
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js?v=e43216b9"></script>
+    <script src="_static/doctools.js?v=888ff710"></script>
+    <script src="_static/sphinx_highlight.js?v=4825356b"></script>
+    <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Terms of Use" href="rst/LICENSE.html" />
+    <link rel="prev" title="CPU Specifics" href="cpu.html" />
+  
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+
+  <link rel="stylesheet" href="https://pages.nist.gov/nist-header-footer/css/nist-combined.css">
+  <script src="https://code.jquery.com/jquery-3.6.2.min.js" type="text/javascript" defer="defer"></script>
+  <script src="https://pages.nist.gov/nist-header-footer/js/nist-header-footer.js" type="text/javascript" defer="defer"></script>
+
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="gpu-specifics">
+<span id="string-formatting-gpu"></span><h1>GPU Specifics<a class="headerlink" href="#gpu-specifics" title="Permalink to this heading">¶</a></h1>
+<section id="gpu-cuda-diffusion">
+<h2>gpu-cuda-diffusion<a class="headerlink" href="#gpu-cuda-diffusion" title="Permalink to this heading">¶</a></h2>
+<section id="cuda-boundaries-cu">
+<h3>cuda_boundaries.cu<a class="headerlink" href="#cuda-boundaries-cu" title="Permalink to this heading">¶</a></h3>
+<p>Implementation of boundary condition functions with OpenMP threading. </p>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-functions">Functions</p>
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv424apply_initial_conditionsPP4fp_tKiKiKi">
+<span id="_CPPv324apply_initial_conditionsPP4fp_tKiKiKi"></span><span id="_CPPv224apply_initial_conditionsPP4fp_tKiKiKi"></span><span id="apply_initial_conditions__fp_tPP.iC.iC.iC"></span><span class="target" id="cuda__boundaries_8cu_1a961fa250a6ba12c4e80e66c1a6fd4583"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">apply_initial_conditions</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="api.html#_CPPv44fp_t" title="fp_t"><span class="n"><span class="pre">fp_t</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">conc</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">nx</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">ny</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">nm</span></span><span class="sig-paren">)</span><br /></dt>
+<dd><p>Initialize flat composition field with fixed boundary conditions. </p>
+<p>The boundary conditions are fixed values of <span class="math notranslate nohighlight">\( c_{hi} \)</span> along the lower-left half and upper-right half walls, no flux everywhere else, with an initial values of <span class="math notranslate nohighlight">\( c_{lo} \)</span> everywhere. These conditions represent a carburizing process, with partial exposure (rather than the entire left and right walls) to produce an inhomogeneous workload and highlight numerical errors at the boundaries. </p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv415boundary_kernelP4fp_tKiKiKi">
+<span id="_CPPv315boundary_kernelP4fp_tKiKiKi"></span><span id="_CPPv215boundary_kernelP4fp_tKiKiKi"></span><span id="boundary_kernel__fp_tP.iC.iC.iC"></span><span class="target" id="cuda__boundaries_8cu_1a2318c1208f8cfc0adbcb9ba91b5f4305"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">boundary_kernel</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="api.html#_CPPv44fp_t" title="fp_t"><span class="n"><span class="pre">fp_t</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">d_conc</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">nx</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">ny</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">nm</span></span><span class="sig-paren">)</span><br /></dt>
+<dd><p>Enable double-precision floats. </p>
+<p>Boundary condition kernel for execution on the GPU.</p>
+<p>Boundary condition kernel for execution on the GPU</p>
+<p>This function accesses 1D data rather than the 2D array representation of the scalar composition field </p>
+</dd></dl>
+
+</div>
+</section>
+<section id="cuda-discretization-cu">
+<h3>cuda_discretization.cu<a class="headerlink" href="#cuda-discretization-cu" title="Permalink to this heading">¶</a></h3>
+<p>Implementation of boundary condition functions with CUDA acceleration. </p>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-functions">Functions</p>
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv418convolution_kernelP4fp_tP4fp_tKiKiKi">
+<span id="_CPPv318convolution_kernelP4fp_tP4fp_tKiKiKi"></span><span id="_CPPv218convolution_kernelP4fp_tP4fp_tKiKiKi"></span><span id="convolution_kernel__fp_tP.fp_tP.iC.iC.iC"></span><span class="target" id="cuda__discretization_8cu_1a7c7f6f8a38ce706ba12da6cb37edc306"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">convolution_kernel</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="api.html#_CPPv44fp_t" title="fp_t"><span class="n"><span class="pre">fp_t</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">d_conc_old</span></span>, <a class="reference internal" href="api.html#_CPPv44fp_t" title="fp_t"><span class="n"><span class="pre">fp_t</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">d_conc_lap</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">nx</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">ny</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">nm</span></span><span class="sig-paren">)</span><br /></dt>
+<dd><p>Tiled convolution algorithm for execution on the GPU. </p>
+<p>This function accesses 1D data rather than the 2D array representation of the scalar composition field, mapping into 2D tiles on the GPU with halo cells before computing the convolution.</p>
+<p>Note:<ul class="simple">
+<li><p>The source matrix (<em>conc_old</em>) and destination matrix (<em>conc_lap</em>) must be identical in size</p></li>
+<li><p>One CUDA core operates on one array index: there is no nested loop over matrix elements</p></li>
+<li><p>The halo (<em>nm/2</em> perimeter cells) in <em>conc_lap</em> are unallocated garbage</p></li>
+<li><p>The same cells in <em>conc_old</em> are boundary values, and contribute to the convolution</p></li>
+<li><p><em>conc_tile</em> is the shared tile of input data, accessible by all threads in this block </p></li>
+</ul>
+</p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv416diffusion_kernelP4fp_tP4fp_tP4fp_tKiKiKiK4fp_tK4fp_t">
+<span id="_CPPv316diffusion_kernelP4fp_tP4fp_tP4fp_tKiKiKiK4fp_tK4fp_t"></span><span id="_CPPv216diffusion_kernelP4fp_tP4fp_tP4fp_tKiKiKiK4fp_tK4fp_t"></span><span id="diffusion_kernel__fp_tP.fp_tP.fp_tP.iC.iC.iC.fp_tC.fp_tC"></span><span class="target" id="cuda__discretization_8cu_1a80eb3a042a574ed2b102a766626368a5"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">diffusion_kernel</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="api.html#_CPPv44fp_t" title="fp_t"><span class="n"><span class="pre">fp_t</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">d_conc_old</span></span>, <a class="reference internal" href="api.html#_CPPv44fp_t" title="fp_t"><span class="n"><span class="pre">fp_t</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">d_conc_new</span></span>, <a class="reference internal" href="api.html#_CPPv44fp_t" title="fp_t"><span class="n"><span class="pre">fp_t</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">d_conc_lap</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">nx</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">ny</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">nm</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="api.html#_CPPv44fp_t" title="fp_t"><span class="n"><span class="pre">fp_t</span></span></a><span class="w"> </span><span class="n sig-param"><span class="pre">D</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="api.html#_CPPv44fp_t" title="fp_t"><span class="n"><span class="pre">fp_t</span></span></a><span class="w"> </span><span class="n sig-param"><span class="pre">dt</span></span><span class="sig-paren">)</span><br /></dt>
+<dd><p>Vector addition algorithm for execution on the GPU. </p>
+<p>This function accesses 1D data rather than the 2D array representation of the scalar composition field. Memory allocation, data transfer, and array release are handled in cuda_init(), with arrays on the host and device managed through CudaData, which is a struct passed by reference into the function. In this way, device kernels can be called in isolation without incurring the cost of data transfers and with reduced risk of memory leaks. </p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv417device_boundariesP4fp_tKiKiKiKiKi">
+<span id="_CPPv317device_boundariesP4fp_tKiKiKiKiKi"></span><span id="_CPPv217device_boundariesP4fp_tKiKiKiKiKi"></span><span id="device_boundaries__fp_tP.iC.iC.iC.iC.iC"></span><span class="target" id="cuda__discretization_8cu_1a0b9329bb0d79a59dffa2c4ebbfdbb7fd"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">device_boundaries</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="api.html#_CPPv44fp_t" title="fp_t"><span class="n"><span class="pre">fp_t</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">conc</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">nx</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">ny</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">nm</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">bx</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">by</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv417device_boundariesP4fp_tKiKiKiKiKi" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Apply boundary conditions on device. </p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv418device_convolutionP4fp_tP4fp_tKiKiKiKiKi">
+<span id="_CPPv318device_convolutionP4fp_tP4fp_tKiKiKiKiKi"></span><span id="_CPPv218device_convolutionP4fp_tP4fp_tKiKiKiKiKi"></span><span id="device_convolution__fp_tP.fp_tP.iC.iC.iC.iC.iC"></span><span class="target" id="cuda__discretization_8cu_1ab39a6c102982d7c24e8c9fc68762be0e"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">device_convolution</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="api.html#_CPPv44fp_t" title="fp_t"><span class="n"><span class="pre">fp_t</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">conc_old</span></span>, <a class="reference internal" href="api.html#_CPPv44fp_t" title="fp_t"><span class="n"><span class="pre">fp_t</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">conc_lap</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">nx</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">ny</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">nm</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">bx</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">by</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv418device_convolutionP4fp_tP4fp_tKiKiKiKiKi" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Compute convolution on device. </p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv418device_compositionP4fp_tP4fp_tP4fp_tKiKiKiKiKiK4fp_tK4fp_t">
+<span id="_CPPv318device_compositionP4fp_tP4fp_tP4fp_tKiKiKiKiKiK4fp_tK4fp_t"></span><span id="_CPPv218device_compositionP4fp_tP4fp_tP4fp_tKiKiKiKiKiK4fp_tK4fp_t"></span><span id="device_composition__fp_tP.fp_tP.fp_tP.iC.iC.iC.iC.iC.fp_tC.fp_tC"></span><span class="target" id="cuda__discretization_8cu_1af1a32a0858f3583d4e6524aaab912f47"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">device_composition</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="api.html#_CPPv44fp_t" title="fp_t"><span class="n"><span class="pre">fp_t</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">conc_old</span></span>, <a class="reference internal" href="api.html#_CPPv44fp_t" title="fp_t"><span class="n"><span class="pre">fp_t</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">conc_new</span></span>, <a class="reference internal" href="api.html#_CPPv44fp_t" title="fp_t"><span class="n"><span class="pre">fp_t</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">conc_lap</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">nx</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">ny</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">nm</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">bx</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">by</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="api.html#_CPPv44fp_t" title="fp_t"><span class="n"><span class="pre">fp_t</span></span></a><span class="w"> </span><span class="n sig-param"><span class="pre">D</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="api.html#_CPPv44fp_t" title="fp_t"><span class="n"><span class="pre">fp_t</span></span></a><span class="w"> </span><span class="n sig-param"><span class="pre">dt</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv418device_compositionP4fp_tP4fp_tP4fp_tKiKiKiKiKiK4fp_tK4fp_t" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Step diffusion equation on device. </p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv415read_out_resultPP4fp_tP4fp_tKiKi">
+<span id="_CPPv315read_out_resultPP4fp_tP4fp_tKiKi"></span><span id="_CPPv215read_out_resultPP4fp_tP4fp_tKiKi"></span><span id="read_out_result__fp_tPP.fp_tP.iC.iC"></span><span class="target" id="cuda__discretization_8cu_1aeef5f0ae518af3a2b8f28a6600567f13"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">read_out_result</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="api.html#_CPPv44fp_t" title="fp_t"><span class="n"><span class="pre">fp_t</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">conc</span></span>, <a class="reference internal" href="api.html#_CPPv44fp_t" title="fp_t"><span class="n"><span class="pre">fp_t</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">d_conc</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">nx</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">ny</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv415read_out_resultPP4fp_tP4fp_tKiKi" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Read data from device. </p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv419compute_convolutionPP4fp_tPP4fp_tPP4fp_tKiKiKiKiKi">
+<span id="_CPPv319compute_convolutionPP4fp_tPP4fp_tPP4fp_tKiKiKiKiKi"></span><span id="_CPPv219compute_convolutionPP4fp_tPP4fp_tPP4fp_tKiKiKiKiKi"></span><span id="compute_convolution__fp_tPP.fp_tPP.fp_tPP.iC.iC.iC.iC.iC"></span><span class="target" id="cuda__discretization_8cu_1a1c30e00c6f4f45c1b2075cbb86f152dd"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">compute_convolution</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="api.html#_CPPv44fp_t" title="fp_t"><span class="n"><span class="pre">fp_t</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">conc_old</span></span>, <a class="reference internal" href="api.html#_CPPv44fp_t" title="fp_t"><span class="n"><span class="pre">fp_t</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">conc_lap</span></span>, <a class="reference internal" href="api.html#_CPPv44fp_t" title="fp_t"><span class="n"><span class="pre">fp_t</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">mask_lap</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">bx</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">by</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">nm</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">nx</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">ny</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv419compute_convolutionPP4fp_tPP4fp_tPP4fp_tKiKiKiKiKi" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Reference showing how to invoke the convolution kernel. </p>
+<p>A stand-alone function like this incurs the cost of host-to-device data transfer each time it is called: it is a teaching tool, not reusable code. It is the basis for <a class="reference internal" href="#cuda__discretization_8cu_1af31dc39a15aeea9f35ea67eb945e83d1"><span class="std std-ref">cuda_diffusion_solver()</span></a>, which achieves much better performance by bundling CUDA kernels together and intelligently managing data transfers between the host (CPU) and device (GPU). </p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv421cuda_diffusion_solverP8CudaDataPP4fp_tKiKiKiKiKiK4fp_tK4fp_tP9Stopwatch">
+<span id="_CPPv321cuda_diffusion_solverP8CudaDataPP4fp_tKiKiKiKiKiK4fp_tK4fp_tP9Stopwatch"></span><span id="_CPPv221cuda_diffusion_solverP8CudaDataPP4fp_tKiKiKiKiKiK4fp_tK4fp_tP9Stopwatch"></span><span id="cuda_diffusion_solver__CudaDataP.fp_tPP.iC.iC.iC.iC.iC.fp_tC.fp_tC.StopwatchP"></span><span class="target" id="cuda__discretization_8cu_1af31dc39a15aeea9f35ea67eb945e83d1"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">cuda_diffusion_solver</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="n"><span class="pre">CudaData</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">dev</span></span>, <a class="reference internal" href="api.html#_CPPv44fp_t" title="fp_t"><span class="n"><span class="pre">fp_t</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">conc_new</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">bx</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">by</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">nm</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">nx</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">ny</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="api.html#_CPPv44fp_t" title="fp_t"><span class="n"><span class="pre">fp_t</span></span></a><span class="w"> </span><span class="n sig-param"><span class="pre">D</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="api.html#_CPPv44fp_t" title="fp_t"><span class="n"><span class="pre">fp_t</span></span></a><span class="w"> </span><span class="n sig-param"><span class="pre">dt</span></span>, <span class="k"><span class="pre">struct</span></span><span class="w"> </span><a class="reference internal" href="api.html#_CPPv49Stopwatch" title="Stopwatch"><span class="n"><span class="pre">Stopwatch</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">sw</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv421cuda_diffusion_solverP8CudaDataPP4fp_tKiKiKiKiKiK4fp_tK4fp_tP9Stopwatch" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Reference optimized code for solving the diffusion equation. </p>
+<p>Solve diffusion equation on the GPU.</p>
+<p>Compare cuda_diffusion_solver(): it accomplishes the same result, but without the memory allocation, data transfer, and array release. These are handled in cuda_init(), with arrays on the host and device managed through CudaData, which is a struct passed by reference into the function. In this way, device kernels can be called in isolation without incurring the cost of data transfers and with reduced risk of memory leaks. </p>
+</dd></dl>
+
+</div>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-variables">Variables</p>
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv46d_mask">
+<span id="_CPPv36d_mask"></span><span id="_CPPv26d_mask"></span><span id="d_mask__fp_tA"></span><span class="target" id="cuda__discretization_8cu_1abe71c4e271ad2707c94a91c63656388b"></span><a class="reference internal" href="api.html#_CPPv44fp_t" title="fp_t"><span class="n"><span class="pre">fp_t</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">d_mask</span></span></span><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">5</span></span><span class="w"> </span><span class="o"><span class="pre">*</span></span><span class="w"> </span><span class="m"><span class="pre">5</span></span><span class="p"><span class="pre">]</span></span><br /></dt>
+<dd><p>Convolution mask array on the GPU, allocated in protected memory. </p>
+</dd></dl>
+
+</div>
+</section>
+</section>
+<section id="gpu-openacc-diffusion">
+<h2>gpu-openacc-diffusion<a class="headerlink" href="#gpu-openacc-diffusion" title="Permalink to this heading">¶</a></h2>
+<section id="openacc-boundaries-c">
+<h3>openacc_boundaries.c<a class="headerlink" href="#openacc-boundaries-c" title="Permalink to this heading">¶</a></h3>
+<p>Implementation of boundary condition functions with OpenMP threading. </p>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-functions">Functions</p>
+<dl class="cpp function">
+<dt class="sig sig-object cpp">
+<span class="target" id="openacc__boundaries_8c_1a961fa250a6ba12c4e80e66c1a6fd4583"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">apply_initial_conditions</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="api.html#_CPPv44fp_t" title="fp_t"><span class="n"><span class="pre">fp_t</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">conc</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">nx</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">ny</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">nm</span></span><span class="sig-paren">)</span><br /></dt>
+<dd><p>Initialize flat composition field with fixed boundary conditions. </p>
+<p>The boundary conditions are fixed values of <span class="math notranslate nohighlight">\( c_{hi} \)</span> along the lower-left half and upper-right half walls, no flux everywhere else, with an initial values of <span class="math notranslate nohighlight">\( c_{lo} \)</span> everywhere. These conditions represent a carburizing process, with partial exposure (rather than the entire left and right walls) to produce an inhomogeneous workload and highlight numerical errors at the boundaries. </p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp">
+<span class="target" id="openacc__boundaries_8c_1ab45bda569a6014095eb6eb0101451aa8"></span><span class="sig-name descname"><span class="pre">void</span> <span class="pre">boundary_kernel</span> <span class="pre">(fp_t</span> <span class="pre">**__restrict__</span> <span class="pre">conc,</span> <span class="pre">const</span> <span class="pre">int</span> <span class="pre">nx,</span> <span class="pre">const</span> <span class="pre">int</span> <span class="pre">ny,</span> <span class="pre">const</span> <span class="pre">int</span> <span class="pre">nm)</span></span></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv425apply_boundary_conditionsPP4fp_tKiKiKi">
+<span id="_CPPv325apply_boundary_conditionsPP4fp_tKiKiKi"></span><span id="_CPPv225apply_boundary_conditionsPP4fp_tKiKiKi"></span><span id="apply_boundary_conditions__fp_tPP.iC.iC.iC"></span><span class="target" id="openacc__boundaries_8c_1a6a8882eee3ee34a22896195ad12ddab5"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">apply_boundary_conditions</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="api.html#_CPPv44fp_t" title="fp_t"><span class="n"><span class="pre">fp_t</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">conc</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">nx</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">ny</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">nm</span></span><span class="sig-paren">)</span><br /></dt>
+<dd><p>Set fixed value <span class="math notranslate nohighlight">\( (c_{hi}) \)</span> along left and bottom, zero-flux elsewhere. </p>
+</dd></dl>
+
+</div>
+</section>
+<section id="openacc-discretization-c">
+<h3>openacc_discretization.c<a class="headerlink" href="#openacc-discretization-c" title="Permalink to this heading">¶</a></h3>
+<p>Implementation of boundary condition functions with OpenACC threading. </p>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-functions">Functions</p>
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv418convolution_kernelPP4fp_tPP4fp_tPP4fp_tKiKiKi">
+<span id="_CPPv318convolution_kernelPP4fp_tPP4fp_tPP4fp_tKiKiKi"></span><span id="_CPPv218convolution_kernelPP4fp_tPP4fp_tPP4fp_tKiKiKi"></span><span id="convolution_kernel__fp_tPP.fp_tPP.fp_tPP.iC.iC.iC"></span><span class="target" id="openacc__discretization_8c_1afba6ecd6a8962be553d9715cb8dfc6f2"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">convolution_kernel</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="api.html#_CPPv44fp_t" title="fp_t"><span class="n"><span class="pre">fp_t</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">conc_old</span></span>, <a class="reference internal" href="api.html#_CPPv44fp_t" title="fp_t"><span class="n"><span class="pre">fp_t</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">conc_lap</span></span>, <a class="reference internal" href="api.html#_CPPv44fp_t" title="fp_t"><span class="n"><span class="pre">fp_t</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">mask_lap</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">nx</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">ny</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">nm</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv418convolution_kernelPP4fp_tPP4fp_tPP4fp_tKiKiKi" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Tiled convolution algorithm for execution on the GPU. </p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv416diffusion_kernelPP4fp_tPP4fp_tPP4fp_tKiKiKiK4fp_tK4fp_t">
+<span id="_CPPv316diffusion_kernelPP4fp_tPP4fp_tPP4fp_tKiKiKiK4fp_tK4fp_t"></span><span id="_CPPv216diffusion_kernelPP4fp_tPP4fp_tPP4fp_tKiKiKiK4fp_tK4fp_t"></span><span id="diffusion_kernel__fp_tPP.fp_tPP.fp_tPP.iC.iC.iC.fp_tC.fp_tC"></span><span class="target" id="openacc__discretization_8c_1a760ae4588e61525ff69f1b951ada2504"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">diffusion_kernel</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="api.html#_CPPv44fp_t" title="fp_t"><span class="n"><span class="pre">fp_t</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">conc_old</span></span>, <a class="reference internal" href="api.html#_CPPv44fp_t" title="fp_t"><span class="n"><span class="pre">fp_t</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">conc_new</span></span>, <a class="reference internal" href="api.html#_CPPv44fp_t" title="fp_t"><span class="n"><span class="pre">fp_t</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">conc_lap</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">nx</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">ny</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">nm</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="api.html#_CPPv44fp_t" title="fp_t"><span class="n"><span class="pre">fp_t</span></span></a><span class="w"> </span><span class="n sig-param"><span class="pre">D</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="api.html#_CPPv44fp_t" title="fp_t"><span class="n"><span class="pre">fp_t</span></span></a><span class="w"> </span><span class="n sig-param"><span class="pre">dt</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv416diffusion_kernelPP4fp_tPP4fp_tPP4fp_tKiKiKiK4fp_tK4fp_t" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Vector addition algorithm for execution on the GPU. </p>
+</dd></dl>
+
+</div>
+</section>
+</section>
+<section id="gpu-opencl-diffusion">
+<h2>gpu-opencl-diffusion<a class="headerlink" href="#gpu-opencl-diffusion" title="Permalink to this heading">¶</a></h2>
+<section id="opencl-boundaries-c">
+<h3>opencl_boundaries.c<a class="headerlink" href="#opencl-boundaries-c" title="Permalink to this heading">¶</a></h3>
+<p>Implementation of boundary condition functions with OpenCL acceleration. </p>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-functions">Functions</p>
+<dl class="cpp function">
+<dt class="sig sig-object cpp">
+<span class="target" id="opencl__boundaries_8c_1a961fa250a6ba12c4e80e66c1a6fd4583"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">apply_initial_conditions</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="api.html#_CPPv44fp_t" title="fp_t"><span class="n"><span class="pre">fp_t</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">conc</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">nx</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">ny</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">nm</span></span><span class="sig-paren">)</span><br /></dt>
+<dd><p>Initialize flat composition field with fixed boundary conditions. </p>
+<p>The boundary conditions are fixed values of <span class="math notranslate nohighlight">\( c_{hi} \)</span> along the lower-left half and upper-right half walls, no flux everywhere else, with an initial values of <span class="math notranslate nohighlight">\( c_{lo} \)</span> everywhere. These conditions represent a carburizing process, with partial exposure (rather than the entire left and right walls) to produce an inhomogeneous workload and highlight numerical errors at the boundaries. </p>
+</dd></dl>
+
+</div>
+</section>
+<section id="opencl-discretization-c">
+<h3>opencl_discretization.c<a class="headerlink" href="#opencl-discretization-c" title="Permalink to this heading">¶</a></h3>
+<p>Implementation of boundary condition functions with OpenCL acceleration. </p>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-functions">Functions</p>
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv417device_boundariesP10OpenCLDataKiKiKiKiKiKi">
+<span id="_CPPv317device_boundariesP10OpenCLDataKiKiKiKiKiKi"></span><span id="_CPPv217device_boundariesP10OpenCLDataKiKiKiKiKiKi"></span><span id="device_boundaries__OpenCLDataP.iC.iC.iC.iC.iC.iC"></span><span class="target" id="opencl__discretization_8c_1a0a914a652e021089dce53dc4d1b1624b"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">device_boundaries</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><a class="reference internal" href="api.html#_CPPv410OpenCLData" title="OpenCLData"><span class="n"><span class="pre">OpenCLData</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">dev</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">flip</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">nx</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">ny</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">nm</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">bx</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">by</span></span><span class="sig-paren">)</span><br /></dt>
+<dd><p>Apply boundary conditions on OpenCL device. </p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv418device_convolutionP10OpenCLDataKiKiKiKiKiKi">
+<span id="_CPPv318device_convolutionP10OpenCLDataKiKiKiKiKiKi"></span><span id="_CPPv218device_convolutionP10OpenCLDataKiKiKiKiKiKi"></span><span id="device_convolution__OpenCLDataP.iC.iC.iC.iC.iC.iC"></span><span class="target" id="opencl__discretization_8c_1a74602ac4191fd72b2f70a6365237fa28"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">device_convolution</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><a class="reference internal" href="api.html#_CPPv410OpenCLData" title="OpenCLData"><span class="n"><span class="pre">OpenCLData</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">dev</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">flip</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">nx</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">ny</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">nm</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">bx</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">by</span></span><span class="sig-paren">)</span><br /></dt>
+<dd><p>Compute convolution on OpenCL device. </p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv416device_diffusionP10OpenCLDataKiKiKiKiKiKiK4fp_tK4fp_t">
+<span id="_CPPv316device_diffusionP10OpenCLDataKiKiKiKiKiKiK4fp_tK4fp_t"></span><span id="_CPPv216device_diffusionP10OpenCLDataKiKiKiKiKiKiK4fp_tK4fp_t"></span><span id="device_diffusion__OpenCLDataP.iC.iC.iC.iC.iC.iC.fp_tC.fp_tC"></span><span class="target" id="opencl__discretization_8c_1a8001ac0b493b224e22750a423a65524a"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">device_diffusion</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><a class="reference internal" href="api.html#_CPPv410OpenCLData" title="OpenCLData"><span class="n"><span class="pre">OpenCLData</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">dev</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">flip</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">nx</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">ny</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">nm</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">bx</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">by</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="api.html#_CPPv44fp_t" title="fp_t"><span class="n"><span class="pre">fp_t</span></span></a><span class="w"> </span><span class="n sig-param"><span class="pre">D</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="api.html#_CPPv44fp_t" title="fp_t"><span class="n"><span class="pre">fp_t</span></span></a><span class="w"> </span><span class="n sig-param"><span class="pre">dt</span></span><span class="sig-paren">)</span><br /></dt>
+<dd><p>Solve diffusion equation on OpenCL device. </p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv415read_out_resultP10OpenCLDataKiPP4fp_tKiKi">
+<span id="_CPPv315read_out_resultP10OpenCLDataKiPP4fp_tKiKi"></span><span id="_CPPv215read_out_resultP10OpenCLDataKiPP4fp_tKiKi"></span><span id="read_out_result__OpenCLDataP.iC.fp_tPP.iC.iC"></span><span class="target" id="opencl__discretization_8c_1a7898fb7f7fe64969df7c8c0fa7b01c40"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">read_out_result</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><a class="reference internal" href="api.html#_CPPv410OpenCLData" title="OpenCLData"><span class="n"><span class="pre">OpenCLData</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">dev</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">flip</span></span>, <a class="reference internal" href="api.html#_CPPv44fp_t" title="fp_t"><span class="n"><span class="pre">fp_t</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">conc</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">nx</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">ny</span></span><span class="sig-paren">)</span><br /></dt>
+<dd><p>Copy data out of OpenCL device. </p>
+</dd></dl>
+
+</div>
+<section id="looking-for-something-specific">
+<h4>Looking for something specific?<a class="headerlink" href="#looking-for-something-specific" title="Permalink to this heading">¶</a></h4>
+<ul class="simple">
+<li><p><a class="reference internal" href="genindex.html"><span class="std std-ref">Index</span></a></p></li>
+<li><p><a class="reference internal" href="search.html"><span class="std std-ref">Search Page</span></a></p></li>
+</ul>
+</section>
+</section>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="contents.html">HiPerC</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="rst/README.html">High Performance Computing Strategies for Boundary Value Problems</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cpu.html">CPU Specifics</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">GPU Specifics</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#gpu-cuda-diffusion">gpu-cuda-diffusion</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#cuda-boundaries-cu">cuda_boundaries.cu</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#cuda-discretization-cu">cuda_discretization.cu</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#gpu-openacc-diffusion">gpu-openacc-diffusion</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#openacc-boundaries-c">openacc_boundaries.c</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#openacc-discretization-c">openacc_discretization.c</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#gpu-opencl-diffusion">gpu-opencl-diffusion</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#opencl-boundaries-c">opencl_boundaries.c</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#opencl-discretization-c">opencl_discretization.c</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="rst/LICENSE.html">Terms of Use</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="contents.html">Documentation overview</a><ul>
+      <li>Previous: <a href="cpu.html" title="previous chapter">CPU Specifics</a></li>
+      <li>Next: <a href="rst/LICENSE.html" title="next chapter">Terms of Use</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+
+  
+    <div class="footer">
+      
+      
+      
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 7.1.2</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.13</a>
+      
+      |
+      <a href="_sources/gpu.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+
+  <!-- Taken from https://www.filamentgroup.com/lab/html-includes/#another-demo%3A-including-another-html-file -->
+  <iframe src="_static/ntd2d_menu.html" onload="this.before((this.contentDocument.body||this.contentDocument).children[0]);this.remove()"></iframe>
+  </body>
+</html>

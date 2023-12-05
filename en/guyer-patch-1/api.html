@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>API Reference &#8212; HiPerC 0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="_static/ntd2d.css?v=88d0a8bc" />
+    <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=eafc0fe6" />
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js?v=e43216b9"></script>
+    <script src="_static/doctools.js?v=888ff710"></script>
+    <script src="_static/sphinx_highlight.js?v=4825356b"></script>
+    <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="CPU Specifics" href="cpu.html" />
+    <link rel="prev" title="High Performance Computing Strategies for Boundary Value Problems" href="rst/README.html" />
+  
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+
+  <link rel="stylesheet" href="https://pages.nist.gov/nist-header-footer/css/nist-combined.css">
+  <script src="https://code.jquery.com/jquery-3.6.2.min.js" type="text/javascript" defer="defer"></script>
+  <script src="https://pages.nist.gov/nist-header-footer/js/nist-header-footer.js" type="text/javascript" defer="defer"></script>
+
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="api-reference">
+<span id="string-formatting-api"></span><h1>API Reference<a class="headerlink" href="#api-reference" title="Permalink to this heading">¶</a></h1>
+<section id="common-diffusion">
+<h2>common-diffusion<a class="headerlink" href="#common-diffusion" title="Permalink to this heading">¶</a></h2>
+<section id="boundaries-h">
+<h3>boundaries.h<a class="headerlink" href="#boundaries-h" title="Permalink to this heading">¶</a></h3>
+<p>Declaration of boundary condition function prototypes. </p>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-functions">Functions</p>
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv424apply_initial_conditionsPP4fp_tKiKiKi">
+<span id="_CPPv324apply_initial_conditionsPP4fp_tKiKiKi"></span><span id="_CPPv224apply_initial_conditionsPP4fp_tKiKiKi"></span><span id="apply_initial_conditions__fp_tPP.iC.iC.iC"></span><span class="target" id="boundaries_8h_1ada72adc166cdd32d4316dad6d69d2336"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">apply_initial_conditions</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#_CPPv44fp_t" title="fp_t"><span class="n"><span class="pre">fp_t</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">conc_old</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">nx</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">ny</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">nm</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv424apply_initial_conditionsPP4fp_tKiKiKi" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Initialize flat composition field with fixed boundary conditions. </p>
+<p>The boundary conditions are fixed values of <span class="math notranslate nohighlight">\( c_{hi} \)</span> along the lower-left half and upper-right half walls, no flux everywhere else, with an initial values of <span class="math notranslate nohighlight">\( c_{lo} \)</span> everywhere. These conditions represent a carburizing process, with partial exposure (rather than the entire left and right walls) to produce an inhomogeneous workload and highlight numerical errors at the boundaries. </p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv425apply_boundary_conditionsPP4fp_tKiKiKi">
+<span id="_CPPv325apply_boundary_conditionsPP4fp_tKiKiKi"></span><span id="_CPPv225apply_boundary_conditionsPP4fp_tKiKiKi"></span><span id="apply_boundary_conditions__fp_tPP.iC.iC.iC"></span><span class="target" id="boundaries_8h_1a5259b37a22dcc6494976c98cfaf77a52"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">apply_boundary_conditions</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#_CPPv44fp_t" title="fp_t"><span class="n"><span class="pre">fp_t</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">conc_old</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">nx</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">ny</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">nm</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv425apply_boundary_conditionsPP4fp_tKiKiKi" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Set fixed value <span class="math notranslate nohighlight">\( (c_{hi}) \)</span> along left and bottom, zero-flux elsewhere. </p>
+</dd></dl>
+
+</div>
+</section>
+<section id="mesh-h">
+<h3>mesh.h<a class="headerlink" href="#mesh-h" title="Permalink to this heading">¶</a></h3>
+<p>Declaration of mesh function prototypes for diffusion benchmarks. </p>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-functions">Functions</p>
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv411make_arraysPPP4fp_tPPP4fp_tPPP4fp_tPPP4fp_tKiKiKi">
+<span id="_CPPv311make_arraysPPP4fp_tPPP4fp_tPPP4fp_tPPP4fp_tKiKiKi"></span><span id="_CPPv211make_arraysPPP4fp_tPPP4fp_tPPP4fp_tPPP4fp_tKiKiKi"></span><span id="make_arrays__fp_tPPP.fp_tPPP.fp_tPPP.fp_tPPP.iC.iC.iC"></span><span class="target" id="mesh_8h_1ae1c267a2ebb220228ca2adc1a8701d76"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">make_arrays</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#_CPPv44fp_t" title="fp_t"><span class="n"><span class="pre">fp_t</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">conc_old</span></span>, <a class="reference internal" href="#_CPPv44fp_t" title="fp_t"><span class="n"><span class="pre">fp_t</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">conc_new</span></span>, <a class="reference internal" href="#_CPPv44fp_t" title="fp_t"><span class="n"><span class="pre">fp_t</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">conc_lap</span></span>, <a class="reference internal" href="#_CPPv44fp_t" title="fp_t"><span class="n"><span class="pre">fp_t</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">mask_lap</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">nx</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">ny</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">nm</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv411make_arraysPPP4fp_tPPP4fp_tPPP4fp_tPPP4fp_tKiKiKi" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Allocate 2D arrays to store scalar composition values. </p>
+<p>Arrays are allocated as 1D arrays, then 2D pointer arrays are mapped over the top. This facilitates use of either 1D or 2D data access, depending on whether the task is spatially dependent or not. </p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv411free_arraysPP4fp_tPP4fp_tPP4fp_tPP4fp_t">
+<span id="_CPPv311free_arraysPP4fp_tPP4fp_tPP4fp_tPP4fp_t"></span><span id="_CPPv211free_arraysPP4fp_tPP4fp_tPP4fp_tPP4fp_t"></span><span id="free_arrays__fp_tPP.fp_tPP.fp_tPP.fp_tPP"></span><span class="target" id="mesh_8h_1a51944f9754f3dec9cfa62aa917e5e5d5"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">free_arrays</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#_CPPv44fp_t" title="fp_t"><span class="n"><span class="pre">fp_t</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">conc_old</span></span>, <a class="reference internal" href="#_CPPv44fp_t" title="fp_t"><span class="n"><span class="pre">fp_t</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">conc_new</span></span>, <a class="reference internal" href="#_CPPv44fp_t" title="fp_t"><span class="n"><span class="pre">fp_t</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">conc_lap</span></span>, <a class="reference internal" href="#_CPPv44fp_t" title="fp_t"><span class="n"><span class="pre">fp_t</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">mask_lap</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv411free_arraysPP4fp_tPP4fp_tPP4fp_tPP4fp_t" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Free dynamically allocated memory. </p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv413swap_pointersPPP4fp_tPPP4fp_t">
+<span id="_CPPv313swap_pointersPPP4fp_tPPP4fp_t"></span><span id="_CPPv213swap_pointersPPP4fp_tPPP4fp_t"></span><span id="swap_pointers__fp_tPPP.fp_tPPP"></span><span class="target" id="mesh_8h_1a7550962b061f580d31ddeafbed0ab7a3"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">swap_pointers</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#_CPPv44fp_t" title="fp_t"><span class="n"><span class="pre">fp_t</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">conc_old</span></span>, <a class="reference internal" href="#_CPPv44fp_t" title="fp_t"><span class="n"><span class="pre">fp_t</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">conc_new</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv413swap_pointersPPP4fp_tPPP4fp_t" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Swap pointers to 2D arrays. </p>
+<p>Rather than copy data from <code class="docutils literal notranslate"><span class="pre">fp_t**</span></code> <em>conc_old</em> into <code class="docutils literal notranslate"><span class="pre">fp_t**</span></code> <em>conc_new</em>, an expensive operation, simply trade the top-most pointers. New becomes old, old becomes new, with no data lost and in almost no time. </p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv416swap_pointers_1DPP4fp_tPP4fp_t">
+<span id="_CPPv316swap_pointers_1DPP4fp_tPP4fp_t"></span><span id="_CPPv216swap_pointers_1DPP4fp_tPP4fp_t"></span><span id="swap_pointers_1D__fp_tPP.fp_tPP"></span><span class="target" id="mesh_8h_1a907b5a49e237e3e2192f6020002187e2"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">swap_pointers_1D</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#_CPPv44fp_t" title="fp_t"><span class="n"><span class="pre">fp_t</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">conc_old</span></span>, <a class="reference internal" href="#_CPPv44fp_t" title="fp_t"><span class="n"><span class="pre">fp_t</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">conc_new</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv416swap_pointers_1DPP4fp_tPP4fp_t" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Swap pointers to data underlying 1D arrays. </p>
+<p>Rather than copy data from <code class="docutils literal notranslate"><span class="pre">fp_t*</span></code> <em>conc_old</em>[0] into <code class="docutils literal notranslate"><span class="pre">fp_t*</span></code> <em>conc_new</em>[0], an expensive operation, simply trade the top-most pointers. New becomes old, old becomes new, with no data lost and in almost no time. </p>
+</dd></dl>
+
+</div>
+</section>
+<section id="numerics-h">
+<h3>numerics.h<a class="headerlink" href="#numerics-h" title="Permalink to this heading">¶</a></h3>
+<p>Declaration of Laplacian operator and analytical solution functions. </p>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-defines">Defines</p>
+<dl class="cpp macro">
+<dt class="sig sig-object cpp" id="c.MAX_MASK_W">
+<span class="target" id="numerics_8h_1ad0032e3bcc7b68b0694edf6193069944"></span><span class="sig-name descname"><span class="n"><span class="pre">MAX_MASK_W</span></span></span><a class="headerlink" href="#c.MAX_MASK_W" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Maximum width of the convolution mask (Laplacian stencil) array. </p>
+</dd></dl>
+
+<dl class="cpp macro">
+<dt class="sig sig-object cpp" id="c.MAX_MASK_H">
+<span class="target" id="numerics_8h_1ad0fecf5ea0e8544505f39653048077f0"></span><span class="sig-name descname"><span class="n"><span class="pre">MAX_MASK_H</span></span></span><a class="headerlink" href="#c.MAX_MASK_H" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Maximum height of the convolution mask (Laplacian stencil) array. </p>
+</dd></dl>
+
+</div>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-functions">Functions</p>
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv48set_maskK4fp_tK4fp_tKiPP4fp_tKi">
+<span id="_CPPv38set_maskK4fp_tK4fp_tKiPP4fp_tKi"></span><span id="_CPPv28set_maskK4fp_tK4fp_tKiPP4fp_tKi"></span><span id="set_mask__fp_tC.fp_tC.iC.fp_tPP.iC"></span><span class="target" id="numerics_8h_1a64ca0af918853ad6ef8edd23f8ec7d24"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">set_mask</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv44fp_t" title="fp_t"><span class="n"><span class="pre">fp_t</span></span></a><span class="w"> </span><span class="n sig-param"><span class="pre">dx</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv44fp_t" title="fp_t"><span class="n"><span class="pre">fp_t</span></span></a><span class="w"> </span><span class="n sig-param"><span class="pre">dy</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">code</span></span>, <a class="reference internal" href="#_CPPv44fp_t" title="fp_t"><span class="n"><span class="pre">fp_t</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">mask_lap</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">nm</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv48set_maskK4fp_tK4fp_tKiPP4fp_tKi" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Specify which stencil (mask) to use for the Laplacian (convolution) </p>
+<p>The mask corresponding to the numerical code will be applied. The suggested encoding is mask width as the ones digit and value count as the tens digit, <em>e.g</em>. 53 specifies <a class="reference internal" href="#numerics_8h_1a5f8773af808ead7ab1379acfbee13c84"><span class="std std-ref">five_point_Laplacian_stencil()</span></a>, while 93 specifies <a class="reference internal" href="#numerics_8h_1ae475c0ace9d262d3860319653542f219"><span class="std std-ref">nine_point_Laplacian_stencil()</span></a>.</p>
+<p>To add your own mask (stencil), add a case to this function with your chosen numerical encoding, then specify that code in the input parameters file (params.txt by default). Note that, for a Laplacian stencil, the sum of the coefficients must equal zero and <em>nm</em> must be an odd integer.</p>
+<p>If your stencil is larger than <span class="math notranslate nohighlight">\( 5\times 5\)</span>, you must increase the values defined by <a class="reference internal" href="#numerics_8h_1ad0032e3bcc7b68b0694edf6193069944"><span class="std std-ref">MAX_MASK_W</span></a> and <a class="reference internal" href="#numerics_8h_1ad0fecf5ea0e8544505f39653048077f0"><span class="std std-ref">MAX_MASK_H</span></a>. </p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv428five_point_Laplacian_stencilK4fp_tK4fp_tPP4fp_tKi">
+<span id="_CPPv328five_point_Laplacian_stencilK4fp_tK4fp_tPP4fp_tKi"></span><span id="_CPPv228five_point_Laplacian_stencilK4fp_tK4fp_tPP4fp_tKi"></span><span id="five_point_Laplacian_stencil__fp_tC.fp_tC.fp_tPP.iC"></span><span class="target" id="numerics_8h_1a5f8773af808ead7ab1379acfbee13c84"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">five_point_Laplacian_stencil</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv44fp_t" title="fp_t"><span class="n"><span class="pre">fp_t</span></span></a><span class="w"> </span><span class="n sig-param"><span class="pre">dx</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv44fp_t" title="fp_t"><span class="n"><span class="pre">fp_t</span></span></a><span class="w"> </span><span class="n sig-param"><span class="pre">dy</span></span>, <a class="reference internal" href="#_CPPv44fp_t" title="fp_t"><span class="n"><span class="pre">fp_t</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">mask_lap</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">nm</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv428five_point_Laplacian_stencilK4fp_tK4fp_tPP4fp_tKi" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Write 5-point Laplacian stencil into convolution mask. </p>
+<p><span class="math notranslate nohighlight">\(3\times3\)</span> mask, 5 values, truncation error <span class="math notranslate nohighlight">\(\mathcal{O}(\Delta x^2)\)</span></p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv428nine_point_Laplacian_stencilK4fp_tK4fp_tPP4fp_tKi">
+<span id="_CPPv328nine_point_Laplacian_stencilK4fp_tK4fp_tPP4fp_tKi"></span><span id="_CPPv228nine_point_Laplacian_stencilK4fp_tK4fp_tPP4fp_tKi"></span><span id="nine_point_Laplacian_stencil__fp_tC.fp_tC.fp_tPP.iC"></span><span class="target" id="numerics_8h_1ae475c0ace9d262d3860319653542f219"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">nine_point_Laplacian_stencil</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv44fp_t" title="fp_t"><span class="n"><span class="pre">fp_t</span></span></a><span class="w"> </span><span class="n sig-param"><span class="pre">dx</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv44fp_t" title="fp_t"><span class="n"><span class="pre">fp_t</span></span></a><span class="w"> </span><span class="n sig-param"><span class="pre">dy</span></span>, <a class="reference internal" href="#_CPPv44fp_t" title="fp_t"><span class="n"><span class="pre">fp_t</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">mask_lap</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">nm</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv428nine_point_Laplacian_stencilK4fp_tK4fp_tPP4fp_tKi" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Write 9-point Laplacian stencil into convolution mask. </p>
+<p><span class="math notranslate nohighlight">\(3\times3\)</span> mask, 9 values, truncation error <span class="math notranslate nohighlight">\(\mathcal{O}(\Delta x^4)\)</span></p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv433slow_nine_point_Laplacian_stencilK4fp_tK4fp_tPP4fp_tKi">
+<span id="_CPPv333slow_nine_point_Laplacian_stencilK4fp_tK4fp_tPP4fp_tKi"></span><span id="_CPPv233slow_nine_point_Laplacian_stencilK4fp_tK4fp_tPP4fp_tKi"></span><span id="slow_nine_point_Laplacian_stencil__fp_tC.fp_tC.fp_tPP.iC"></span><span class="target" id="numerics_8h_1a41c570ff08f58af7a9e0f967c945ecae"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">slow_nine_point_Laplacian_stencil</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv44fp_t" title="fp_t"><span class="n"><span class="pre">fp_t</span></span></a><span class="w"> </span><span class="n sig-param"><span class="pre">dx</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv44fp_t" title="fp_t"><span class="n"><span class="pre">fp_t</span></span></a><span class="w"> </span><span class="n sig-param"><span class="pre">dy</span></span>, <a class="reference internal" href="#_CPPv44fp_t" title="fp_t"><span class="n"><span class="pre">fp_t</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">mask_lap</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">nm</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv433slow_nine_point_Laplacian_stencilK4fp_tK4fp_tPP4fp_tKi" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Write 9-point Laplacian stencil into convolution mask. </p>
+<p><span class="math notranslate nohighlight">\(5\times5\)</span> mask, 9 values, truncation error <span class="math notranslate nohighlight">\(\mathcal{O}(\Delta x^4)\)</span></p>
+<p>Provided for testing and demonstration of scalability, only: as the name indicates, this 9-point stencil is computationally more expensive than the <span class="math notranslate nohighlight">\(3\times3\)</span> version. If your code requires <span class="math notranslate nohighlight">\(\mathcal{O}(\Delta x^4)\)</span> accuracy, please use <a class="reference internal" href="#numerics_8h_1ae475c0ace9d262d3860319653542f219"><span class="std std-ref">nine_point_Laplacian_stencil()</span></a>. </p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv419compute_convolutionPCP4fp_tPP4fp_tPCP4fp_tKiKiKi">
+<span id="_CPPv319compute_convolutionPCP4fp_tPP4fp_tPCP4fp_tKiKiKi"></span><span id="_CPPv219compute_convolutionPCP4fp_tPP4fp_tPCP4fp_tKiKiKi"></span><span id="compute_convolution__fp_tPPC.fp_tPP.fp_tPPC.iC.iC.iC"></span><span class="target" id="numerics_8h_1a35e0aa775d95dbdb1db5e712d8f46c31"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">compute_convolution</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#_CPPv44fp_t" title="fp_t"><span class="n"><span class="pre">fp_t</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">*</span></span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">conc_old</span></span>, <a class="reference internal" href="#_CPPv44fp_t" title="fp_t"><span class="n"><span class="pre">fp_t</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">conc_lap</span></span>, <a class="reference internal" href="#_CPPv44fp_t" title="fp_t"><span class="n"><span class="pre">fp_t</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">*</span></span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">mask_lap</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">nx</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">ny</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">nm</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv419compute_convolutionPCP4fp_tPP4fp_tPCP4fp_tKiKiKi" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Perform the convolution of the mask matrix with the composition matrix. </p>
+<p>If the convolution mask is the Laplacian stencil, the convolution evaluates the discrete Laplacian of the composition field. Other masks are possible, for example the Sobel filters for edge detection. This function is general purpose: as long as the dimensions <em>nx</em>, <em>ny</em>, and <em>nm</em> are properly specified, the convolution will be correctly computed. </p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv418update_compositionPP4fp_tPP4fp_tPP4fp_tKiKiKiK4fp_tK4fp_t">
+<span id="_CPPv318update_compositionPP4fp_tPP4fp_tPP4fp_tKiKiKiK4fp_tK4fp_t"></span><span id="_CPPv218update_compositionPP4fp_tPP4fp_tPP4fp_tKiKiKiK4fp_tK4fp_t"></span><span id="update_composition__fp_tPP.fp_tPP.fp_tPP.iC.iC.iC.fp_tC.fp_tC"></span><span class="target" id="numerics_8h_1ae0ed027a1fe66708b81f92e50b9b5979"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">update_composition</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#_CPPv44fp_t" title="fp_t"><span class="n"><span class="pre">fp_t</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">conc_old</span></span>, <a class="reference internal" href="#_CPPv44fp_t" title="fp_t"><span class="n"><span class="pre">fp_t</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">conc_lap</span></span>, <a class="reference internal" href="#_CPPv44fp_t" title="fp_t"><span class="n"><span class="pre">fp_t</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">conc_new</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">nx</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">ny</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">nm</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv44fp_t" title="fp_t"><span class="n"><span class="pre">fp_t</span></span></a><span class="w"> </span><span class="n sig-param"><span class="pre">D</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv44fp_t" title="fp_t"><span class="n"><span class="pre">fp_t</span></span></a><span class="w"> </span><span class="n sig-param"><span class="pre">dt</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv418update_compositionPP4fp_tPP4fp_tPP4fp_tKiKiKiK4fp_tK4fp_t" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Update composition field using explicit Euler discretization (forward-time centered space) </p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv418euclidean_distanceK4fp_tK4fp_tK4fp_tK4fp_t">
+<span id="_CPPv318euclidean_distanceK4fp_tK4fp_tK4fp_tK4fp_t"></span><span id="_CPPv218euclidean_distanceK4fp_tK4fp_tK4fp_tK4fp_t"></span><span id="euclidean_distance__fp_tC.fp_tC.fp_tC.fp_tC"></span><span class="target" id="numerics_8h_1a1695c2bbde3aca43954a8c8b445eee88"></span><a class="reference internal" href="#_CPPv44fp_t" title="fp_t"><span class="n"><span class="pre">fp_t</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">euclidean_distance</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv44fp_t" title="fp_t"><span class="n"><span class="pre">fp_t</span></span></a><span class="w"> </span><span class="n sig-param"><span class="pre">ax</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv44fp_t" title="fp_t"><span class="n"><span class="pre">fp_t</span></span></a><span class="w"> </span><span class="n sig-param"><span class="pre">ay</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv44fp_t" title="fp_t"><span class="n"><span class="pre">fp_t</span></span></a><span class="w"> </span><span class="n sig-param"><span class="pre">bx</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv44fp_t" title="fp_t"><span class="n"><span class="pre">fp_t</span></span></a><span class="w"> </span><span class="n sig-param"><span class="pre">by</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv418euclidean_distanceK4fp_tK4fp_tK4fp_tK4fp_t" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Compute Euclidean distance between two points, <em>a</em> and <em>b</em>. </p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv418manhattan_distanceK4fp_tK4fp_tK4fp_tK4fp_t">
+<span id="_CPPv318manhattan_distanceK4fp_tK4fp_tK4fp_tK4fp_t"></span><span id="_CPPv218manhattan_distanceK4fp_tK4fp_tK4fp_tK4fp_t"></span><span id="manhattan_distance__fp_tC.fp_tC.fp_tC.fp_tC"></span><span class="target" id="numerics_8h_1a10c4909752c02d11a2fa46d212ba9b13"></span><a class="reference internal" href="#_CPPv44fp_t" title="fp_t"><span class="n"><span class="pre">fp_t</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">manhattan_distance</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv44fp_t" title="fp_t"><span class="n"><span class="pre">fp_t</span></span></a><span class="w"> </span><span class="n sig-param"><span class="pre">ax</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv44fp_t" title="fp_t"><span class="n"><span class="pre">fp_t</span></span></a><span class="w"> </span><span class="n sig-param"><span class="pre">ay</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv44fp_t" title="fp_t"><span class="n"><span class="pre">fp_t</span></span></a><span class="w"> </span><span class="n sig-param"><span class="pre">bx</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv44fp_t" title="fp_t"><span class="n"><span class="pre">fp_t</span></span></a><span class="w"> </span><span class="n sig-param"><span class="pre">by</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv418manhattan_distanceK4fp_tK4fp_tK4fp_tK4fp_t" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Compute Manhattan distance between two points, <em>a</em> and <em>b</em>. </p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv425distance_point_to_segmentK4fp_tK4fp_tK4fp_tK4fp_tK4fp_tK4fp_t">
+<span id="_CPPv325distance_point_to_segmentK4fp_tK4fp_tK4fp_tK4fp_tK4fp_tK4fp_t"></span><span id="_CPPv225distance_point_to_segmentK4fp_tK4fp_tK4fp_tK4fp_tK4fp_tK4fp_t"></span><span id="distance_point_to_segment__fp_tC.fp_tC.fp_tC.fp_tC.fp_tC.fp_tC"></span><span class="target" id="numerics_8h_1a3b729f468a5b9aa3c677ffd14591c6e7"></span><a class="reference internal" href="#_CPPv44fp_t" title="fp_t"><span class="n"><span class="pre">fp_t</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">distance_point_to_segment</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv44fp_t" title="fp_t"><span class="n"><span class="pre">fp_t</span></span></a><span class="w"> </span><span class="n sig-param"><span class="pre">ax</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv44fp_t" title="fp_t"><span class="n"><span class="pre">fp_t</span></span></a><span class="w"> </span><span class="n sig-param"><span class="pre">ay</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv44fp_t" title="fp_t"><span class="n"><span class="pre">fp_t</span></span></a><span class="w"> </span><span class="n sig-param"><span class="pre">bx</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv44fp_t" title="fp_t"><span class="n"><span class="pre">fp_t</span></span></a><span class="w"> </span><span class="n sig-param"><span class="pre">by</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv44fp_t" title="fp_t"><span class="n"><span class="pre">fp_t</span></span></a><span class="w"> </span><span class="n sig-param"><span class="pre">px</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv44fp_t" title="fp_t"><span class="n"><span class="pre">fp_t</span></span></a><span class="w"> </span><span class="n sig-param"><span class="pre">py</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv425distance_point_to_segmentK4fp_tK4fp_tK4fp_tK4fp_tK4fp_tK4fp_t" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Compute minimum distance from point <em>p</em> to a line segment bounded by points <em>a</em> and <em>b</em>. </p>
+<p>This function computes the projection of <em>p</em> onto <em>ab</em>, limiting the projected range to [0, 1] to handle projections that fall outside of <em>ab</em>. Implemented after Grumdrig on Stackoverflow, <a class="reference external" href="https://stackoverflow.com/a/1501725">https://stackoverflow.com/a/1501725</a>. </p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv416analytical_valueK4fp_tK4fp_tK4fp_tP4fp_t">
+<span id="_CPPv316analytical_valueK4fp_tK4fp_tK4fp_tP4fp_t"></span><span id="_CPPv216analytical_valueK4fp_tK4fp_tK4fp_tP4fp_t"></span><span id="analytical_value__fp_tC.fp_tC.fp_tC.fp_tP"></span><span class="target" id="numerics_8h_1a71935851817e36d4acd28ac84a3af38b"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">analytical_value</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv44fp_t" title="fp_t"><span class="n"><span class="pre">fp_t</span></span></a><span class="w"> </span><span class="n sig-param"><span class="pre">x</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv44fp_t" title="fp_t"><span class="n"><span class="pre">fp_t</span></span></a><span class="w"> </span><span class="n sig-param"><span class="pre">t</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv44fp_t" title="fp_t"><span class="n"><span class="pre">fp_t</span></span></a><span class="w"> </span><span class="n sig-param"><span class="pre">D</span></span>, <a class="reference internal" href="#_CPPv44fp_t" title="fp_t"><span class="n"><span class="pre">fp_t</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">c</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv416analytical_valueK4fp_tK4fp_tK4fp_tP4fp_t" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Analytical solution of the diffusion equation for a carburizing process. </p>
+<p>For 1D diffusion through a semi-infinite domain with initial and far-field composition <span class="math notranslate nohighlight">\( c_{\infty} \)</span> and boundary value <span class="math notranslate nohighlight">\( c(x=0, t) = c_0 \)</span> with constant diffusivity <em>D</em>, the solution to Fick’s second law is <div class="math notranslate nohighlight">
+\[ c(x,t) = c_0 - (c_0 - c_{\infty})\mathrm{erf}\left(\frac{x}{\sqrt{4Dt}}\right) \]</div>
+ which reduces, when <span class="math notranslate nohighlight">\( c_{\infty} = 0 \)</span>, to <div class="math notranslate nohighlight">
+\[ c(x,t) = c_0\left[1 - \mathrm{erf}\left(\frac{x}{\sqrt{4Dt}}\right)\right]. \]</div>
+</p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv414check_solutionPP4fp_tPP4fp_tKiKiK4fp_tK4fp_tKiK4fp_tK4fp_tP4fp_t">
+<span id="_CPPv314check_solutionPP4fp_tPP4fp_tKiKiK4fp_tK4fp_tKiK4fp_tK4fp_tP4fp_t"></span><span id="_CPPv214check_solutionPP4fp_tPP4fp_tKiKiK4fp_tK4fp_tKiK4fp_tK4fp_tP4fp_t"></span><span id="check_solution__fp_tPP.fp_tPP.iC.iC.fp_tC.fp_tC.iC.fp_tC.fp_tC.fp_tP"></span><span class="target" id="numerics_8h_1a992f2e2605e0472a57b16c2768ca1cc5"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">check_solution</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#_CPPv44fp_t" title="fp_t"><span class="n"><span class="pre">fp_t</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">conc_new</span></span>, <a class="reference internal" href="#_CPPv44fp_t" title="fp_t"><span class="n"><span class="pre">fp_t</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">conc_lap</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">nx</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">ny</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv44fp_t" title="fp_t"><span class="n"><span class="pre">fp_t</span></span></a><span class="w"> </span><span class="n sig-param"><span class="pre">dx</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv44fp_t" title="fp_t"><span class="n"><span class="pre">fp_t</span></span></a><span class="w"> </span><span class="n sig-param"><span class="pre">dy</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">nm</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv44fp_t" title="fp_t"><span class="n"><span class="pre">fp_t</span></span></a><span class="w"> </span><span class="n sig-param"><span class="pre">elapsed</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv44fp_t" title="fp_t"><span class="n"><span class="pre">fp_t</span></span></a><span class="w"> </span><span class="n sig-param"><span class="pre">D</span></span>, <a class="reference internal" href="#_CPPv44fp_t" title="fp_t"><span class="n"><span class="pre">fp_t</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">rss</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv414check_solutionPP4fp_tPP4fp_tKiKiK4fp_tK4fp_tKiK4fp_tK4fp_tP4fp_t" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Compare numerical and analytical solutions of the diffusion equation. </p>
+<p>
+Overwrites <em>conc_lap</em>, into which the point-wise RSS is written. Normalized RSS is then computed as the sum of the point-wise values. </p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Residual sum of squares (RSS), normalized to the domain size.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+</section>
+<section id="output-h">
+<h3>output.h<a class="headerlink" href="#output-h" title="Permalink to this heading">¶</a></h3>
+<p>Declaration of output function prototypes for diffusion benchmarks. </p>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-functions">Functions</p>
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv412param_parseriA_PcPiPiPiPiP4fp_tP4fp_tP4fp_tP4fp_tPiPiPiPi">
+<span id="_CPPv312param_parseriA_PcPiPiPiPiP4fp_tP4fp_tP4fp_tP4fp_tPiPiPiPi"></span><span id="_CPPv212param_parseriA_PcPiPiPiPiP4fp_tP4fp_tP4fp_tP4fp_tPiPiPiPi"></span><span id="param_parser__i.cPA.iP.iP.iP.iP.fp_tP.fp_tP.fp_tP.fp_tP.iP.iP.iP.iP"></span><span class="target" id="output_8h_1af95f63bdb4b30ad5c81a81fb4fd9ed4a"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">param_parser</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">argc</span></span>, <span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">argv</span></span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">]</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">bx</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">by</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">checks</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">code</span></span>, <a class="reference internal" href="#_CPPv44fp_t" title="fp_t"><span class="n"><span class="pre">fp_t</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">D</span></span>, <a class="reference internal" href="#_CPPv44fp_t" title="fp_t"><span class="n"><span class="pre">fp_t</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">dx</span></span>, <a class="reference internal" href="#_CPPv44fp_t" title="fp_t"><span class="n"><span class="pre">fp_t</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">dy</span></span>, <a class="reference internal" href="#_CPPv44fp_t" title="fp_t"><span class="n"><span class="pre">fp_t</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">linStab</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">nm</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">nx</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">ny</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">steps</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv412param_parseriA_PcPiPiPiPiP4fp_tP4fp_tP4fp_tP4fp_tPiPiPiPi" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Read parameters from file specified on the command line. </p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv414print_progressKiKi">
+<span id="_CPPv314print_progressKiKi"></span><span id="_CPPv214print_progressKiKi"></span><span id="print_progress__iC.iC"></span><span class="target" id="output_8h_1ab42d36d4fb0ec1fd0902bd6b4f54793b"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">print_progress</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">step</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">steps</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv414print_progressKiKi" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Prints timestamps and a 20-point progress bar to stdout. </p>
+<p>Call inside the timestepping loop, near the top, e.g. <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">step</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">step</span><span class="o">&lt;</span><span class="n">steps</span><span class="p">;</span><span class="w"> </span><span class="n">step</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">print_progress</span><span class="p">(</span><span class="n">step</span><span class="p">,</span><span class="w"> </span><span class="n">steps</span><span class="p">);</span>
+<span class="w">    </span><span class="n">take_a_step</span><span class="p">();</span>
+<span class="w">    </span><span class="n">elapsed</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="n">dt</span><span class="p">;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv49write_csvPP4fp_tKiKiK4fp_tK4fp_tKi">
+<span id="_CPPv39write_csvPP4fp_tKiKiK4fp_tK4fp_tKi"></span><span id="_CPPv29write_csvPP4fp_tKiKiK4fp_tK4fp_tKi"></span><span id="write_csv__fp_tPP.iC.iC.fp_tC.fp_tC.iC"></span><span class="target" id="output_8h_1ad9615b86227af3eff4b725891ea8d372"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">write_csv</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#_CPPv44fp_t" title="fp_t"><span class="n"><span class="pre">fp_t</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">conc</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">nx</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">ny</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv44fp_t" title="fp_t"><span class="n"><span class="pre">fp_t</span></span></a><span class="w"> </span><span class="n sig-param"><span class="pre">dx</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv44fp_t" title="fp_t"><span class="n"><span class="pre">fp_t</span></span></a><span class="w"> </span><span class="n sig-param"><span class="pre">dy</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">step</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv49write_csvPP4fp_tKiKiK4fp_tK4fp_tKi" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Writes scalar composition field to diffusion.???????.csv. </p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv49write_pngPP4fp_tKiKiKi">
+<span id="_CPPv39write_pngPP4fp_tKiKiKi"></span><span id="_CPPv29write_pngPP4fp_tKiKiKi"></span><span id="write_png__fp_tPP.iC.iC.iC"></span><span class="target" id="output_8h_1a389218df762c3662870fcfde834290b4"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">write_png</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#_CPPv44fp_t" title="fp_t"><span class="n"><span class="pre">fp_t</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">conc</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">nx</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">ny</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">step</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv49write_pngPP4fp_tKiKiKi" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Writes scalar composition field to diffusion.???????.png. </p>
+</dd></dl>
+
+</div>
+</section>
+<section id="timer-h">
+<h3>timer.h<a class="headerlink" href="#timer-h" title="Permalink to this heading">¶</a></h3>
+<p>Declaration of timer function prototypes for diffusion benchmarks. </p>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-functions">Functions</p>
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv410StartTimerv">
+<span id="_CPPv310StartTimerv"></span><span id="_CPPv210StartTimerv"></span><span id="StartTimer"></span><span class="target" id="timer_8h_1a66509b494102a5c28ba6c8be3eab7733"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">StartTimer</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv410StartTimerv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Set CPU frequency and begin timing. </p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv48GetTimerv">
+<span id="_CPPv38GetTimerv"></span><span id="_CPPv28GetTimerv"></span><span id="GetTimer"></span><span class="target" id="timer_8h_1ab9a9e5a3142f8bbd781192e032d74c66"></span><span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">GetTimer</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv48GetTimerv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Return elapsed time in seconds. </p>
+</dd></dl>
+
+</div>
+</section>
+<section id="type-h">
+<h3>type.h<a class="headerlink" href="#type-h" title="Permalink to this heading">¶</a></h3>
+<p>Definition of scalar data type and Doxygen diffusion group. </p>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-typedefs">Typedefs</p>
+<dl class="cpp type">
+<dt class="sig sig-object cpp" id="_CPPv44fp_t">
+<span id="_CPPv34fp_t"></span><span id="_CPPv24fp_t"></span><span id="fp_t"></span><span class="target" id="type_8h_1ab25cc4c4d0a09d9da9582fdcfc6185b5"></span><span class="k"><span class="pre">typedef</span></span><span class="w"> </span><span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">fp_t</span></span></span><a class="headerlink" href="#_CPPv44fp_t" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Specify the basic data type to achieve the desired accuracy in floating-point arithmetic: float for single-precision, double for double-precision. This choice propagates throughout the code, and may significantly affect runtime on GPU hardware. </p>
+</dd></dl>
+
+</div>
+<dl class="cpp struct">
+<dt class="sig sig-object cpp" id="_CPPv49Stopwatch">
+<span id="_CPPv39Stopwatch"></span><span id="_CPPv29Stopwatch"></span><span id="Stopwatch"></span><span class="target" id="structStopwatch"></span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">Stopwatch</span></span></span><a class="headerlink" href="#_CPPv49Stopwatch" title="Permalink to this definition">¶</a><br /></dt>
+<dd><div class="docutils container">
+<em>#include &lt;type.h&gt;</em></div>
+<p>Container for timing data </p>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-public-members">Public Members</p>
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N9Stopwatch4convE">
+<span id="_CPPv3N9Stopwatch4convE"></span><span id="_CPPv2N9Stopwatch4convE"></span><span id="Stopwatch::conv__fp_t"></span><span class="target" id="structStopwatch_1aa2fe1dc8781e4907000f8b8e9407a1f1"></span><a class="reference internal" href="#_CPPv44fp_t" title="fp_t"><span class="n"><span class="pre">fp_t</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">conv</span></span></span><a class="headerlink" href="#_CPPv4N9Stopwatch4convE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Cumulative time executing <a class="reference internal" href="#numerics_8h_1a35e0aa775d95dbdb1db5e712d8f46c31"><span class="std std-ref">compute_convolution()</span></a></p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N9Stopwatch4stepE">
+<span id="_CPPv3N9Stopwatch4stepE"></span><span id="_CPPv2N9Stopwatch4stepE"></span><span id="Stopwatch::step__fp_t"></span><span class="target" id="structStopwatch_1ace007d06897e387e06fadcbe5002514b"></span><a class="reference internal" href="#_CPPv44fp_t" title="fp_t"><span class="n"><span class="pre">fp_t</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">step</span></span></span><a class="headerlink" href="#_CPPv4N9Stopwatch4stepE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Cumulative time executing solve_diffusion_equation() </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N9Stopwatch4fileE">
+<span id="_CPPv3N9Stopwatch4fileE"></span><span id="_CPPv2N9Stopwatch4fileE"></span><span id="Stopwatch::file__fp_t"></span><span class="target" id="structStopwatch_1a7f59c639c54153c15819ca67869fecd6"></span><a class="reference internal" href="#_CPPv44fp_t" title="fp_t"><span class="n"><span class="pre">fp_t</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">file</span></span></span><a class="headerlink" href="#_CPPv4N9Stopwatch4fileE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Cumulative time executing write_csv() and write_png()</p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N9Stopwatch4solnE">
+<span id="_CPPv3N9Stopwatch4solnE"></span><span id="_CPPv2N9Stopwatch4solnE"></span><span id="Stopwatch::soln__fp_t"></span><span class="target" id="structStopwatch_1a6d0b2a7816584fc247b479239b53a14b"></span><a class="reference internal" href="#_CPPv44fp_t" title="fp_t"><span class="n"><span class="pre">fp_t</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">soln</span></span></span><a class="headerlink" href="#_CPPv4N9Stopwatch4solnE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Cumulative time executing check_solution()</p>
+</dd></dl>
+
+</div>
+</dd></dl>
+
+</section>
+</section>
+<section id="gpu-cuda-diffusion">
+<h2>gpu-cuda-diffusion<a class="headerlink" href="#gpu-cuda-diffusion" title="Permalink to this heading">¶</a></h2>
+<section id="cuda-kernels-cuh">
+<h3>cuda_kernels.cuh<a class="headerlink" href="#cuda-kernels-cuh" title="Permalink to this heading">¶</a></h3>
+<p>Declaration of functions to execute on the GPU (CUDA kernels) </p>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-functions">Functions</p>
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv415boundary_kernelP4fp_tKiKiKi">
+<span id="_CPPv315boundary_kernelP4fp_tKiKiKi"></span><span id="_CPPv215boundary_kernelP4fp_tKiKiKi"></span><span id="boundary_kernel__fp_tP.iC.iC.iC"></span><span class="target" id="cuda__kernels_8cuh_1a9b5b126fb9ae9e22c7faea87a5b1e125"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">boundary_kernel</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#_CPPv44fp_t" title="fp_t"><span class="n"><span class="pre">fp_t</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">conc</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">nx</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">ny</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">nm</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv415boundary_kernelP4fp_tKiKiKi" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Boundary condition kernel for execution on the GPU. </p>
+<p>This function accesses 1D data rather than the 2D array representation of the scalar composition field</p>
+<p>Boundary condition kernel for execution on the GPU.</p>
+<p>Boundary condition kernel for execution on the GPU</p>
+<p>This function accesses 1D data rather than the 2D array representation of the scalar composition field </p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv418convolution_kernelP4fp_tP4fp_tKiKiKi">
+<span id="_CPPv318convolution_kernelP4fp_tP4fp_tKiKiKi"></span><span id="_CPPv218convolution_kernelP4fp_tP4fp_tKiKiKi"></span><span id="convolution_kernel__fp_tP.fp_tP.iC.iC.iC"></span><span class="target" id="cuda__kernels_8cuh_1ac26a10c1f3a887212dec46fa6e822a24"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">convolution_kernel</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#_CPPv44fp_t" title="fp_t"><span class="n"><span class="pre">fp_t</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">conc_old</span></span>, <a class="reference internal" href="#_CPPv44fp_t" title="fp_t"><span class="n"><span class="pre">fp_t</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">conc_lap</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">nx</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">ny</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">nm</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv418convolution_kernelP4fp_tP4fp_tKiKiKi" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Tiled convolution algorithm for execution on the GPU. </p>
+<p>This function accesses 1D data rather than the 2D array representation of the scalar composition field, mapping into 2D tiles on the GPU with halo cells before computing the convolution.</p>
+<p>Note:<ul class="simple">
+<li><p>The source matrix (<em>conc_old</em>) and destination matrix (<em>conc_lap</em>) must be identical in size</p></li>
+<li><p>One CUDA core operates on one array index: there is no nested loop over matrix elements</p></li>
+<li><p>The halo (<em>nm/2</em> perimeter cells) in <em>conc_lap</em> are unallocated garbage</p></li>
+<li><p>The same cells in <em>conc_old</em> are boundary values, and contribute to the convolution</p></li>
+<li><p><em>conc_tile</em> is the shared tile of input data, accessible by all threads in this block </p></li>
+</ul>
+</p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv416diffusion_kernelP4fp_tP4fp_tP4fp_tKiKiKiK4fp_tK4fp_t">
+<span id="_CPPv316diffusion_kernelP4fp_tP4fp_tP4fp_tKiKiKiK4fp_tK4fp_t"></span><span id="_CPPv216diffusion_kernelP4fp_tP4fp_tP4fp_tKiKiKiK4fp_tK4fp_t"></span><span id="diffusion_kernel__fp_tP.fp_tP.fp_tP.iC.iC.iC.fp_tC.fp_tC"></span><span class="target" id="cuda__kernels_8cuh_1a480a047f5eaad06dce39dca93d913fad"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">diffusion_kernel</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#_CPPv44fp_t" title="fp_t"><span class="n"><span class="pre">fp_t</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">conc_old</span></span>, <a class="reference internal" href="#_CPPv44fp_t" title="fp_t"><span class="n"><span class="pre">fp_t</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">conc_new</span></span>, <a class="reference internal" href="#_CPPv44fp_t" title="fp_t"><span class="n"><span class="pre">fp_t</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">conc_lap</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">nx</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">ny</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">nm</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv44fp_t" title="fp_t"><span class="n"><span class="pre">fp_t</span></span></a><span class="w"> </span><span class="n sig-param"><span class="pre">D</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv44fp_t" title="fp_t"><span class="n"><span class="pre">fp_t</span></span></a><span class="w"> </span><span class="n sig-param"><span class="pre">dt</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv416diffusion_kernelP4fp_tP4fp_tP4fp_tKiKiKiK4fp_tK4fp_t" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Vector addition algorithm for execution on the GPU. </p>
+<p>This function accesses 1D data rather than the 2D array representation of the scalar composition field. Memory allocation, data transfer, and array release are handled in cuda_init(), with arrays on the host and device managed through CudaData, which is a struct passed by reference into the function. In this way, device kernels can be called in isolation without incurring the cost of data transfers and with reduced risk of memory leaks. </p>
+</dd></dl>
+
+</div>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-variables">Variables</p>
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv46d_mask">
+<span id="_CPPv36d_mask"></span><span id="_CPPv26d_mask"></span><span id="d_mask__fp_tA"></span><span class="target" id="cuda__kernels_8cuh_1abe71c4e271ad2707c94a91c63656388b"></span><a class="reference internal" href="#_CPPv44fp_t" title="fp_t"><span class="n"><span class="pre">fp_t</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">d_mask</span></span></span><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">5</span></span><span class="w"> </span><span class="o"><span class="pre">*</span></span><span class="w"> </span><span class="m"><span class="pre">5</span></span><span class="p"><span class="pre">]</span></span><a class="headerlink" href="#_CPPv46d_mask" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Convolution mask array on the GPU, allocated in protected memory. </p>
+</dd></dl>
+
+</div>
+</section>
+</section>
+<section id="gpu-opencl-diffusion">
+<h2>gpu-opencl-diffusion<a class="headerlink" href="#gpu-opencl-diffusion" title="Permalink to this heading">¶</a></h2>
+<section id="opencl-data-h">
+<h3>opencl_data.h<a class="headerlink" href="#opencl-data-h" title="Permalink to this heading">¶</a></h3>
+<p>Declaration of OpenCL data container. </p>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-functions">Functions</p>
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv412report_error6cl_intPKc">
+<span id="_CPPv312report_error6cl_intPKc"></span><span id="_CPPv212report_error6cl_intPKc"></span><span id="report_error__cl_int.cCP"></span><span class="target" id="opencl__data_8h_1af7a963c5d80ab4f274ee2114e203d9c0"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">report_error</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">cl_int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">error</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">message</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv412report_error6cl_intPKc" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Report error code when status is not <code class="docutils literal notranslate"><span class="pre">CL_SUCCESS</span></code>. </p>
+<p>Refer to <a class="reference external" href="https://streamhpc.com/blog/2013-04-28/opencl-error-codes/">https://streamhpc.com/blog/2013-04-28/opencl-error-codes/</a> for help interpreting error codes. </p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv413build_programPKcP10cl_contextP12cl_device_idP10cl_programP6cl_int">
+<span id="_CPPv313build_programPKcP10cl_contextP12cl_device_idP10cl_programP6cl_int"></span><span id="_CPPv213build_programPKcP10cl_contextP12cl_device_idP10cl_programP6cl_int"></span><span id="build_program__cCP.cl_contextP.cl_device_idP.cl_programP.cl_intP"></span><span class="target" id="opencl__data_8h_1a772888c2131f8bbaa31e671cb7eeb970"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">build_program</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">filename</span></span>, <span class="n"><span class="pre">cl_context</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">context</span></span>, <span class="n"><span class="pre">cl_device_id</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">gpu</span></span>, <span class="n"><span class="pre">cl_program</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">program</span></span>, <span class="n"><span class="pre">cl_int</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">status</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv413build_programPKcP10cl_contextP12cl_device_idP10cl_programP6cl_int" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Build kernel program from text input. </p>
+<p>Source follows the OpenCL Programming Book, <a class="reference external" href="https://www.fixstars.com/en/opencl/book/OpenCLProgrammingBook/calling-the-kernel/">https://www.fixstars.com/en/opencl/book/OpenCLProgrammingBook/calling-the-kernel/</a></p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv411init_openclPP4fp_tPP4fp_tKiKiKiP10OpenCLData">
+<span id="_CPPv311init_openclPP4fp_tPP4fp_tKiKiKiP10OpenCLData"></span><span id="_CPPv211init_openclPP4fp_tPP4fp_tKiKiKiP10OpenCLData"></span><span id="init_opencl__fp_tPP.fp_tPP.iC.iC.iC.OpenCLDataP"></span><span class="target" id="opencl__data_8h_1a9db2a524fc87cc32b90527d2bbb2f4e4"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">init_opencl</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#_CPPv44fp_t" title="fp_t"><span class="n"><span class="pre">fp_t</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">conc_old</span></span>, <a class="reference internal" href="#_CPPv44fp_t" title="fp_t"><span class="n"><span class="pre">fp_t</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">mask_lap</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">nx</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">ny</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">nm</span></span>, <span class="k"><span class="pre">struct</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv410OpenCLData" title="OpenCLData"><span class="n"><span class="pre">OpenCLData</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">dev</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv411init_openclPP4fp_tPP4fp_tKiKiKiP10OpenCLData" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Initialize OpenCL device memory before marching. </p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv417device_boundariesP10OpenCLDataKiKiKiKiKiKi">
+<span id="_CPPv317device_boundariesP10OpenCLDataKiKiKiKiKiKi"></span><span id="_CPPv217device_boundariesP10OpenCLDataKiKiKiKiKiKi"></span><span id="device_boundaries__OpenCLDataP.iC.iC.iC.iC.iC.iC"></span><span class="target" id="opencl__data_8h_1a0a914a652e021089dce53dc4d1b1624b"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">device_boundaries</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv410OpenCLData" title="OpenCLData"><span class="n"><span class="pre">OpenCLData</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">dev</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">flip</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">nx</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">ny</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">nm</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">bx</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">by</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv417device_boundariesP10OpenCLDataKiKiKiKiKiKi" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Apply boundary conditions on OpenCL device. </p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv418device_convolutionP10OpenCLDataKiKiKiKiKiKi">
+<span id="_CPPv318device_convolutionP10OpenCLDataKiKiKiKiKiKi"></span><span id="_CPPv218device_convolutionP10OpenCLDataKiKiKiKiKiKi"></span><span id="device_convolution__OpenCLDataP.iC.iC.iC.iC.iC.iC"></span><span class="target" id="opencl__data_8h_1a74602ac4191fd72b2f70a6365237fa28"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">device_convolution</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv410OpenCLData" title="OpenCLData"><span class="n"><span class="pre">OpenCLData</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">dev</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">flip</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">nx</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">ny</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">nm</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">bx</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">by</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv418device_convolutionP10OpenCLDataKiKiKiKiKiKi" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Compute convolution on OpenCL device. </p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv416device_diffusionP10OpenCLDataKiKiKiKiKiKiK4fp_tK4fp_t">
+<span id="_CPPv316device_diffusionP10OpenCLDataKiKiKiKiKiKiK4fp_tK4fp_t"></span><span id="_CPPv216device_diffusionP10OpenCLDataKiKiKiKiKiKiK4fp_tK4fp_t"></span><span id="device_diffusion__OpenCLDataP.iC.iC.iC.iC.iC.iC.fp_tC.fp_tC"></span><span class="target" id="opencl__data_8h_1a8001ac0b493b224e22750a423a65524a"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">device_diffusion</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv410OpenCLData" title="OpenCLData"><span class="n"><span class="pre">OpenCLData</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">dev</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">flip</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">nx</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">ny</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">nm</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">bx</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">by</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv44fp_t" title="fp_t"><span class="n"><span class="pre">fp_t</span></span></a><span class="w"> </span><span class="n sig-param"><span class="pre">D</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv44fp_t" title="fp_t"><span class="n"><span class="pre">fp_t</span></span></a><span class="w"> </span><span class="n sig-param"><span class="pre">dt</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv416device_diffusionP10OpenCLDataKiKiKiKiKiKiK4fp_tK4fp_t" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Solve diffusion equation on OpenCL device. </p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv415read_out_resultP10OpenCLDataKiPP4fp_tKiKi">
+<span id="_CPPv315read_out_resultP10OpenCLDataKiPP4fp_tKiKi"></span><span id="_CPPv215read_out_resultP10OpenCLDataKiPP4fp_tKiKi"></span><span id="read_out_result__OpenCLDataP.iC.fp_tPP.iC.iC"></span><span class="target" id="opencl__data_8h_1ae91f108396136ed581aecd8ab92358df"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">read_out_result</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv410OpenCLData" title="OpenCLData"><span class="n"><span class="pre">OpenCLData</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">dev</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">flip</span></span>, <a class="reference internal" href="#_CPPv44fp_t" title="fp_t"><span class="n"><span class="pre">fp_t</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">conc_new</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">nx</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">ny</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv415read_out_resultP10OpenCLDataKiPP4fp_tKiKi" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Copy data out of OpenCL device. </p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv411free_openclP10OpenCLData">
+<span id="_CPPv311free_openclP10OpenCLData"></span><span id="_CPPv211free_openclP10OpenCLData"></span><span id="free_opencl__OpenCLDataP"></span><span class="target" id="opencl__data_8h_1aacbbf37d6e7a7b7b7a74770d062f67ce"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">free_opencl</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv410OpenCLData" title="OpenCLData"><span class="n"><span class="pre">OpenCLData</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">dev</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv411free_openclP10OpenCLData" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Free OpenCL device memory after marching. </p>
+</dd></dl>
+
+</div>
+<dl class="cpp struct">
+<dt class="sig sig-object cpp" id="_CPPv410OpenCLData">
+<span id="_CPPv310OpenCLData"></span><span id="_CPPv210OpenCLData"></span><span id="OpenCLData"></span><span class="target" id="structOpenCLData"></span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">OpenCLData</span></span></span><a class="headerlink" href="#_CPPv410OpenCLData" title="Permalink to this definition">¶</a><br /></dt>
+<dd><div class="docutils container">
+<em>#include &lt;opencl_data.h&gt;</em></div>
+<p>Container for GPU array pointers and parameters. </p>
+<p>From the <a class="reference external" href="https://www.khronos.org/registry/OpenCL/specs/opencl-1.2.pdf">OpenCL v1.2</a> spec:<ul class="simple">
+<li><p>A <em>Context</em> is the environment within which the kernels execute and the domain in which synchronization and memory management is defined. The context includes a set of devices, the memory accessible to those devices, the corresponding memory properties and one or more command-queues used to schedule execution of a kernel(s) or operations on memory objects.</p></li>
+<li><p>A <em>Program</em> <em>Object</em> encapsulates the following information:<ul>
+<li><p>A reference to an associated context.</p></li>
+<li><p>A program source or binary.</p></li>
+<li><p>The latest successfully built program executable, the list of devices for which the program executable is built, the build options used and a build log.</p></li>
+<li><p>The number of kernel objects currently attached.</p></li>
+</ul>
+</p></li>
+<li><p>A <em>Kernel</em> <em>Object</em> encapsulates a specific <code class="docutils literal notranslate"><span class="pre">__kernel</span></code> function declared in a program and the argument values to be used when executing this <code class="docutils literal notranslate"><span class="pre">__kernel</span></code> function. </p></li>
+</ul>
+</p>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-public-members">Public Members</p>
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N10OpenCLData7contextE">
+<span id="_CPPv3N10OpenCLData7contextE"></span><span id="_CPPv2N10OpenCLData7contextE"></span><span id="OpenCLData::context__cl_context"></span><span class="target" id="structOpenCLData_1a426c999b52676d2ae583dbfdae2012e1"></span><span class="n"><span class="pre">cl_context</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">context</span></span></span><a class="headerlink" href="#_CPPv4N10OpenCLData7contextE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>OpenCL interface to the GPU, hardware and software </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N10OpenCLData8conc_oldE">
+<span id="_CPPv3N10OpenCLData8conc_oldE"></span><span id="_CPPv2N10OpenCLData8conc_oldE"></span><span id="OpenCLData::conc_old__cl_mem"></span><span class="target" id="structOpenCLData_1aca0dba7ba4b3e1cbb33c4e87f6a1bac6"></span><span class="n"><span class="pre">cl_mem</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">conc_old</span></span></span><a class="headerlink" href="#_CPPv4N10OpenCLData8conc_oldE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Copy of old composition field on the GPU </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N10OpenCLData8conc_newE">
+<span id="_CPPv3N10OpenCLData8conc_newE"></span><span id="_CPPv2N10OpenCLData8conc_newE"></span><span id="OpenCLData::conc_new__cl_mem"></span><span class="target" id="structOpenCLData_1a1be0fa4484f6b6bc82d8239e9744fac8"></span><span class="n"><span class="pre">cl_mem</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">conc_new</span></span></span><a class="headerlink" href="#_CPPv4N10OpenCLData8conc_newE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Copy of new composition field on the GPU </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N10OpenCLData8conc_lapE">
+<span id="_CPPv3N10OpenCLData8conc_lapE"></span><span id="_CPPv2N10OpenCLData8conc_lapE"></span><span id="OpenCLData::conc_lap__cl_mem"></span><span class="target" id="structOpenCLData_1a1dcc51a2b09b3b5cfa688d61b6dc5e84"></span><span class="n"><span class="pre">cl_mem</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">conc_lap</span></span></span><a class="headerlink" href="#_CPPv4N10OpenCLData8conc_lapE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Copy of Laplacian field on the GPU </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N10OpenCLData4maskE">
+<span id="_CPPv3N10OpenCLData4maskE"></span><span id="_CPPv2N10OpenCLData4maskE"></span><span id="OpenCLData::mask__cl_mem"></span><span class="target" id="structOpenCLData_1a08e741147e494450c409211f632126eb"></span><span class="n"><span class="pre">cl_mem</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">mask</span></span></span><a class="headerlink" href="#_CPPv4N10OpenCLData4maskE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Copy of Laplacian mask on the GPU </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N10OpenCLData16boundary_programE">
+<span id="_CPPv3N10OpenCLData16boundary_programE"></span><span id="_CPPv2N10OpenCLData16boundary_programE"></span><span id="OpenCLData::boundary_program__cl_program"></span><span class="target" id="structOpenCLData_1acbc6804e249662f935d1561160a36636"></span><span class="n"><span class="pre">cl_program</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">boundary_program</span></span></span><a class="headerlink" href="#_CPPv4N10OpenCLData16boundary_programE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Boundary program source for JIT compilation on the GPU </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N10OpenCLData19convolution_programE">
+<span id="_CPPv3N10OpenCLData19convolution_programE"></span><span id="_CPPv2N10OpenCLData19convolution_programE"></span><span id="OpenCLData::convolution_program__cl_program"></span><span class="target" id="structOpenCLData_1a0cb89ef6375488dc8cc3b62b3e4a86d5"></span><span class="n"><span class="pre">cl_program</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">convolution_program</span></span></span><a class="headerlink" href="#_CPPv4N10OpenCLData19convolution_programE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Convolution program source for JIT compilation on the GPU </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N10OpenCLData17diffusion_programE">
+<span id="_CPPv3N10OpenCLData17diffusion_programE"></span><span id="_CPPv2N10OpenCLData17diffusion_programE"></span><span id="OpenCLData::diffusion_program__cl_program"></span><span class="target" id="structOpenCLData_1a546ed23199192a59e95685c48727f8ae"></span><span class="n"><span class="pre">cl_program</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">diffusion_program</span></span></span><a class="headerlink" href="#_CPPv4N10OpenCLData17diffusion_programE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Timestepping program source for JIT compilation on the GPU </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N10OpenCLData15boundary_kernelE">
+<span id="_CPPv3N10OpenCLData15boundary_kernelE"></span><span id="_CPPv2N10OpenCLData15boundary_kernelE"></span><span id="OpenCLData::boundary_kernel__cl_kernel"></span><span class="target" id="structOpenCLData_1ad24fe792a07db6d882442ef75ab7e1d1"></span><span class="n"><span class="pre">cl_kernel</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">boundary_kernel</span></span></span><a class="headerlink" href="#_CPPv4N10OpenCLData15boundary_kernelE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Boundary program executable for the GPU </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N10OpenCLData18convolution_kernelE">
+<span id="_CPPv3N10OpenCLData18convolution_kernelE"></span><span id="_CPPv2N10OpenCLData18convolution_kernelE"></span><span id="OpenCLData::convolution_kernel__cl_kernel"></span><span class="target" id="structOpenCLData_1ab50463e0208a17ac24e7fc987c0bc3f1"></span><span class="n"><span class="pre">cl_kernel</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">convolution_kernel</span></span></span><a class="headerlink" href="#_CPPv4N10OpenCLData18convolution_kernelE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Convolution program executable for the GPU </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N10OpenCLData16diffusion_kernelE">
+<span id="_CPPv3N10OpenCLData16diffusion_kernelE"></span><span id="_CPPv2N10OpenCLData16diffusion_kernelE"></span><span id="OpenCLData::diffusion_kernel__cl_kernel"></span><span class="target" id="structOpenCLData_1a7df67c3c393297a197e8081aa854f86b"></span><span class="n"><span class="pre">cl_kernel</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">diffusion_kernel</span></span></span><a class="headerlink" href="#_CPPv4N10OpenCLData16diffusion_kernelE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Timestepping program executable for the GPU </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N10OpenCLData12commandQueueE">
+<span id="_CPPv3N10OpenCLData12commandQueueE"></span><span id="_CPPv2N10OpenCLData12commandQueueE"></span><span id="OpenCLData::commandQueue__cl_command_queue"></span><span class="target" id="structOpenCLData_1a0b3cb11f72de77fe53bc6f2cc0235437"></span><span class="n"><span class="pre">cl_command_queue</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">commandQueue</span></span></span><a class="headerlink" href="#_CPPv4N10OpenCLData12commandQueueE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Queue for submitting OpenCL jobs to the GPU </p>
+</dd></dl>
+
+</div>
+</dd></dl>
+
+</section>
+<section id="opencl-kernels-h">
+<h3>opencl_kernels.h<a class="headerlink" href="#opencl-kernels-h" title="Permalink to this heading">¶</a></h3>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>doxygenfile: Cannot find file “opencl_kernels.h </p>
+</div>
+<section id="looking-for-something-specific">
+<h4>Looking for something specific?<a class="headerlink" href="#looking-for-something-specific" title="Permalink to this heading">¶</a></h4>
+<ul class="simple">
+<li><p><a class="reference internal" href="genindex.html"><span class="std std-ref">Index</span></a></p></li>
+<li><p><a class="reference internal" href="search.html"><span class="std std-ref">Search Page</span></a></p></li>
+</ul>
+</section>
+</section>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="contents.html">HiPerC</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="rst/README.html">High Performance Computing Strategies for Boundary Value Problems</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">API Reference</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#common-diffusion">common-diffusion</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#boundaries-h">boundaries.h</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#mesh-h">mesh.h</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#numerics-h">numerics.h</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#output-h">output.h</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#timer-h">timer.h</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#type-h">type.h</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#gpu-cuda-diffusion">gpu-cuda-diffusion</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#cuda-kernels-cuh">cuda_kernels.cuh</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#gpu-opencl-diffusion">gpu-opencl-diffusion</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#opencl-data-h">opencl_data.h</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#opencl-kernels-h">opencl_kernels.h</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="cpu.html">CPU Specifics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gpu.html">GPU Specifics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="rst/LICENSE.html">Terms of Use</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="contents.html">Documentation overview</a><ul>
+      <li>Previous: <a href="rst/README.html" title="previous chapter">High Performance Computing Strategies for Boundary Value Problems</a></li>
+      <li>Next: <a href="cpu.html" title="next chapter">CPU Specifics</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+
+  
+    <div class="footer">
+      
+      
+      
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 7.1.2</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.13</a>
+      
+      |
+      <a href="_sources/api.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+
+  <!-- Taken from https://www.filamentgroup.com/lab/html-includes/#another-demo%3A-including-another-html-file -->
+  <iframe src="_static/ntd2d_menu.html" onload="this.before((this.contentDocument.body||this.contentDocument).children[0]);this.remove()"></iframe>
+  </body>
+</html>

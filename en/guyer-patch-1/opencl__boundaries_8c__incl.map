@@ -1,0 +1,9 @@
+<map id="opencl_boundaries.c" name="opencl_boundaries.c">
+<area shape="rect" id="node1" title="Implementation of boundary condition functions with OpenCL acceleration." alt="" coords="134,5,274,32"/>
+<area shape="rect" id="node2" title=" " alt="" coords="5,80,67,107"/>
+<area shape="rect" id="node3" title=" " alt="" coords="91,80,149,107"/>
+<area shape="rect" id="node4" title=" " alt="" coords="173,80,235,107"/>
+<area shape="rect" id="node5" href="$boundaries_8h.html" title="Declaration of boundary condition function prototypes." alt="" coords="259,80,354,107"/>
+<area shape="rect" id="node7" href="$numerics_8h.html" title="Declaration of Laplacian operator and analytical solution functions." alt="" coords="379,80,464,107"/>
+<area shape="rect" id="node6" href="$type_8h.html" title="Definition of scalar data type and Doxygen diffusion group." alt="" coords="336,155,392,181"/>
+</map>

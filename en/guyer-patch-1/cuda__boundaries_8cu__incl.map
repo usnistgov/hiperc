@@ -1,0 +1,9 @@
+<map id="cuda_boundaries.cu" name="cuda_boundaries.cu">
+<area shape="rect" id="node1" title="Implementation of boundary condition functions with OpenMP threading." alt="" coords="85,5,222,32"/>
+<area shape="rect" id="node2" title=" " alt="" coords="5,80,67,107"/>
+<area shape="rect" id="node3" title=" " alt="" coords="91,80,149,107"/>
+<area shape="rect" id="node4" href="$boundaries_8h.html" title="Declaration of boundary condition function prototypes." alt="" coords="135,155,230,181"/>
+<area shape="rect" id="node6" href="$cuda__kernels_8cuh.html" title="Declaration of functions to execute on the GPU (CUDA kernels)" alt="" coords="232,80,355,107"/>
+<area shape="rect" id="node5" href="$type_8h.html" title="Definition of scalar data type and Doxygen diffusion group." alt="" coords="212,229,268,256"/>
+<area shape="rect" id="node7" href="$numerics_8h.html" title="Declaration of Laplacian operator and analytical solution functions." alt="" coords="255,155,340,181"/>
+</map>
